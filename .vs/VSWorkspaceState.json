@@ -1,8 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\project"
+    "\\project",
+    "\\project\\.vs",
+    "\\project\\.vs\\project",
+    "\\project\\.vs\\project\\v16",
+    "\\src\\libs"
   ],
-  "SelectedNode": "\\project\\project.sln",
+  "SelectedNode": "\\project\\.vs",
   "PreviewInSolutionExplorer": false
 }
