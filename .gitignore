@@ -2,8 +2,9 @@
 # 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
 ################################################################################
 
-/project/.vs/project/v16
+/project/.vs
 /project/Debug
-/.vs/botzone-CSMahjong/v16/ipch/AutoPCH/8c80e54942605e80
+/project/x64
 /.vs
-/project/x64/Debug
+/.git
+/.gitignore
