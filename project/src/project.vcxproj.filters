@@ -23,5 +23,8 @@
     <ClInclude Include="cs_mahjong.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StateContainer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
