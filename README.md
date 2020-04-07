@@ -13,17 +13,17 @@ A bot of Chinese Standard Mahjong in botzone
 │      Building a Computer Mahjong Player Based on Monte Carlo Simulation and Opponent Models.pdf
 │      资料导航.md					 // 一些关于国标麻将及botzone的资料
 │
-├─project
-│      cs_mahjong.cpp
-│      cs_mahjong.h
-│      project.sln
-│      project.vcxproj
-│      project.vcxproj.filters
-│      project.vcxproj.user
-│
-└─src
-    └─libs							// 外部库
-        ├─ChineseOfficialMahjongHelper		// 官方所给的库（见wiki页），也是番数库的依赖库
+└─project
+    ├─src
+    │      cs_mahjong.cpp
+    │      cs_mahjong.h
+    │      project.sln
+    │      project.vcxproj
+    │      project.vcxproj.filters
+    │      project.vcxproj.user
+    │
+    └─utils								
+        ├─ChineseOfficialMahjongHelper			// 官方所给的库（见wiki页），也是番数库的依赖库
         │  └─Classes
         │      └─mahjong-algorithm
         │              CHANGELOG
@@ -40,7 +40,7 @@ A bot of Chinese Standard Mahjong in botzone
         │              tile.h
         │              unit_test.cpp
         │
-        └─Mahjong-GB-CPP				// 官方所给的番数计算库
+        └─Mahjong-GB-CPP						// 官方所给的番数计算库
             │  README-zh.md
             │  README.md
             │  test.cpp
@@ -48,6 +48,5 @@ A bot of Chinese Standard Mahjong in botzone
             └─MahjongGB
                     MahjongGB.cpp
                     MahjongGB.h
-
 ```
 
