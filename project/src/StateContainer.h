@@ -47,22 +47,22 @@ public:
     }
 
     valarray<Mahjong>& getInHand() { return inHand; }
-    valarray<Mahjong>& getFlowerTilesOf(int __idx) { return flowerTilesOf[__idx]; }
-    valarray<Mahjong>& getChiOf(int __idx) { return chiOf[__idx]; }
-    valarray<Mahjong>& getPengOf(int __idx) { return pengOf[__idx]; }
-    valarray<Mahjong>& getGangOf(int __idx) { return gangOf[__idx]; }
+    valarray<Mahjong>& getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
+    valarray<Mahjong>& getChiOf(int idx) { return chiOf[idx]; }
+    valarray<Mahjong>& getPengOf(int idx) { return pengOf[idx]; }
+    valarray<Mahjong>& getGangOf(int idx) { return gangOf[idx]; }
     valarray<Mahjong>& getDiscards() { return discards; }
 
     const valarray<Mahjong>& getInHand() const { return inHand; }
-    const valarray<Mahjong>& getFlowerTilesOf(int __idx) const { return flowerTilesOf[__idx]; }
-    const valarray<Mahjong>& getChiOf(int __idx) const { return chiOf[__idx]; }
-    const valarray<Mahjong>& getPengOf(int __idx) const { return pengOf[__idx]; }
-    const valarray<Mahjong>& getGangOf(int __idx) const { return gangOf[__idx]; }
+    const valarray<Mahjong>& getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
+    const valarray<Mahjong>& getChiOf(int idx) const { return chiOf[idx]; }
+    const valarray<Mahjong>& getPengOf(int idx) const { return pengOf[idx]; }
+    const valarray<Mahjong>& getGangOf(int idx) const { return gangOf[idx]; }
     const valarray<Mahjong>& getDiscards() const { return discards; }
 
-    void setCurPosition(int __curP) { curPosition = __curP; }
+    void setCurPosition(int curP) { curPosition = curP; }
     int getCurPosition() const { return curPosition; }
-    void setCurTurnPlayer(int __curTP) { curTurnPlayer = __curTP; }
+    void setCurTurnPlayer(int curTP) { curTurnPlayer = curTP; }
     int getCurTurnPlayer() const { return curTurnPlayer; }
 
     void nxtPosition() { curPosition = (curPosition + 1) % 4; }
