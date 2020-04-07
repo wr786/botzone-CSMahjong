@@ -7,6 +7,7 @@ A bot of Chinese Standard Mahjong in botzone
 
 ```
 │  README.md
+│  代码规范.md						// 有关代码规范
 │
 ├─material							// 用于存放参考资料
 │      Botzone2020_Mahjong.pptx		// 官方PPT
