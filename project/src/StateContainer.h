@@ -1,8 +1,6 @@
 #ifndef STATECONTAINER_H
 #define STATECONTAINER_H
 
-#include <string>
-#include <iostream>
 #include <valarray>
 
 using namespace std;
