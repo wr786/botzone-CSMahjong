@@ -35,7 +35,7 @@ private:
     Mahjong lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果为"N0"则上回合是其他操作（比如其他玩家抽牌、补花
 
 public:
-    StateContainer() :inHand(13) {}
+    StateContainer(int curP=0, int curT=0) :inHand(13), curPosition(curP), curTurnPlayer(curT) {}
     StateContainer(const StateContainer& other) {
         curPosition = other.curPosition;
         inHand = other.inHand;
