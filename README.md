@@ -1,6 +1,8 @@
 # botzone-CSMahjong
 A bot of Chinese Standard Mahjong in botzone
 
+#### 采取C++17标准
+
 **弃用`tree /f`**
 
 改为陈列`material`文件夹中的内容及其相关说明
