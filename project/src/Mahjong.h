@@ -3,6 +3,7 @@
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
+#include <string>
 #include <string_view>
 
 using namespace std;
@@ -29,22 +30,24 @@ typedef enum TILETYPE {
 
 class Mahjong {
 private:
-    TILE innerType;                                              // 储存麻将对应的类型
+    TILE innerType;                                                         // 储存麻将对应的类型
 public:
-    Mahjong(): innerType(0) {}                                   // 未初始化
-//    Mahjong(const Mahjong& other): innerType(other.innerType) {} // 复制构造函数
-//    Mahjong(string_view strExpr);                                // 通过string直接创建Mahjong
+    Mahjong(): innerType(0) {}                                              // 未初始化
+    Mahjong(const Mahjong& other);                                          // 复制构造函数
+    Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong
+    explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
 
-    // 运算符重载 =
     Mahjong& operator = (const Mahjong& other);
-    Mahjong& operator = (string_view strExpr);
 
-    static int parseTileType(string_view strExpr);      // 从string得到麻将牌的类型
-    static int parseTileNum(string_view strExpr);       // 从string得到麻将牌的数字
-    static TILE parseTile(string_view strExpr);          // 从string得到麻将牌（用TILE表示）
-    char getTileType() const;                                 // 获得麻将牌的类型
-    int getTileNum() const;                                   // 获得麻将牌的数字
-    bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+    void resetFromString(string_view strExpr);                              // 由此将string转换为string_view，提高速度
+
+    static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+    static int parseTileType(string_view strExpr);                          // 从string得到麻将牌的类型
+    static int parseTileNum(string_view strExpr);                           // 从string得到麻将牌的数字
+    static TILE parseTile(string_view strExpr);                             // 从string得到麻将牌（用TILE表示）
+    [[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+    [[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+    [[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 
     //todo 这里应有不少实用的方法……有空再写（或者有个人来写也挺好的
 };

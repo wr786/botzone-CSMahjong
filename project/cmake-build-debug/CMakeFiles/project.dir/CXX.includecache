@@ -6,3 +6,25 @@
 
 #IncludeRegexTransform: 
 
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.cpp
+Mahjong.h
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+cassert
+-
+iostream
+-
+
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+string
+-
+string_view
+-
+
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/test.cpp
+Mahjong.h
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+string
+-
+iostream
+-
+
