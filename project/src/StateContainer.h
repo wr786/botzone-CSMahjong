@@ -8,6 +8,7 @@
 
 using namespace std;
 
+// todo 将这里的Mahjong换成Mahjong.h中的Mahjong类
 typedef pair<char, int> Mahjong; // 所有麻将牌均以“大写字母+数字”组合表示
 
 // 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
