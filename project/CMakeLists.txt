@@ -25,4 +25,4 @@ add_executable(project
 #        utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.cpp
 #        utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.h
 #        utils/Mahjong-GB-CPP/test.cpp
-        )
+        src/StateContainer.cpp)

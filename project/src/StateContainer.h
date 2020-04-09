@@ -6,10 +6,12 @@
 
 #include <valarray>
 
+// 使用Mahjong类
+#include "Mahjong.h"
+
 using namespace std;
 
-// todo 将这里的Mahjong换成Mahjong.h中的Mahjong类
-typedef pair<char, int> Mahjong; // 所有麻将牌均以“大写字母+数字”组合表示
+//typedef pair<char, int> Mahjong; // 所有麻将牌均以“大写字母+数字”组合表示
 
 // 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
 // 0. 我们的位置、当前的风圈 
@@ -32,54 +34,40 @@ private:
     valarray<Mahjong> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
     valarray<Mahjong> discards;         // 用于存放弃牌堆
     valarray<Mahjong> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-    int secretGangCntOf[4];             // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+    int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
     Mahjong lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果为"N0"则上回合是其他操作（比如其他玩家抽牌、补花
 
 public:
-    StateContainer(int curP=0, int curT=0) :inHand(13), curPosition(curP), curTurnPlayer(curT) {}
-    StateContainer(const StateContainer& other) {
-        curPosition = other.curPosition;
-        inHand = other.inHand;
-        curTurnPlayer = other.curTurnPlayer;
-        lastPlayed = other.lastPlayed;
-        for (int i = 0; i < 4; i++) {
-            flowerTilesOf[i] = other.flowerTilesOf[i];
-            chiOf[i] = other.chiOf[i];
-            pengOf[i] = other.pengOf[i];
-            gangOf[i] = other.gangOf[i];
-            discards[i] = other.discards[i];
-            tilePlayedOf[i] = other.tilePlayedOf[i];
-            secretGangCntOf[i] = other.secretGangCntOf[i];
-        }
-    }
+    explicit StateContainer(int curP=0, int curT=0);
+    StateContainer(const StateContainer& other);
 
-    valarray<Mahjong>& getInHand() { return inHand; }
-    valarray<Mahjong>& getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
-    valarray<Mahjong>& getChiOf(int idx) { return chiOf[idx]; }
-    valarray<Mahjong>& getPengOf(int idx) { return pengOf[idx]; }
-    valarray<Mahjong>& getGangOf(int idx) { return gangOf[idx]; }
-    valarray<Mahjong>& getDiscards() { return discards; }
-    valarray<Mahjong>& getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+    [[nodiscard]] valarray<Mahjong>& getInHand();                               // 获取手牌
+    [[nodiscard]] valarray<Mahjong>& getFlowerTilesOf(int idx);                 // 获取花牌
+    [[nodiscard]] valarray<Mahjong>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+    [[nodiscard]] valarray<Mahjong>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+    [[nodiscard]] valarray<Mahjong>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+    [[nodiscard]] valarray<Mahjong>& getDiscards();                             // 获取弃牌堆
+    [[nodiscard]] valarray<Mahjong>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
 
-    const valarray<Mahjong>& getInHand() const { return inHand; }
-    const valarray<Mahjong>& getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
-    const valarray<Mahjong>& getChiOf(int idx) const { return chiOf[idx]; }
-    const valarray<Mahjong>& getPengOf(int idx) const { return pengOf[idx]; }
-    const valarray<Mahjong>& getGangOf(int idx) const { return gangOf[idx]; }
-    const valarray<Mahjong>& getDiscards() const { return discards; }
-    const valarray<Mahjong>& getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
+    [[nodiscard]] const valarray<Mahjong>& getInHand() const;                   //  获取手牌的常引用，下同上
+    [[nodiscard]] const valarray<Mahjong>& getFlowerTilesOf(int idx) const;
+    [[nodiscard]] const valarray<Mahjong>& getChiOf(int idx) const;
+    [[nodiscard]] const valarray<Mahjong>& getPengOf(int idx) const;
+    [[nodiscard]] const valarray<Mahjong>& getGangOf(int idx) const;
+    [[nodiscard]] const valarray<Mahjong>& getDiscards() const;
+    [[nodiscard]] const valarray<Mahjong>& getTilePlayedOf(int idx) const;
 
-    int getSecretGangCntOf(int idx) const { return secretGangCntOf[idx]; }
+    [[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
 
-    void setCurPosition(int curP) { curPosition = curP; }
-    int getCurPosition() const { return curPosition; }
-    void setCurTurnPlayer(int curTP) { curTurnPlayer = curTP; }
-    int getCurTurnPlayer() const { return curTurnPlayer; }
-    void setLastPlayed(Mahjong lastTile) { lastPlayed = lastTile; }
-    Mahjong getLastPlayed() const { return lastPlayed; }
+    void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
+    [[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
+    void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
+    [[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
+    void setLastPlayed(const Mahjong& lastTile);                                // 设置上一个被打出来的麻将
+    [[nodiscard]] const Mahjong& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
 
-    void nxtPosition() { curPosition = (curPosition + 1) % 4; }
-    void nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
+    void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
+    void nxtTurn();                                                             // 进入下一回合
 };
 
 #endif

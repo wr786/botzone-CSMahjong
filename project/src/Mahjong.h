@@ -34,7 +34,7 @@ private:
 public:
     Mahjong(): innerType(0) {}                                              // 未初始化
     Mahjong(const Mahjong& other);                                          // 复制构造函数
-    Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong
+    Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong，！允许隐式转换
     explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
 
     Mahjong& operator = (const Mahjong& other);

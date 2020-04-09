@@ -88,10 +88,10 @@
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h">
 			<Option target="project"/>
 		</Unit>
-		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h">
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.cpp">
 			<Option target="project"/>
 		</Unit>
-		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/test.cpp">
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h">
 			<Option target="project"/>
 		</Unit>
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/CMakeLists.txt">

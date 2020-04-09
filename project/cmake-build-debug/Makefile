@@ -149,32 +149,32 @@ src/Mahjong.cpp.s:
 	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/Mahjong.cpp.s
 .PHONY : src/Mahjong.cpp.s
 
-src/test.obj: src/test.cpp.obj
+src/StateContainer.obj: src/StateContainer.cpp.obj
 
-.PHONY : src/test.obj
+.PHONY : src/StateContainer.obj
 
 # target to build an object file
-src/test.cpp.obj:
-	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/test.cpp.obj
-.PHONY : src/test.cpp.obj
+src/StateContainer.cpp.obj:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/StateContainer.cpp.obj
+.PHONY : src/StateContainer.cpp.obj
 
-src/test.i: src/test.cpp.i
+src/StateContainer.i: src/StateContainer.cpp.i
 
-.PHONY : src/test.i
+.PHONY : src/StateContainer.i
 
 # target to preprocess a source file
-src/test.cpp.i:
-	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/test.cpp.i
-.PHONY : src/test.cpp.i
+src/StateContainer.cpp.i:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/StateContainer.cpp.i
+.PHONY : src/StateContainer.cpp.i
 
-src/test.s: src/test.cpp.s
+src/StateContainer.s: src/StateContainer.cpp.s
 
-.PHONY : src/test.s
+.PHONY : src/StateContainer.s
 
 # target to generate assembly for a file
-src/test.cpp.s:
-	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/test.cpp.s
-.PHONY : src/test.cpp.s
+src/StateContainer.cpp.s:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/StateContainer.cpp.s
+.PHONY : src/StateContainer.cpp.s
 
 # Help Target
 help:
@@ -188,9 +188,9 @@ help:
 	@echo ... src/Mahjong.obj
 	@echo ... src/Mahjong.i
 	@echo ... src/Mahjong.s
-	@echo ... src/test.obj
-	@echo ... src/test.i
-	@echo ... src/test.s
+	@echo ... src/StateContainer.obj
+	@echo ... src/StateContainer.i
+	@echo ... src/StateContainer.s
 .PHONY : help
 
 

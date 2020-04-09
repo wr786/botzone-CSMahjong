@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/project.dir/src/Mahjong.cpp.obj"
-  "CMakeFiles/project.dir/src/test.cpp.obj"
+  "CMakeFiles/project.dir/src/StateContainer.cpp.obj"
   "libproject.dll.a"
   "project.exe"
   "project.exe.manifest"

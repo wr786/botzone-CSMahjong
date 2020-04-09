@@ -70,30 +70,30 @@ CMakeFiles/project.dir/src/Mahjong.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/Mahjong.cpp.s"
 	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\Mahjong.cpp -o CMakeFiles\project.dir\src\Mahjong.cpp.s
 
-CMakeFiles/project.dir/src/test.cpp.obj: CMakeFiles/project.dir/flags.make
-CMakeFiles/project.dir/src/test.cpp.obj: CMakeFiles/project.dir/includes_CXX.rsp
-CMakeFiles/project.dir/src/test.cpp.obj: ../src/test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/project.dir/src/test.cpp.obj"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\project.dir\src\test.cpp.obj -c C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\test.cpp
+CMakeFiles/project.dir/src/StateContainer.cpp.obj: CMakeFiles/project.dir/flags.make
+CMakeFiles/project.dir/src/StateContainer.cpp.obj: CMakeFiles/project.dir/includes_CXX.rsp
+CMakeFiles/project.dir/src/StateContainer.cpp.obj: ../src/StateContainer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/project.dir/src/StateContainer.cpp.obj"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\project.dir\src\StateContainer.cpp.obj -c C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\StateContainer.cpp
 
-CMakeFiles/project.dir/src/test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/src/test.cpp.i"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\test.cpp > CMakeFiles\project.dir\src\test.cpp.i
+CMakeFiles/project.dir/src/StateContainer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/src/StateContainer.cpp.i"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\StateContainer.cpp > CMakeFiles\project.dir\src\StateContainer.cpp.i
 
-CMakeFiles/project.dir/src/test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/test.cpp.s"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\test.cpp -o CMakeFiles\project.dir\src\test.cpp.s
+CMakeFiles/project.dir/src/StateContainer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/StateContainer.cpp.s"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\StateContainer.cpp -o CMakeFiles\project.dir\src\StateContainer.cpp.s
 
 # Object files for target project
 project_OBJECTS = \
 "CMakeFiles/project.dir/src/Mahjong.cpp.obj" \
-"CMakeFiles/project.dir/src/test.cpp.obj"
+"CMakeFiles/project.dir/src/StateContainer.cpp.obj"
 
 # External object files for target project
 project_EXTERNAL_OBJECTS =
 
 project.exe: CMakeFiles/project.dir/src/Mahjong.cpp.obj
-project.exe: CMakeFiles/project.dir/src/test.cpp.obj
+project.exe: CMakeFiles/project.dir/src/StateContainer.cpp.obj
 project.exe: CMakeFiles/project.dir/build.make
 project.exe: CMakeFiles/project.dir/linklibs.rsp
 project.exe: CMakeFiles/project.dir/objects1.rsp
