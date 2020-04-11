@@ -89,4 +89,9 @@ bool Mahjong::isFlowerTile() const {
     return getTileType() == 'H';
 }
 
+string Mahjong::getTileString() const{
+    string r="";
+    r=r+getTileType()+(char)getTileNum();
+    return r;
+}
 

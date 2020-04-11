@@ -35,6 +35,7 @@ public:
     Mahjong(): innerType(0) {}                                              // 未初始化
     Mahjong(const Mahjong& other);                                          // 复制构造函数
     Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong，！允许隐式转换
+    Mahjong(const int& intExpr);                                            // 通过int直接创建Mahjong(主要目的是利用Mahjong类中的函数将int转化为botzone表示法的string代码,可能浪费了时间——wym)
     explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
 
     Mahjong& operator = (const Mahjong& other);
@@ -48,7 +49,7 @@ public:
     [[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
     [[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
     [[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-
+    [[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
     //todo 这里应有不少实用的方法……有空再写（或者有个人来写也挺好的
 };
 
