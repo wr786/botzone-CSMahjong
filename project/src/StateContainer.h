@@ -32,12 +32,12 @@ private:
     valarray<Mahjong> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
     valarray<Mahjong> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
     valarray<Mahjong> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-    valarray<Mahjong> discards;         // 用于存放弃牌堆
+//    valarray<Mahjong> discards;       // 用于存放弃牌堆
     valarray<Mahjong> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
     int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
     Mahjong lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果为"N0"则上回合是其他操作（比如其他玩家抽牌、补花
-    int TileLeft[70];                   // (还未修改.cpp中的内容)用于记录除去已打出牌外各种类型牌所剩余的数量,感觉可以只接取代discards.——wym
-    int TotalLeft;                      // (还未修改.cpp中的内容)已打出牌外牌的总数    
+    int tileLeft[70];                   // 用于记录除去已打出牌外各种类型牌所剩余的数量
+    int totalLeft;                      // 已打出牌外牌的总数（初始144）
 
 public:
     explicit StateContainer(int curP=0, int curT=0);
@@ -59,8 +59,8 @@ public:
     [[nodiscard]] const valarray<Mahjong>& getDiscards() const;
     [[nodiscard]] const valarray<Mahjong>& getTilePlayedOf(int idx) const;
 
-    [[nodiscard]] const int & getTileLeft(int idx);
-    [[nodiscard]] const int & getTotalLeft();
+    [[nodiscard]] int getTileLeft(int idx) const;                               // 获得idx对应的牌的剩余数量
+    [[nodiscard]] int getTotalLeft() const;                                     // 获得所有牌的剩余数量
 
     [[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
 

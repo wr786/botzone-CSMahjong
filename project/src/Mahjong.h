@@ -19,12 +19,12 @@ using namespace std;
 typedef int TILE;
 typedef enum TILETYPE {
     NILL = 0,    // 无，一般出现这个就是没初始化过
-    WANN,        // 万
-    BING,        // 筒
-    TIAO,        // 条
-    FENG,        // 风
-    JIAN,        // 箭
-    HANA,        // 花
+    WANN,        // 万 1
+    BING,        // 筒 2
+    TIAO,        // 条 3
+    FENG,        // 风 4
+    JIAN,        // 箭 5
+    HANA,        // 花 6
     TILE_T_SIZE  // 以便循环使用
 } TILE_T;
 
@@ -35,7 +35,7 @@ public:
     Mahjong(): innerType(0) {}                                              // 未初始化
     Mahjong(const Mahjong& other);                                          // 复制构造函数
     Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong，！允许隐式转换
-    Mahjong(const int& intExpr);                                            // 通过int直接创建Mahjong(主要目的是利用Mahjong类中的函数将int转化为botzone表示法的string代码,可能浪费了时间——wym)
+    explicit Mahjong(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Mahjong
     explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
 
     Mahjong& operator = (const Mahjong& other);
