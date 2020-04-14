@@ -88,6 +88,12 @@
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h">
 			<Option target="project"/>
 		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.cpp">
+			<Option target="project"/>
+		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.h">
+			<Option target="project"/>
+		</Unit>
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.cpp">
 			<Option target="project"/>
 		</Unit>

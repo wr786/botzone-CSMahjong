@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.cpp" "C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/project.dir/src/Mahjong.cpp.obj"
+  "C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.cpp" "C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/project.dir/src/RequestReader.cpp.obj"
   "C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.cpp" "C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/project.dir/src/StateContainer.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

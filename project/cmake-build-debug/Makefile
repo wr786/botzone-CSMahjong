@@ -149,6 +149,33 @@ src/Mahjong.cpp.s:
 	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/Mahjong.cpp.s
 .PHONY : src/Mahjong.cpp.s
 
+src/RequestReader.obj: src/RequestReader.cpp.obj
+
+.PHONY : src/RequestReader.obj
+
+# target to build an object file
+src/RequestReader.cpp.obj:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/RequestReader.cpp.obj
+.PHONY : src/RequestReader.cpp.obj
+
+src/RequestReader.i: src/RequestReader.cpp.i
+
+.PHONY : src/RequestReader.i
+
+# target to preprocess a source file
+src/RequestReader.cpp.i:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/RequestReader.cpp.i
+.PHONY : src/RequestReader.cpp.i
+
+src/RequestReader.s: src/RequestReader.cpp.s
+
+.PHONY : src/RequestReader.s
+
+# target to generate assembly for a file
+src/RequestReader.cpp.s:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/RequestReader.cpp.s
+.PHONY : src/RequestReader.cpp.s
+
 src/StateContainer.obj: src/StateContainer.cpp.obj
 
 .PHONY : src/StateContainer.obj
@@ -188,6 +215,9 @@ help:
 	@echo ... src/Mahjong.obj
 	@echo ... src/Mahjong.i
 	@echo ... src/Mahjong.s
+	@echo ... src/RequestReader.obj
+	@echo ... src/RequestReader.i
+	@echo ... src/RequestReader.s
 	@echo ... src/StateContainer.obj
 	@echo ... src/StateContainer.i
 	@echo ... src/StateContainer.s
