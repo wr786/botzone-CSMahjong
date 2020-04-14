@@ -60,6 +60,11 @@ Mahjong& Mahjong::operator = (const Mahjong& other) {
     return *this;
 }
 
+bool Mahjong::operator == (const Mahjong &other) {
+    return innerType == other.innerType;
+}
+
+
 
 /*
  * 其他方法区
@@ -85,6 +90,11 @@ int Mahjong::getTileNum() const {
     return innerType % 10;
 }
 
+TILE Mahjong::getTileInt() const {
+    return innerType;
+}
+
+
 bool Mahjong::isFlowerTile() const {
     return getTileType() == 'H';
 }
@@ -94,4 +104,6 @@ string Mahjong::getTileString() const{
     r=r+getTileType()+(char)getTileNum();
     return r;
 }
+
+
 

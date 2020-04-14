@@ -39,6 +39,7 @@ public:
     explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
 
     Mahjong& operator = (const Mahjong& other);
+    bool operator == (const Mahjong& other);
 
     void resetFromString(string_view strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -48,6 +49,7 @@ public:
     static TILE parseTile(string_view strExpr);                             // 从string得到麻将牌（用TILE表示）
     [[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
     [[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+    [[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
     [[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
     [[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
     //todo 这里应有不少实用的方法……有空再写（或者有个人来写也挺好的

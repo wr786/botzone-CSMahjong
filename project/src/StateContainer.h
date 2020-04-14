@@ -25,7 +25,6 @@ using namespace std;
 class StateContainer {
 private:
     int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-    static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
     valarray<Mahjong> inHand;           // 用于存储手牌
     valarray<Mahjong> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
     int curTurnPlayer;                  // 当前是哪个玩家的回合
@@ -35,11 +34,15 @@ private:
 //    valarray<Mahjong> discards;       // 用于存放弃牌堆
     valarray<Mahjong> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
     int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
-    Mahjong lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果为"N0"则上回合是其他操作（比如其他玩家抽牌、补花
-    int tileLeft[70];                   // 用于记录除去已打出牌外各种类型牌所剩余的数量
-    int totalLeft;                      // 已打出牌外牌的总数（初始144）
+    // 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
+    Mahjong lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+    int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
+    int totalLeft;                      // 没出现过的牌的总数（初始144）
+    int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
 
 public:
+    static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+
     explicit StateContainer(int curP=0, int curT=0);
     StateContainer(const StateContainer& other);
 
@@ -48,7 +51,7 @@ public:
     [[nodiscard]] valarray<Mahjong>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
     [[nodiscard]] valarray<Mahjong>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
     [[nodiscard]] valarray<Mahjong>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-    [[nodiscard]] valarray<Mahjong>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Mahjong>& getDiscards();                             // 获取弃牌堆
     [[nodiscard]] valarray<Mahjong>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
 
     [[nodiscard]] const valarray<Mahjong>& getInHand() const;                   //  获取手牌的常引用，下同上
@@ -56,9 +59,11 @@ public:
     [[nodiscard]] const valarray<Mahjong>& getChiOf(int idx) const;
     [[nodiscard]] const valarray<Mahjong>& getPengOf(int idx) const;
     [[nodiscard]] const valarray<Mahjong>& getGangOf(int idx) const;
-    [[nodiscard]] const valarray<Mahjong>& getDiscards() const;
+//    [[nodiscard]] const valarray<Mahjong>& getDiscards() const;
     [[nodiscard]] const valarray<Mahjong>& getTilePlayedOf(int idx) const;
 
+    void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
+    void decTileLeft(Mahjong mj);                                               // 同上
     [[nodiscard]] int getTileLeft(int idx) const;                               // 获得idx对应的牌的剩余数量
     [[nodiscard]] int getTotalLeft() const;                                     // 获得所有牌的剩余数量
 
@@ -70,6 +75,11 @@ public:
     [[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
     void setLastPlayed(const Mahjong& lastTile);                                // 设置上一个被打出来的麻将
     [[nodiscard]] const Mahjong& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+    void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
+    [[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
+    void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
+    void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
+
 
     void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
     void nxtTurn();                                                             // 进入下一回合
