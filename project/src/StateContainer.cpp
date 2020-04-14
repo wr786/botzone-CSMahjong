@@ -41,7 +41,7 @@ valarray<Mahjong> &StateContainer::getFlowerTilesOf(int idx) { return flowerTile
 valarray<Mahjong> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
 valarray<Mahjong> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
 valarray<Mahjong> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
-valarray<Mahjong> &StateContainer::getDiscards() { return discards; }
+//valarray<Mahjong> &StateContainer::getDiscards() { return discards; }
 valarray<Mahjong> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
 
 const valarray<Mahjong> &StateContainer::getInHand() const { return inHand; }
@@ -49,7 +49,7 @@ const valarray<Mahjong> &StateContainer::getFlowerTilesOf(int idx) const { retur
 const valarray<Mahjong> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
 const valarray<Mahjong> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
 const valarray<Mahjong> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
-const valarray<Mahjong> &StateContainer::getDiscards() const { return discards; }
+//const valarray<Mahjong> &StateContainer::getDiscards() const { return discards; }
 const valarray<Mahjong> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
 
 int StateContainer::getTileLeft(int idx) const {return tileLeft[idx];}
