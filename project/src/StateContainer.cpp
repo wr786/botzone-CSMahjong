@@ -65,6 +65,7 @@ void StateContainer::decTileLeft(Mahjong mj) {
 int StateContainer::getTileLeft(int idx) const {return tileLeft[idx];}
 int StateContainer::getTotalLeft() const {return totalLeft;}
 
+void StateContainer::incSecretGangCntOf(int idx) {secretGangCntOf[idx]++;}
 int StateContainer::getSecretGangCntOf(int idx) const { return secretGangCntOf[idx]; }
 
 void StateContainer::setCurPosition(int curP) { curPosition = curP; }
@@ -77,6 +78,17 @@ void StateContainer::setInHandCntOf(int idx, int cnt) { inHandCnt[idx] = cnt; }
 int StateContainer::getInHandCntOf(int idx) const { return inHandCnt[idx]; }
 void StateContainer::incInHandCntOf(int idx) { inHandCnt[idx]++; }
 void StateContainer::decInHandCntOf(int idx) { inHandCnt[idx]--; }
+
+void StateContainer::deleteFromInHand(const Mahjong &toDelete) {
+    int lim = inHand.size();
+    for(int i=0; i<lim; i++) {
+        if(inHand[i] == toDelete) {
+            swap(inHand[i], inHand[lim-1]);
+            break;
+        }
+    }
+    inHand.resize(lim-1);
+}
 
 void StateContainer::nxtPosition() { curPosition = (curPosition + 1) % 4; }
 void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }

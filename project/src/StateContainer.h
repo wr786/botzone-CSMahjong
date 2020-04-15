@@ -5,6 +5,7 @@
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <algorithm>
 
 // 使用Mahjong类
 #include "Mahjong.h"
@@ -67,6 +68,7 @@ public:
     [[nodiscard]] int getTileLeft(int idx) const;                               // 获得idx对应的牌的剩余数量
     [[nodiscard]] int getTotalLeft() const;                                     // 获得所有牌的剩余数量
 
+    void incSecretGangCntOf(int idx);                  // 给某名玩家的暗杠数量+1
     [[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
 
     void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
@@ -80,6 +82,7 @@ public:
     void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
     void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
 
+    void deleteFromInHand(const Mahjong& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
 
     void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
     void nxtTurn();                                                             // 进入下一回合

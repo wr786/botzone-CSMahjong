@@ -105,5 +105,15 @@ string Mahjong::getTileString() const{
     return r;
 }
 
+Mahjong Mahjong::getNxtMahjong() {
+    //! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
+    return Mahjong(innerType + 1);
+}
+
+Mahjong Mahjong::getPrvMahjong() {
+    //! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
+    return Mahjong(innerType - 1);
+}
+
 
 
