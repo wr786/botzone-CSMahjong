@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 
 #ifndef MAHJONG_H
 #define MAHJONG_H

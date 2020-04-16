@@ -1,5 +1,5 @@
 
-#pragma once
+//#pragma once
 
 #ifndef SCORECALCULATOR_H
 #define SCORECALCULATOR_H

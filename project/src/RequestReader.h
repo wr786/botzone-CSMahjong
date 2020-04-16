@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 
 #ifndef REQUESTREADER_H
 #define REQUESTREADER_H

@@ -1,5 +1,5 @@
 
-#pragma once
+//#pragma once
 
 #ifndef RESPONSEOUTPUT_H
 #define RESPONSEOUTPUT_H

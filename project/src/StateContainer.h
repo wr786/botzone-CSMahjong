@@ -1,5 +1,5 @@
 
-#pragma once
+//#pragma once
 
 #ifndef STATECONTAINER_H
 #define STATECONTAINER_H

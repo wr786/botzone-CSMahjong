@@ -4,17 +4,19 @@ void Output::Response(StateContainer state,int request){
     
     //接口不同,把valarray转化vector(优化后去掉此步骤)
     vector<Mahjong> hand;
-    for(int i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
+    for(size_t i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
     vector<pair<string,Mahjong> > pack;
-    for(int i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
-    for(int i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
-    for(int i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
+    for(size_t i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
+    for(size_t i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
+    for(size_t i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
     
     //注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
     int tileAmount[70];
-    memset(tileAmount,0,sizeof(tileAmount)); 
-    for(int i=0;i<hand.size();i++){
-        tileAmount[hand[i].getTileInt()]++;
+    memset(tileAmount,0,sizeof(tileAmount));
+    //! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
+//    for(size_t i=0;i<hand.size();i++){
+    for(const auto& item: hand)
+        tileAmount[item.getTileInt()]++;
     } 
 
     //如果是抽牌
@@ -49,7 +51,7 @@ void Output::Response(StateContainer state,int request){
         }
         //PENG
         else if(judgePeng(tileAmount,lastTile)){
-            Mahjong MahjongPlay=getBestCP(state,pack,hand,lastTile,0);
+            Mahjong MahjongPlay = getBestCP(state,pack,hand,lastTile,0);
             if(MahjongPlay.getTileInt()==1){
                 printf("PASS");
             }
@@ -90,6 +92,7 @@ void Output::Response(StateContainer state,int request){
 bool Output::judgeHu(
     vector<pair<string,Mahjong> > pack,
     vector<Mahjong> hand,
+    //! 优化? The parameter 'winTile' is copied for each invocation but only used as a const reference; consider making it a const reference
     Mahjong winTile
 ){
     //再次转换接口(可优化)
@@ -107,8 +110,7 @@ bool Output::judgeHu(
     auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
     int r=0; 
     for(int i=0;i<re.size();i++) r+=re[i].first;
-    if(r>=8) return true;
-    else return false;
+    return r >= 8;  // 这里简化了一下
 }
 
 int Output::judgeChi(
