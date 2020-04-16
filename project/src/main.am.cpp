@@ -1,9 +1,13 @@
+#ifdef _BOTZONE_ONLINE
+#include "MahjongGB/MahjongGB.h"
+#endif
 
-/*** Start of inlined file: Mahjong.h ***/
+
+/*** Start of inlined file: Majang.h ***/
 //#pragma once
 
-#ifndef MAHJONG_H
-#define MAHJONG_H
+#ifndef MAJANG_H
+#define MAJANG_H
 
 #include <string>
 #include <string_view>
@@ -30,18 +34,18 @@ typedef enum TILETYPE {
 	TILE_T_SIZE  // 以便循环使用
 } TILE_T;
 
-class Mahjong {
+class Majang {
 private:
 	TILE innerType;                                                         // 储存麻将对应的类型
 public:
-	Mahjong(): innerType(0) {}                                              // 未初始化
-	Mahjong(const Mahjong& other);                                          // 复制构造函数
-	Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong，！允许隐式转换
-	explicit Mahjong(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Mahjong
-	explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(string_view strExpr);                                  // 通过string直接创建Majang
 
-	Mahjong& operator = (const Mahjong& other);
-	bool operator == (const Mahjong& other);
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other);
 
 	void resetFromString(string_view strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -55,25 +59,25 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Mahjong getNxtMahjong();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Mahjong getPrvMahjong();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
-/*** End of inlined file: Mahjong.h ***/
+/*** End of inlined file: Majang.h ***/
 
 
-/*** Start of inlined file: Mahjong.cpp ***/
+/*** Start of inlined file: Majang.cpp ***/
 #include <cassert>
 
 // 没有注释的函数大多都是易于理解的
-// 每个函数都可以在Mahjong.h的声明处找到简要的注释
+// 每个函数都可以在Majang.h的声明处找到简要的注释
 
 /*
  * static工具函数区
  */
 
-TILE_T Mahjong::getTileTypeFromChar(char ch) {
+TILE_T Majang::getTileTypeFromChar(char ch) {
 	// 这里是比较固定的，所以直接采用switch
 	switch(ch) {
 		case 'W': return WANN;
@@ -86,15 +90,15 @@ TILE_T Mahjong::getTileTypeFromChar(char ch) {
 	}
 }
 
-int Mahjong::parseTileType(string_view strExpr) {
+int Majang::parseTileType(string_view strExpr) {
 	return getTileTypeFromChar(strExpr[0]);
 }
 
-int Mahjong::parseTileNum(string_view strExpr) {
+int Majang::parseTileNum(string_view strExpr) {
 	return strExpr[1] - '0';
 }
 
-TILE Mahjong::parseTile(string_view strExpr) {
+TILE Majang::parseTile(string_view strExpr) {
 	assert(strExpr.length() == 2);  // 麻将牌只能有二位
 	return parseTileType(strExpr) * 10 + parseTileNum(strExpr);
 }
@@ -103,15 +107,15 @@ TILE Mahjong::parseTile(string_view strExpr) {
  * 构造函数区
  */
 
-Mahjong::Mahjong(const Mahjong &other) : innerType(other.innerType) {}
+Majang::Majang(const Majang &other) : innerType(other.innerType) {}
 
-Mahjong::Mahjong(const char *cstrExpr) {
+Majang::Majang(const char *cstrExpr) {
 	innerType = getTileTypeFromChar(cstrExpr[0]) * 10 + cstrExpr[1] - '0';
 }
 
-// 通过string直接创建Mahjong
-// 比如Mahjong(H1),创建的即为61
-Mahjong::Mahjong(string_view strExpr) {
+// 通过string直接创建Majang
+// 比如Majang(H1),创建的即为61
+Majang::Majang(string_view strExpr) {
 	innerType = parseTile(strExpr);
 }
 
@@ -119,13 +123,13 @@ Mahjong::Mahjong(string_view strExpr) {
  * 运算符重载区
  */
 
-Mahjong& Mahjong::operator = (const Mahjong& other) {
+Majang& Majang::operator = (const Majang& other) {
 	if(&other == this) { return *this; } // self-assignment
 	innerType = other.innerType;
 	return *this;
 }
 
-bool Mahjong::operator == (const Mahjong &other) {
+bool Majang::operator == (const Majang &other) {
 	return innerType == other.innerType;
 }
 
@@ -133,11 +137,11 @@ bool Mahjong::operator == (const Mahjong &other) {
  * 其他方法区
  */
 
-void Mahjong::resetFromString(string_view strExpr) {
+void Majang::resetFromString(string_view strExpr) {
 	innerType = parseTile(strExpr);
 }
 
-char Mahjong::getTileType() const {
+char Majang::getTileType() const {
 	switch(auto tile_t = TILE_T(innerType / 10); tile_t) {
 		case WANN: return 'W';
 		case BING: return 'B';
@@ -149,35 +153,35 @@ char Mahjong::getTileType() const {
 	}
 }
 
-int Mahjong::getTileNum() const {
+int Majang::getTileNum() const {
 	return innerType % 10;
 }
 
-TILE Mahjong::getTileInt() const {
+TILE Majang::getTileInt() const {
 	return innerType;
 }
 
-bool Mahjong::isFlowerTile() const {
+bool Majang::isFlowerTile() const {
 	return getTileType() == 'H';
 }
 
-string Mahjong::getTileString() const{
+string Majang::getTileString() const{
 	string r="";
 	r=r+getTileType()+(char)getTileNum();
 	return r;
 }
 
-Mahjong Mahjong::getNxtMahjong() {
+Majang Majang::getNxtMajang() {
 	//! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
-	return Mahjong(innerType + 1);
+	return Majang(innerType + 1);
 }
 
-Mahjong Mahjong::getPrvMahjong() {
+Majang Majang::getPrvMajang() {
 	//! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
-	return Mahjong(innerType - 1);
+	return Majang(innerType - 1);
 }
 
-/*** End of inlined file: Mahjong.cpp ***/
+/*** End of inlined file: Majang.cpp ***/
 
 
 /*** Start of inlined file: StateContainer.h ***/
@@ -189,11 +193,11 @@ Mahjong Mahjong::getPrvMahjong() {
 #include <valarray>
 #include <algorithm>
 
-// 使用Mahjong类
+// 使用Majang类
 
 using namespace std;
 
-//typedef pair<char, int> Mahjong; // 所有麻将牌均以“大写字母+数字”组合表示
+//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
 
 // 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
 // 0. 我们的位置、当前的风圈
@@ -207,17 +211,17 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Mahjong> inHand;           // 用于存储手牌
-	valarray<Mahjong> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	valarray<Majang> inHand;           // 用于存储手牌
+	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Mahjong> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Mahjong> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Mahjong> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-//    valarray<Mahjong> discards;       // 用于存放弃牌堆
-	valarray<Mahjong> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> discards;       // 用于存放弃牌堆
+	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
-	Mahjong lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
 	int totalLeft;                      // 没出现过的牌的总数（初始144）
 	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
@@ -228,24 +232,24 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Mahjong>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Mahjong>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Mahjong>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Mahjong>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Mahjong>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Mahjong>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Mahjong>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
 
-	[[nodiscard]] const valarray<Mahjong>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Mahjong>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Mahjong>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Mahjong>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Mahjong>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Mahjong>& getDiscards() const;
-	[[nodiscard]] const valarray<Mahjong>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
-	void decTileLeft(Mahjong mj);                                               // 同上
+	void decTileLeft(Majang mj);                                               // 同上
 	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
 	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
 
@@ -256,14 +260,14 @@ public:
 	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
 	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
 	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
-	void setLastPlayed(const Mahjong& lastTile);                                // 设置上一个被打出来的麻将
-	[[nodiscard]] const Mahjong& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
+	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
 	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
 	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
 	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
 	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
 
-	void deleteFromInHand(const Mahjong& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
+	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
 
 	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
 	void nxtTurn();                                                             // 进入下一回合
@@ -276,7 +280,7 @@ public:
 /*** Start of inlined file: StateContainer.cpp ***/
 #include <cassert>
 
-StateContainer::StateContainer(int curP, int curT) : inHand(13), curPosition(curP), curTurnPlayer(curT), totalLeft(144) {
+StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), inHand(13), curTurnPlayer(curT), totalLeft(144) {
 	for(int i = 1; i < 10; i++) {
 		tileLeft[10 + i] = 4;   // WANN
 		tileLeft[20 + i] = 4;   // BING
@@ -289,7 +293,7 @@ StateContainer::StateContainer(int curP, int curT) : inHand(13), curPosition(cur
 	for(int i = 1; i < 9; i++) {
 		tileLeft[60 + i] = 1;   // 花牌只有一张
 	}
-	lastPlayed = Mahjong("N0");
+	lastPlayed = Majang("N0");
 	for(int& i : inHandCnt) { // 初始化手牌数量
 		i = 13;
 	}
@@ -316,24 +320,24 @@ StateContainer::StateContainer(const StateContainer &other) {
 	}
 }
 
-valarray<Mahjong> &StateContainer::getInHand() { return inHand; }
-valarray<Mahjong> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
-valarray<Mahjong> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
-valarray<Mahjong> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
-valarray<Mahjong> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
-//valarray<Mahjong> &StateContainer::getDiscards() { return discards; }
-valarray<Mahjong> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+valarray<Majang> &StateContainer::getInHand() { return inHand; }
+valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
+valarray<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
+valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
+valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
+//valarray<Majang> &StateContainer::getDiscards() { return discards; }
+valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
 
-const valarray<Mahjong> &StateContainer::getInHand() const { return inHand; }
-const valarray<Mahjong> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
-const valarray<Mahjong> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
-const valarray<Mahjong> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
-const valarray<Mahjong> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
-//const valarray<Mahjong> &StateContainer::getDiscards() const { return discards; }
-const valarray<Mahjong> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
+const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
+const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
+const valarray<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
+const valarray<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
+const valarray<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
+//const valarray<Majang> &StateContainer::getDiscards() const { return discards; }
+const valarray<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
 
 void StateContainer::decTileLeft(int idx) { tileLeft[idx]--; totalLeft--; }
-void StateContainer::decTileLeft(Mahjong mj) {
+void StateContainer::decTileLeft(Majang mj) {
 	tileLeft[mj.getTileInt()]--;
 	totalLeft--;
 }
@@ -347,14 +351,14 @@ void StateContainer::setCurPosition(int curP) { curPosition = curP; }
 int StateContainer::getCurPosition() const { return curPosition; }
 void StateContainer::setCurTurnPlayer(int curTP) { curTurnPlayer = curTP; }
 int StateContainer::getCurTurnPlayer() const { return curTurnPlayer; }
-void StateContainer::setLastPlayed(const Mahjong &lastTile) { lastPlayed = lastTile; }
-const Mahjong &StateContainer::getLastPlayed() const { return lastPlayed; }
+void StateContainer::setLastPlayed(const Majang &lastTile) { lastPlayed = lastTile; }
+const Majang &StateContainer::getLastPlayed() const { return lastPlayed; }
 void StateContainer::setInHandCntOf(int idx, int cnt) { inHandCnt[idx] = cnt; }
 int StateContainer::getInHandCntOf(int idx) const { return inHandCnt[idx]; }
 void StateContainer::incInHandCntOf(int idx) { inHandCnt[idx]++; }
 void StateContainer::decInHandCntOf(int idx) { inHandCnt[idx]--; }
 
-void StateContainer::deleteFromInHand(const Mahjong &toDelete) {
+void StateContainer::deleteFromInHand(const Majang &toDelete) {
 	int lim = inHand.size();
 	for(int i=0; i<lim; i++) {
 		if(inHand[i] == toDelete) {
@@ -380,8 +384,11 @@ void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
 #include <cstdio>
 #include <cctype>
 #include <string>
+#include <cstring>
 #include <valarray>
 #include <cassert>
+
+#include "MahjongGB/MahjongGB.h"
 
 using namespace std;
 
@@ -389,7 +396,7 @@ class Reader{
 public:
 	static void readIn(string& str);                            // 读取string
 	static void readIn(int& x);                                 // 读取int
-	static void readIn(Mahjong& tile);                          // 读取Mahjong
+	static void readIn(Majang& tile);                          // 读取Majang
 
 	// 能根据对应编号读入不同的信息并存放到StateContainer
 	// 返回值为int，代表这条request读取到了什么操作
@@ -428,7 +435,7 @@ void Reader::readIn(int &x) {
 	}
 }
 
-void Reader::readIn(Mahjong &tile) {
+void Reader::readIn(Majang &tile) {
 	string tmp;
 	readIn(tmp);
 	tile.resetFromString(tmp);
@@ -474,7 +481,7 @@ int Reader::readRequest(StateContainer &state) {
 			break;
 		}
 		case 2: { // 我们抽牌
-			valarray<Mahjong>& tmpInHand = state.getInHand();
+			valarray<Majang>& tmpInHand = state.getInHand();
 			int pos = tmpInHand.size();
 			tmpInHand.resize(pos+1);
 			readIn(tmpInHand[pos]);
@@ -492,7 +499,7 @@ int Reader::readRequest(StateContainer &state) {
 			string op; readIn(op);
 			if (op == "BUHUA") {
 				ret += 0;
-				valarray<Mahjong> &tmpHana = state.getFlowerTilesOf(playerID);
+				valarray<Majang> &tmpHana = state.getFlowerTilesOf(playerID);
 				int pos = tmpHana.size();
 				tmpHana.resize(pos + 1);
 				readIn(tmpHana[pos]);
@@ -503,10 +510,10 @@ int Reader::readRequest(StateContainer &state) {
 				state.incInHandCntOf(playerID);
 				state.setLastPlayed("D0");  // D0 -> 其他玩家抽牌
 			} else if (op == "PLAY") {
-				Mahjong tmpPlayed; readIn(tmpPlayed);
+				Majang tmpPlayed; readIn(tmpPlayed);
 				state.setLastPlayed(tmpPlayed);
 				state.decInHandCntOf(playerID);
-				valarray<Mahjong>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+				valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
 				int pos = tmpTilePlayed.size();
 				tmpTilePlayed.resize(pos + 1);
 				tmpTilePlayed[pos] = tmpPlayed;
@@ -517,15 +524,15 @@ int Reader::readRequest(StateContainer &state) {
 				}
 				ret += 2;
 			} else if (op == "PENG") {
-				Mahjong tmpPlayed; readIn(tmpPlayed);
-				Mahjong pengTile = state.getLastPlayed();   // 碰的牌为上一回合打出的牌
-				valarray<Mahjong>& tmpPengOf = state.getPengOf(playerID);
+				Majang tmpPlayed; readIn(tmpPlayed);
+				Majang pengTile = state.getLastPlayed();   // 碰的牌为上一回合打出的牌
+				valarray<Majang>& tmpPengOf = state.getPengOf(playerID);
 				int pos = tmpPengOf.size();
 				tmpPengOf.resize(pos + 1);
 				tmpPengOf[pos] = tmpPlayed;
 				state.decTileLeft(pengTile);    // 被碰的牌又会打出两张
 				state.decTileLeft(pengTile);
-				valarray<Mahjong>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+				valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
 				pos = tmpTilePlayed.size();
 				tmpTilePlayed.resize(pos + 1);
 				tmpTilePlayed[pos] = tmpPlayed;
@@ -540,16 +547,16 @@ int Reader::readRequest(StateContainer &state) {
 				}
 				ret += 3;
 			} else if (op == "CHI") {
-				Mahjong tmpCHI, tmpPlayed;
+				Majang tmpCHI, tmpPlayed;
 				readIn(tmpCHI); readIn(tmpPlayed);
-				valarray<Mahjong>& tmpChiOf = state.getChiOf(playerID);
+				valarray<Majang>& tmpChiOf = state.getChiOf(playerID);
 				int pos = tmpChiOf.size();
 				tmpChiOf.resize(pos + 1);
 				tmpChiOf[pos] = tmpCHI;
 				// 这里需要判断出该玩家为了吃打出来的是哪两张牌
-				Mahjong tmpCHIprv = tmpCHI.getPrvMahjong();
-				Mahjong tmpCHInxt = tmpCHI.getNxtMahjong();
-				const Mahjong& lastPlayed = state.getLastPlayed();
+				Majang tmpCHIprv = tmpCHI.getPrvMajang();
+				Majang tmpCHInxt = tmpCHI.getNxtMajang();
+				const Majang& lastPlayed = state.getLastPlayed();
 				if(tmpCHIprv == lastPlayed) {
 					state.decTileLeft(tmpCHI);
 					state.decTileLeft(tmpCHInxt);
@@ -560,9 +567,9 @@ int Reader::readRequest(StateContainer &state) {
 					state.decTileLeft(tmpCHIprv);
 					state.decTileLeft(tmpCHI);
 				} else {
-					assert("[ERROR] judge CHI failed!" == "");
+					assert(strcmp("[ERROR] judge CHI failed!",""));
 				}
-				valarray<Mahjong>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+				valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
 				pos = tmpTilePlayed.size();
 				tmpTilePlayed.resize(pos + 1);
 				tmpTilePlayed[pos] = tmpPlayed;
@@ -580,7 +587,7 @@ int Reader::readRequest(StateContainer &state) {
 						state.deleteFromInHand(tmpCHIprv);
 						state.deleteFromInHand(tmpCHI);
 					} else {
-						assert("[ERROR] remove CHI tiles from inHand failed!" == "");
+						assert(strcmp("[ERROR] remove CHI tiles from inHand failed!",""));
 					}
 					state.deleteFromInHand(tmpPlayed);  // 以及打出的牌
 				}
@@ -593,8 +600,8 @@ int Reader::readRequest(StateContainer &state) {
 					state.setInHandCntOf(playerID, state.getInHandCntOf(playerID) - 4);
 				} else {
 					// 明杠，这里假设抽牌操作和打牌操作会在之后以draw和play的request呈现
-					const Mahjong& gangTile = state.getLastPlayed();
-					valarray<Mahjong>& tmpGangOf = state.getGangOf(playerID);
+					const Majang& gangTile = state.getLastPlayed();
+					valarray<Majang>& tmpGangOf = state.getGangOf(playerID);
 					int pos = tmpGangOf.size();
 					tmpGangOf.resize(pos + 1);
 					tmpGangOf[pos] = gangTile;
@@ -610,13 +617,13 @@ int Reader::readRequest(StateContainer &state) {
 				}
 				ret += 5;
 			} else if (op == "BUGANG") {
-				Mahjong tmpBuGang; readIn(tmpBuGang);
-				valarray<Mahjong>& tmpGangOf = state.getGangOf(playerID);
+				Majang tmpBuGang; readIn(tmpBuGang);
+				valarray<Majang>& tmpGangOf = state.getGangOf(playerID);
 				int pos = tmpGangOf.size();
 				tmpGangOf.resize(pos + 1);
 				tmpGangOf[pos] = tmpBuGang;
 				// 同时还要从碰中去除
-				valarray<Mahjong>& tmpPengOf = state.getPengOf(playerID);
+				valarray<Majang>& tmpPengOf = state.getPengOf(playerID);
 				int lim = tmpPengOf.size();
 				for(int i=0; i<lim; i++) {
 					if(tmpPengOf[i] == tmpBuGang) {
@@ -631,12 +638,12 @@ int Reader::readRequest(StateContainer &state) {
 				}
 				ret += 6;
 			} else {
-				assert("[ERROR] readOP failed!" == "");
+				assert(strcmp("[ERROR] readOP failed!",""));
 			}
 			break;
 		}
 		default: {
-			assert("[ERROR] readRequestID failed!" == "");
+			assert(strcmp("[ERROR] readRequestID failed!",""));
 			break;
 		}
 	}
@@ -653,6 +660,7 @@ int Reader::readRequest(StateContainer &state) {
 #define SCORECALCULATOR_H
 
 #include <string>
+#include <cstring>
 #include <vector>
 #include <utility>
 
@@ -673,10 +681,10 @@ using namespace std;
 class Calculator{
 public:
 	//返回一副牌的得分(番数得分和手牌得分的加权和)
-	static double MahjongScoreCalculator(
-		vector<pair<string, Mahjong> > pack,
+	static double MajangScoreCalculator(
+		vector<pair<string, Majang> > pack,
 		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
-		vector<Mahjong> hand,
+		vector<Majang> hand,
 		//hand:玩家的暗牌
 		int flowerCount,
 		//flowerCount:补花数
@@ -686,24 +694,24 @@ public:
 
 	//利用算番器计算番数得分
 	static double FanScoreCalculator(
-		vector<pair<string, Mahjong> > pack,
-		vector<Mahjong> hand,
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
 		int flowerCount,
-		Mahjong winTile
+		Majang winTile
 	);
 
 	//一副牌的番数得分
-	static double MahjongFanScore(
-		vector<pair<string, Mahjong> > pack,
-		vector<Mahjong> hand,
+	static double MajangFanScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
 		int flowerCount,
 		StateContainer state
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
-	static double MahjongHandScore(
-		vector<pair<string, Mahjong> > pack,
-		vector<Mahjong> hand
+	static double MajangHandScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand
 	);
 
 	static double HandScoreCalculator(
@@ -717,9 +725,9 @@ public:
 
 /*** Start of inlined file: ScoreCalculator.cpp ***/
 //最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
-double Calculator::MahjongScoreCalculator(
-	vector<pair<string, Mahjong> > pack,
-	vector<Mahjong> hand,
+double Calculator::MajangScoreCalculator(
+	vector<pair<string, Majang> > pack,
+	vector<Majang> hand,
 	int flowerCount,
 	StateContainer state
 ){
@@ -727,67 +735,67 @@ double Calculator::MahjongScoreCalculator(
 	int k1=0.5;    // 手牌得分所占权重
 	int k2=0.3;    // 自摸番数得分所占权重
 	int k3=0.2;    // 点炮番数得分所占权重
-	double r1=MahjongHandScore(pack,hand);
-	double r2=MahjongFanScore(pack,hand,flowerCount,state);
+	double r1=MajangHandScore(pack,hand);
+	double r2=MajangFanScore(pack,hand,flowerCount,state);
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
 	return r1*k1+r2*(k2+k3);
 }
 
 //参数c是用来使番数得分与手牌得分的数值相当
 double Calculator::FanScoreCalculator(
-	vector<pair<string, Mahjong> > pack,//似乎可以直接用两位整数直接作为代表mahjong的参数，从而节省时间与空间
-	vector<Mahjong> hand,//似乎可以直接用两位整数直接作为代表mahjong的参数，从而节省时间与空间
+	vector<pair<string, Majang> > pack,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
+	vector<Majang> hand,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
 	int flowerCount,
-	Mahjong winTile
+	Majang winTile
 ){
 	double c=1;
-	//将Mahjong类调整为适用于算番器的接口
+	//将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
-	for(int i=0;i<pack.size();++i){
+	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
 	}
 	vector <string> h;
-	for(int i=0;i<hand.size();++i){
+	for(unsigned int i=0;i<hand.size();++i){
 		h.push_back(hand[i].getTileString());
 	}
 	//算番器啥时候初始化呢？
 	MahjongInit();
 	auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,flowerCount,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
 	int r=0;
-	for(int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
+	for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
 	return r*c;
 }
 
-double Calculator::MahjongFanScore(
-	vector<pair<string, Mahjong> > pack,
-	vector<Mahjong> hand,
+double Calculator::MajangFanScore(
+	vector<pair<string, Majang> > pack,
+	vector<Majang> hand,
 	int flowerCount,
 	StateContainer state
 ){
 	double r=0;
 	for(int i=11;i<=19;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Mahjong(i));
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
 		}
 	}
 	for(int i=21;i<=29;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Mahjong(i));
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
 		}
 	}
 	for(int i=31;i<=39;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Mahjong(i));
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
 		}
 	}
 	for(int i=41;i<=44;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Mahjong(i));
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
 		}
 	}
 	for(int i=51;i<=53;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Mahjong(i));
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
 		}
 	}
 	for(int i=61;i<=68;i++){
@@ -796,7 +804,7 @@ double Calculator::MahjongFanScore(
 //            newstate.getTileLeft(i)--;
 //            newstate.getTotalLeft()--;
 			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MahjongFanScore(pack,hand,flowerCount+1,newstate);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate);
 		}
 	}
 	return r;
@@ -804,17 +812,17 @@ double Calculator::MahjongFanScore(
 
 //这里采用了将手牌hand和明牌pack合并起来计算的方式,若有必要,可以分开计算并赋上权值
 //参数c是用来使番数得分与手牌得分的数值相当
-double Calculator::MahjongHandScore(
-	vector<pair<string, Mahjong> > pack,
-	vector<Mahjong> hand
+double Calculator::MajangHandScore(
+	vector<pair<string, Majang> > pack,
+	vector<Majang> hand
 ){
 	double c=1;
 	int tileAmount[70];
 	memset(tileAmount,0,sizeof(tileAmount));
-	for(int i=0;i<hand.size();i++){
+	for(unsigned int i=0;i<hand.size();i++){
 		tileAmount[hand[i].getTileInt()]++;
 	}
-	for(int i=0;i<pack.size();i++){
+	for(unsigned int i=0;i<pack.size();i++){
 		if(pack[i].first=="GANG") tileAmount[pack[i].second.getTileInt()]=4;
 		else if(pack[i].first=="PENG") tileAmount[pack[i].second.getTileInt()]=3;
 		else{
@@ -914,7 +922,8 @@ double Calculator::HandScoreCalculator(
 	valueT*=(1+(double)sumT/sum);
 	valueF*=(1+(double)sumF/sum);
 	valueJ*=(1+(double)sumJ/sum);
-	return valueW+valueB+valueT+valueF+valueJ;
+	r=valueW+valueB+valueT+valueF+valueJ;
+	return r;
 }
 
 /*** End of inlined file: ScoreCalculator.cpp ***/
@@ -935,13 +944,13 @@ using namespace std;
 class Output{
 public:
 	static void Response(StateContainer state,int request);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Mahjong> > pack,vector<Mahjong> hand,Mahjong winTile);   //判断是否胡了
-	static bool judgeGang(int tileAmout[70],vector<pair<string,Mahjong> > pack,vector<Mahjong> hand,Mahjong newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
-	static bool judgeBuGang(StateContainer state,vector<pair<string,Mahjong> > pack,vector<Mahjong> hand,Mahjong newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
-	static bool judgePeng(int tileAmout[70],Mahjong newTile);    //对手出牌后判断能否碰
-	static int judgeChi(int tileAmout[70],Mahjong newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
-	static const pair<double,Mahjong> & getBestPlay(StateContainer state,vector<pair<string,Mahjong> > pack,vector<Mahjong> hand);   //返回最优的出牌及此时的评估值
-	static const Mahjong & getBestCP(StateContainer state,vector<pair<string,Mahjong> > pack,vector<Mahjong> hand,Mahjong newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Mahjong,否则Mahjong值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,Majang winTile);   //判断是否胡了
+	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
+	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
+	static bool judgePeng(int tileAmout[70],Majang newTile);    //对手出牌后判断能否碰
+	static int judgeChi(int tileAmout[70],Majang newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
+	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
 };
 
 #endif
@@ -952,19 +961,20 @@ public:
 void Output::Response(StateContainer state,int request){
 
 	//接口不同,把valarray转化vector(优化后去掉此步骤)
-	vector<Mahjong> hand;
-	for(int i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
-	vector<pair<string,Mahjong> > pack;
-	for(int i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
-	for(int i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
-	for(int i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
+	vector<Majang> hand;
+	for(size_t i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
+	vector<pair<string,Majang> > pack;
+	for(size_t i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
+	for(size_t i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
+	for(size_t i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
 
 	//注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
 	int tileAmount[70];
 	memset(tileAmount,0,sizeof(tileAmount));
-	for(int i=0;i<hand.size();i++){
-		tileAmount[hand[i].getTileInt()]++;
-	}
+	//! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
+//    for(size_t i=0;i<hand.size();i++){
+	for(const auto& item: hand)
+		tileAmount[item.getTileInt()]++;
 
 	//如果是抽牌
 	if(request==2){
@@ -979,14 +989,14 @@ void Output::Response(StateContainer state,int request){
 			printf("GANG %s",hand.back().getTileString().c_str());
 		}
 		else{
-			Mahjong Tileplay=getBestPlay(state,pack,hand).second;
+			Majang Tileplay=getBestPlay(state,pack,hand).second;
 			printf("PLAY %s",Tileplay.getTileString().c_str());
 		}
 	}
 
 	//如果有别人打出的牌
 	else if(request==32||request==33||request==34){
-		Mahjong lastTile=state.getLastPlayed();//被打出的牌
+		Majang lastTile=state.getLastPlayed();//被打出的牌
 		int chi=judgeChi(tileAmount,lastTile);
 		//HU
 		if(judgeHu(pack,hand,lastTile)){
@@ -998,24 +1008,24 @@ void Output::Response(StateContainer state,int request){
 		}
 		//PENG
 		else if(judgePeng(tileAmount,lastTile)){
-			Mahjong MahjongPlay=getBestCP(state,pack,hand,lastTile,0);
-			if(MahjongPlay.getTileInt()==1){
+			Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
+			if(MajangPlay.getTileInt()==1){
 				printf("PASS");
 			}
 			else{
-				printf("PENG %s",MahjongPlay.getTileString());
+				printf("PENG %s",MajangPlay.getTileString().c_str());
 			}
 		}
 		//chi
 		else if(chi){
-			Mahjong MahjongPlay=getBestCP(state,pack,hand,lastTile,chi);
-			if(MahjongPlay.getTileInt()==1){
+			Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi);
+			if(MajangPlay.getTileInt()==1){
 				printf("PASS");
 			}
 			else{
-				if(chi==1) printf("CHI %s %s",lastTile.getNxtMahjong().getTileString().c_str(),MahjongPlay.getTileString());
-				else if(chi==2) printf("CHI %s %s",lastTile.getTileString().c_str(),MahjongPlay.getTileString());
-				else printf("CHI %s %s",lastTile.getPrvMahjong().getTileString().c_str(),MahjongPlay.getTileString());
+				if(chi==1) printf("CHI %s %s",lastTile.getNxtMajang().getTileString().c_str(),MajangPlay.getTileString().c_str());
+				else if(chi==2) printf("CHI %s %s",lastTile.getTileString().c_str(),MajangPlay.getTileString().c_str());
+				else printf("CHI %s %s",lastTile.getPrvMajang().getTileString().c_str(),MajangPlay.getTileString().c_str());
 			}
 		}
 		else{
@@ -1037,17 +1047,18 @@ void Output::Response(StateContainer state,int request){
 }
 
 bool Output::judgeHu(
-	vector<pair<string,Mahjong> > pack,
-	vector<Mahjong> hand,
-	Mahjong winTile
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	//! 优化? The parameter 'winTile' is copied for each invocation but only used as a const reference; consider making it a const reference
+	Majang winTile
 ){
 	//再次转换接口(可优化)
 	vector <pair<string,pair<string,int> > > p;
-	for(int i=0;i<pack.size();++i){
+	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
 	}
 	vector <string> h;
-	for(int i=0;i<hand.size();++i){
+	for(unsigned int i=0;i<hand.size();++i){
 		h.push_back(hand[i].getTileString());
 	}
 
@@ -1055,14 +1066,13 @@ bool Output::judgeHu(
 	MahjongInit();
 	auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
 	int r=0;
-	for(int i=0;i<re.size();i++) r+=re[i].first;
-	if(r>=8) return true;
-	else return false;
+	for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
+	return r >= 8;  // 这里简化了一下
 }
 
 int Output::judgeChi(
 	int TileAmount[70],
-	Mahjong newTile
+	Majang newTile
 ){
 	if(newTile.getTileInt()/10<=3){
 		if(newTile.getTileNum()<=7&&TileAmount[newTile.getTileInt()+1]&&TileAmount[newTile.getTileInt()+2]) return 1;
@@ -1077,7 +1087,7 @@ int Output::judgeChi(
 
 bool Output::judgePeng(
 	int tileAmout[70],
-	Mahjong newTile
+	Majang newTile
 ){
 	if(tileAmout[newTile.getTileInt()]==2) return true;
 	else return false;
@@ -1085,25 +1095,25 @@ bool Output::judgePeng(
 
 bool Output::judgeGang(
 	int tileAmout[70],
-	vector<pair<string,Mahjong> > pack,
-	vector<Mahjong> hand,
-	Mahjong newTile,
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	Majang newTile,
 	StateContainer state,
 	int status
 ){
 	if(status==3){
 		if(tileAmout[newTile.getTileInt()]==3){
 			//先得到不杠时的评估值
-			double maxResult1=Calculator::MahjongScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			//杠后修改pack,hand;
-			for(int i=0;i<hand.size();i++){
+			for(unsigned int i=0;i<hand.size();i++){
 				if(hand[i].getTileInt()==newTile.getTileInt()){
 					hand.erase(hand.begin()+i);
 					i--;
 			}
 		}
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MahjongScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 		}
@@ -1114,13 +1124,13 @@ bool Output::judgeGang(
 			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
 			double maxResult1=getBestPlay(state,pack,hand).first;
 			//杠后修改pack,hand;
-			for(int i=0;i<hand.size();i++){
+			for(unsigned int i=0;i<hand.size();i++){
 				if(hand[i].getTileInt()==newTile.getTileInt()){
 					hand.erase(hand.begin()+i);
 					i--;
 			}
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MahjongScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 			}
@@ -1132,16 +1142,16 @@ bool Output::judgeGang(
 
 bool Output::judgeBuGang(
 	StateContainer state,
-	vector<pair<string,Mahjong> > pack,
-	vector<Mahjong> hand,
-	Mahjong newTile
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	Majang newTile
 ){
-	for(int i=0;i<pack.size();i++){
+	for(unsigned int i=0;i<pack.size();i++){
 		if(pack[i].first=="PENG"&&pack[i].second.getTileInt()==newTile.getTileInt()){
 			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
 			double maxResult1=getBestPlay(state,pack,hand).first;
 			//如果杠,先把手牌中的这张牌去掉,再在pack中去掉peng,增加gang
-			for(int k=0;k<hand.size();k++){
+			for(unsigned int k=0;k<hand.size();k++){
 				if(hand[k].getTileInt()==newTile.getTileInt()){
 					hand.erase(hand.begin()+k);
 					break;
@@ -1149,7 +1159,7 @@ bool Output::judgeBuGang(
 			}
 			pack.erase(pack.begin()+i);
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MahjongScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 		}
@@ -1157,17 +1167,17 @@ bool Output::judgeBuGang(
 	return false;
 }
 
-const pair<double,Mahjong> getBestPlay(
+const pair<double,Majang> Output::getBestPlay(
 	StateContainer state,
-	vector<pair<string,Mahjong> > pack,
-	vector<Mahjong> hand
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand
 ){
 	int bestChoice=0;
 	double maxResult=-1e5;
-	for(int i=0;i<hand.size();i++){
-		vector<Mahjong> newHand(hand);
+	for(unsigned int i=0;i<hand.size();i++){
+		vector<Majang> newHand(hand);
 		newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-		double ans=Calculator::MahjongScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+		double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 		if(ans>maxResult){
 			maxResult=ans;
 			bestChoice=i;
@@ -1176,18 +1186,18 @@ const pair<double,Mahjong> getBestPlay(
 	return make_pair(maxResult,hand[bestChoice]);
 }
 
-const Mahjong getBestCP(
+const Majang Output::getBestCP(
 	StateContainer state,
-	vector<pair<string,Mahjong> > pack,
-	vector<Mahjong> hand,
-	Mahjong newTile,
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	Majang newTile,
 	int pos
 ){
 	//先得到不进行操作时最优得分
-	double maxResult1=Calculator::MahjongScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+	double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 	//进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
 	if(pos==0){
-		for(int i=0;i<hand.size();i++){
+		for(unsigned int i=0;i<hand.size();i++){
 			if(hand[i].getTileInt()==newTile.getTileInt()){
 				hand.erase(hand.begin()+i);
 				i--;
@@ -1199,7 +1209,7 @@ const Mahjong getBestCP(
 		//把吃掉的牌从手牌hand中去掉,再把顺子加到pack中
 		if(pos==1){
 			int k1=1,k2=1;
-			int i=0;
+			unsigned int i=0;
 			while(k1&&k2&&i<hand.size()){
 				if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
 					k1--;
@@ -1213,11 +1223,11 @@ const Mahjong getBestCP(
 					i++;
 				}
 			}
-			pack.push_back(make_pair("CHI",newTile.getNxtMahjong()));
+			pack.push_back(make_pair("CHI",newTile.getNxtMajang()));
 		}
 		else if(pos==2){
 			int k1=1,k2=1;
-			int i=0;
+			unsigned int i=0;
 			while(k1&&k2&&i<hand.size()){
 				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
 					k1--;
@@ -1235,7 +1245,7 @@ const Mahjong getBestCP(
 		}
 		else{
 			int k1=1,k2=1;
-			int i=0;
+			unsigned int i=0;
 			while(k1&&k2&&i<hand.size()){
 				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
 					k1--;
@@ -1249,19 +1259,20 @@ const Mahjong getBestCP(
 					i++;
 				}
 			}
-			pack.push_back(make_pair("CHI",newTile.getPrvMahjong()));
+			pack.push_back(make_pair("CHI",newTile.getPrvMajang()));
 		}
 	}
 	//得到操作过后的最优解
-	pair<double,Mahjong> r=getBestPlay(state,pack,hand);
+	pair<double,Majang> r=getBestPlay(state,pack,hand);
 	double maxResult2=r.first;
 	if(maxResult2-maxResult1>=1e-5){
 		return r.second;
 	}
-	else return Mahjong(1);
+	else return Majang(1);
 }
 /*** End of inlined file: ResponseOutput.cpp ***/
 
+int StateContainer::quan=0;
 int main() {
 	int turnID; Reader::readIn(turnID);
 	StateContainer basicState;

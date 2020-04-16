@@ -1,6 +1,3 @@
-#ifdef _BOTZONE_ONLINE
-#include "MahjongGB/MahjongGB.h"
-#endif
 
 #include "Majang.h"
 #include "Majang.cpp"

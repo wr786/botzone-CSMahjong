@@ -11,7 +11,6 @@
 #include <cassert>
 #include "Majang.h"
 #include "StateContainer.h"
-#include "MahjongGB/MahjongGB.h"
 
 using namespace std;
 

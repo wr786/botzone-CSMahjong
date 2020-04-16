@@ -1,7 +1,7 @@
-#pragma once
+//#pragma once
 
-#ifndef MAHJONG_H
-#define MAHJONG_H
+#ifndef MAJANG_H
+#define MAJANG_H
 
 #include <string>
 #include <string_view>
@@ -28,18 +28,18 @@ typedef enum TILETYPE {
     TILE_T_SIZE  // 以便循环使用
 } TILE_T;
 
-class Mahjong {
+class Majang {
 private:
     TILE innerType;                                                         // 储存麻将对应的类型
 public:
-    Mahjong(): innerType(0) {}                                              // 未初始化
-    Mahjong(const Mahjong& other);                                          // 复制构造函数
-    Mahjong(const char* cstrExpr);                                          // 通过字符串常量创建Mahjong，！允许隐式转换
-    explicit Mahjong(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Mahjong
-    explicit Mahjong(string_view strExpr);                                  // 通过string直接创建Mahjong
+    Majang(): innerType(0) {}                                              // 未初始化
+    Majang(const Majang& other);                                          // 复制构造函数
+    Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+    explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+    explicit Majang(string_view strExpr);                                  // 通过string直接创建Majang
 
-    Mahjong& operator = (const Mahjong& other);
-    bool operator == (const Mahjong& other);
+    Majang& operator = (const Majang& other);
+    bool operator == (const Majang& other);
 
     void resetFromString(string_view strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -53,8 +53,8 @@ public:
     [[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
     [[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-    [[nodiscard]] Mahjong getNxtMahjong();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-    [[nodiscard]] Mahjong getPrvMahjong();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+    [[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+    [[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif

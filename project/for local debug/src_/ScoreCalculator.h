@@ -12,10 +12,7 @@
 #include "Majang.h"
 #include "StateContainer.h"
 
-// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
-#ifdef _BOTZONE_ONLINE
-#include "MahjongGB/MahjongGB.h"
-#endif
+#include "../utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.h"
 
 using namespace std;
 
