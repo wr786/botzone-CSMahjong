@@ -4,8 +4,6 @@ project(project)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src)
-#include_directories(utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm)
-#include_directories(utils/Mahjong-GB-CPP/MahjongGB)
 
 add_executable(project
 #        src/cs_mahjong.cpp
@@ -13,16 +11,12 @@ add_executable(project
         src/Mahjong.cpp
         src/Mahjong.h
         src/StateContainer.h
-        #        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/fan_calculator.cpp
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/fan_calculator.h
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/shanten.cpp
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/shanten.h
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/standard_tiles.h
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/stringify.cpp
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/stringify.h
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/tile.h
-#        utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/unit_test.cpp
-#        utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.cpp
-#        utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.h
-#        utils/Mahjong-GB-CPP/test.cpp
-        src/StateContainer.cpp src/RequestReader.h src/RequestReader.cpp)
+        src/StateContainer.cpp
+        src/RequestReader.h
+        src/RequestReader.cpp
+        src/ScoreCalculator.cpp
+        src/ScoreCalculator.h
+        src/ResponseOutput.cpp
+        src/ResponseOutput.h
+        src/main.cpp
+        )

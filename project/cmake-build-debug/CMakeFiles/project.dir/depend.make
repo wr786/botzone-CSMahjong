@@ -4,6 +4,63 @@
 CMakeFiles/project.dir/src/Mahjong.cpp.obj: ../src/Mahjong.cpp
 CMakeFiles/project.dir/src/Mahjong.cpp.obj: ../src/Mahjong.h
 
-CMakeFiles/project.dir/src/test.cpp.obj: ../src/Mahjong.h
-CMakeFiles/project.dir/src/test.cpp.obj: ../src/test.cpp
+CMakeFiles/project.dir/src/RequestReader.cpp.obj: ../src/Mahjong.h
+CMakeFiles/project.dir/src/RequestReader.cpp.obj: ../src/RequestReader.cpp
+CMakeFiles/project.dir/src/RequestReader.cpp.obj: ../src/RequestReader.h
+CMakeFiles/project.dir/src/RequestReader.cpp.obj: ../src/StateContainer.h
+
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../src/Mahjong.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../src/ResponseOutput.cpp
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../src/ResponseOutput.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../src/ScoreCalculator.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../src/StateContainer.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.cpp
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../utils/ChineseOfficialMahjongHelper/standard_tiles.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../utils/ChineseOfficialMahjongHelper/tile.h
+
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../src/Mahjong.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../src/ScoreCalculator.cpp
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../src/ScoreCalculator.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../src/StateContainer.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.cpp
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/standard_tiles.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/tile.h
+
+CMakeFiles/project.dir/src/StateContainer.cpp.obj: ../src/Mahjong.h
+CMakeFiles/project.dir/src/StateContainer.cpp.obj: ../src/StateContainer.cpp
+CMakeFiles/project.dir/src/StateContainer.cpp.obj: ../src/StateContainer.h
+
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/Mahjong.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/RequestReader.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/ResponseOutput.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/ScoreCalculator.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/StateContainer.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/main.cpp
+CMakeFiles/project.dir/src/main.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+CMakeFiles/project.dir/src/main.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.cpp
+CMakeFiles/project.dir/src/main.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../utils/ChineseOfficialMahjongHelper/standard_tiles.h
+CMakeFiles/project.dir/src/main.cpp.obj: ../utils/ChineseOfficialMahjongHelper/tile.h
+
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/fan_calculator.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/standard_tiles.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp.obj: ../utils/ChineseOfficialMahjongHelper/tile.h
+
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/shanten.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.cpp
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/shanten.cpp.obj: ../utils/ChineseOfficialMahjongHelper/shanten.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/shanten.cpp.obj: ../utils/ChineseOfficialMahjongHelper/standard_tiles.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/shanten.cpp.obj: ../utils/ChineseOfficialMahjongHelper/tile.h
+
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/stringify.cpp.obj: ../utils/ChineseOfficialMahjongHelper/stringify.cpp
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/stringify.cpp.obj: ../utils/ChineseOfficialMahjongHelper/stringify.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/stringify.cpp.obj: ../utils/ChineseOfficialMahjongHelper/tile.h
 

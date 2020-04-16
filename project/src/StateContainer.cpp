@@ -62,8 +62,8 @@ void StateContainer::decTileLeft(Mahjong mj) {
     tileLeft[mj.getTileInt()]--;
     totalLeft--;
 }
-int StateContainer::getTileLeft(int idx) const {return tileLeft[idx];}
-int StateContainer::getTotalLeft() const {return totalLeft;}
+const int & StateContainer::getTileLeft(int idx) const {return tileLeft[idx];}
+const int & StateContainer::getTotalLeft() const {return totalLeft;}
 
 void StateContainer::incSecretGangCntOf(int idx) {secretGangCntOf[idx]++;}
 int StateContainer::getSecretGangCntOf(int idx) const { return secretGangCntOf[idx]; }

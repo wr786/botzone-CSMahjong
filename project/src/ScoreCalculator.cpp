@@ -1,6 +1,5 @@
 #include "ScoreCalculator.h"
 
-
 //最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
 double Calculator::MahjongScoreCalculator(
     vector<pair<string, Mahjong> > pack,
@@ -78,8 +77,9 @@ double Calculator::MahjongFanScore(
     for(int i=61;i<=68;i++){
         if(state.getTileLeft(i)){
             StateContainer newstate=state;//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
-            newstate.getTileLeft(i)--;
-            newstate.getTotalLeft()--;
+//            newstate.getTileLeft(i)--;
+//            newstate.getTotalLeft()--;
+            newstate.decTileLeft(i);
             r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MahjongFanScore(pack,hand,flowerCount+1,newstate);
         }
     }

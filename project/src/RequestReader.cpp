@@ -183,6 +183,7 @@ int Reader::readRequest(StateContainer &state) {
                 if(state.getLastPlayed().getTileType() == 'D') {
                     // 如果上一回合是摸牌，表示进行暗杠
                     state.incSecretGangCntOf(playerID);
+                    state.setInHandCntOf(playerID, state.getInHandCntOf(playerID) - 4);
                 } else {
                     // 明杠，这里假设抽牌操作和打牌操作会在之后以draw和play的request呈现
                     const Mahjong& gangTile = state.getLastPlayed();

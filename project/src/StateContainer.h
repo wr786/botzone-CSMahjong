@@ -65,10 +65,10 @@ public:
 
     void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
     void decTileLeft(Mahjong mj);                                               // 同上
-    [[nodiscard]] int & getTileLeft(int idx) const;                               // 获得idx对应的牌的剩余数量
-    [[nodiscard]] int & getTotalLeft() const;                                     // 获得所有牌的剩余数量
+    [[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
+    [[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
 
-    void incSecretGangCntOf(int idx);                  // 给某名玩家的暗杠数量+1
+    void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
     [[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
 
     void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位

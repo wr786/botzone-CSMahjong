@@ -98,11 +98,56 @@ CMakeFiles/project.dir/src/RequestReader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/RequestReader.cpp.s"
 	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\RequestReader.cpp -o CMakeFiles\project.dir\src\RequestReader.cpp.s
 
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: CMakeFiles/project.dir/flags.make
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: CMakeFiles/project.dir/includes_CXX.rsp
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj: ../src/ScoreCalculator.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\project.dir\src\ScoreCalculator.cpp.obj -c C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\ScoreCalculator.cpp
+
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/src/ScoreCalculator.cpp.i"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\ScoreCalculator.cpp > CMakeFiles\project.dir\src\ScoreCalculator.cpp.i
+
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/ScoreCalculator.cpp.s"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\ScoreCalculator.cpp -o CMakeFiles\project.dir\src\ScoreCalculator.cpp.s
+
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: CMakeFiles/project.dir/flags.make
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: CMakeFiles/project.dir/includes_CXX.rsp
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj: ../src/ResponseOutput.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/project.dir/src/ResponseOutput.cpp.obj"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\project.dir\src\ResponseOutput.cpp.obj -c C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\ResponseOutput.cpp
+
+CMakeFiles/project.dir/src/ResponseOutput.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/src/ResponseOutput.cpp.i"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\ResponseOutput.cpp > CMakeFiles\project.dir\src\ResponseOutput.cpp.i
+
+CMakeFiles/project.dir/src/ResponseOutput.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/ResponseOutput.cpp.s"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\ResponseOutput.cpp -o CMakeFiles\project.dir\src\ResponseOutput.cpp.s
+
+CMakeFiles/project.dir/src/main.cpp.obj: CMakeFiles/project.dir/flags.make
+CMakeFiles/project.dir/src/main.cpp.obj: CMakeFiles/project.dir/includes_CXX.rsp
+CMakeFiles/project.dir/src/main.cpp.obj: ../src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/project.dir/src/main.cpp.obj"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\project.dir\src\main.cpp.obj -c C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\main.cpp
+
+CMakeFiles/project.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/src/main.cpp.i"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\main.cpp > CMakeFiles\project.dir\src\main.cpp.i
+
+CMakeFiles/project.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/src/main.cpp.s"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\src\main.cpp -o CMakeFiles\project.dir\src\main.cpp.s
+
 # Object files for target project
 project_OBJECTS = \
 "CMakeFiles/project.dir/src/Mahjong.cpp.obj" \
 "CMakeFiles/project.dir/src/StateContainer.cpp.obj" \
-"CMakeFiles/project.dir/src/RequestReader.cpp.obj"
+"CMakeFiles/project.dir/src/RequestReader.cpp.obj" \
+"CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj" \
+"CMakeFiles/project.dir/src/ResponseOutput.cpp.obj" \
+"CMakeFiles/project.dir/src/main.cpp.obj"
 
 # External object files for target project
 project_EXTERNAL_OBJECTS =
@@ -110,11 +155,14 @@ project_EXTERNAL_OBJECTS =
 project.exe: CMakeFiles/project.dir/src/Mahjong.cpp.obj
 project.exe: CMakeFiles/project.dir/src/StateContainer.cpp.obj
 project.exe: CMakeFiles/project.dir/src/RequestReader.cpp.obj
+project.exe: CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj
+project.exe: CMakeFiles/project.dir/src/ResponseOutput.cpp.obj
+project.exe: CMakeFiles/project.dir/src/main.cpp.obj
 project.exe: CMakeFiles/project.dir/build.make
 project.exe: CMakeFiles/project.dir/linklibs.rsp
 project.exe: CMakeFiles/project.dir/objects1.rsp
 project.exe: CMakeFiles/project.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable project.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable project.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\project.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

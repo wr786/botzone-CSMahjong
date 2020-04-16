@@ -94,10 +94,25 @@
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.h">
 			<Option target="project"/>
 		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ResponseOutput.cpp">
+			<Option target="project"/>
+		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ResponseOutput.h">
+			<Option target="project"/>
+		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ScoreCalculator.cpp">
+			<Option target="project"/>
+		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ScoreCalculator.h">
+			<Option target="project"/>
+		</Unit>
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.cpp">
 			<Option target="project"/>
 		</Unit>
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h">
+			<Option target="project"/>
+		</Unit>
+		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/main.cpp">
 			<Option target="project"/>
 		</Unit>
 		<Unit filename="C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/CMakeLists.txt">

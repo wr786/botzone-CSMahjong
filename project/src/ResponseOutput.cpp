@@ -180,6 +180,7 @@ bool Output::judgeGang(
         }
         else return false;        
     }
+    return false;
 }
 
 
@@ -211,7 +212,7 @@ bool Output::judgeBuGang(
 }
 
 
-const pair<double,Mahjong> & getBestPlay(
+const pair<double,Mahjong> getBestPlay(
     StateContainer state,
     vector<pair<string,Mahjong> > pack,
     vector<Mahjong> hand
@@ -231,7 +232,7 @@ const pair<double,Mahjong> & getBestPlay(
 }
 
 
-const Mahjong & getBestCP(
+const Mahjong getBestCP(
     StateContainer state,
     vector<pair<string,Mahjong> > pack,
     vector<Mahjong> hand,

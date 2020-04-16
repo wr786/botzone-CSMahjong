@@ -4,6 +4,63 @@
 CMakeFiles/project.dir/src/Mahjong.cpp.obj
  C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.cpp
  C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
-CMakeFiles/project.dir/src/test.cpp.obj
+CMakeFiles/project.dir/src/RequestReader.cpp.obj
  C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
- C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/test.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h
+CMakeFiles/project.dir/src/ResponseOutput.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ResponseOutput.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ResponseOutput.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ScoreCalculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/standard_tiles.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ScoreCalculator.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ScoreCalculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/standard_tiles.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+CMakeFiles/project.dir/src/StateContainer.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h
+CMakeFiles/project.dir/src/main.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/RequestReader.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ResponseOutput.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/ScoreCalculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/StateContainer.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/main.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/standard_tiles.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/fan_calculator.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/standard_tiles.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/shanten.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/shanten.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/standard_tiles.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+CMakeFiles/project.dir/utils/ChineseOfficialMahjongHelper/stringify.cpp.obj
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/stringify.cpp
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/stringify.h
+ C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h

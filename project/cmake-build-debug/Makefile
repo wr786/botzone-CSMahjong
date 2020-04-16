@@ -176,6 +176,60 @@ src/RequestReader.cpp.s:
 	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/RequestReader.cpp.s
 .PHONY : src/RequestReader.cpp.s
 
+src/ResponseOutput.obj: src/ResponseOutput.cpp.obj
+
+.PHONY : src/ResponseOutput.obj
+
+# target to build an object file
+src/ResponseOutput.cpp.obj:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/ResponseOutput.cpp.obj
+.PHONY : src/ResponseOutput.cpp.obj
+
+src/ResponseOutput.i: src/ResponseOutput.cpp.i
+
+.PHONY : src/ResponseOutput.i
+
+# target to preprocess a source file
+src/ResponseOutput.cpp.i:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/ResponseOutput.cpp.i
+.PHONY : src/ResponseOutput.cpp.i
+
+src/ResponseOutput.s: src/ResponseOutput.cpp.s
+
+.PHONY : src/ResponseOutput.s
+
+# target to generate assembly for a file
+src/ResponseOutput.cpp.s:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/ResponseOutput.cpp.s
+.PHONY : src/ResponseOutput.cpp.s
+
+src/ScoreCalculator.obj: src/ScoreCalculator.cpp.obj
+
+.PHONY : src/ScoreCalculator.obj
+
+# target to build an object file
+src/ScoreCalculator.cpp.obj:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/ScoreCalculator.cpp.obj
+.PHONY : src/ScoreCalculator.cpp.obj
+
+src/ScoreCalculator.i: src/ScoreCalculator.cpp.i
+
+.PHONY : src/ScoreCalculator.i
+
+# target to preprocess a source file
+src/ScoreCalculator.cpp.i:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/ScoreCalculator.cpp.i
+.PHONY : src/ScoreCalculator.cpp.i
+
+src/ScoreCalculator.s: src/ScoreCalculator.cpp.s
+
+.PHONY : src/ScoreCalculator.s
+
+# target to generate assembly for a file
+src/ScoreCalculator.cpp.s:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/ScoreCalculator.cpp.s
+.PHONY : src/ScoreCalculator.cpp.s
+
 src/StateContainer.obj: src/StateContainer.cpp.obj
 
 .PHONY : src/StateContainer.obj
@@ -203,6 +257,33 @@ src/StateContainer.cpp.s:
 	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/StateContainer.cpp.s
 .PHONY : src/StateContainer.cpp.s
 
+src/main.obj: src/main.cpp.obj
+
+.PHONY : src/main.obj
+
+# target to build an object file
+src/main.cpp.obj:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/main.cpp.obj
+.PHONY : src/main.cpp.obj
+
+src/main.i: src/main.cpp.i
+
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -218,9 +299,18 @@ help:
 	@echo ... src/RequestReader.obj
 	@echo ... src/RequestReader.i
 	@echo ... src/RequestReader.s
+	@echo ... src/ResponseOutput.obj
+	@echo ... src/ResponseOutput.i
+	@echo ... src/ResponseOutput.s
+	@echo ... src/ScoreCalculator.obj
+	@echo ... src/ScoreCalculator.i
+	@echo ... src/ScoreCalculator.s
 	@echo ... src/StateContainer.obj
 	@echo ... src/StateContainer.i
 	@echo ... src/StateContainer.s
+	@echo ... src/main.obj
+	@echo ... src/main.i
+	@echo ... src/main.s
 .PHONY : help
 
 

@@ -73,12 +73,12 @@ preinstall:
 CMakeFiles/project.dir/all:
 	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/depend
 	$(MAKE) -f CMakeFiles\project.dir\build.make CMakeFiles/project.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=1,2,3,4 "Built target project"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target project"
 .PHONY : CMakeFiles/project.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/project.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles 7
 	$(MAKE) -f CMakeFiles\Makefile2 CMakeFiles/project.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles/project.dir/rule

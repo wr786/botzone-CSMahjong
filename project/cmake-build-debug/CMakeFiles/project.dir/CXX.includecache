@@ -6,25 +6,23 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.cpp
-Mahjong.h
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
-cassert
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/stringify.cpp
+stringify.h
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/stringify.h
+string.h
 -
-iostream
+algorithm
 -
-
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
-string
--
-string_view
+iterator
 -
 
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/test.cpp
-Mahjong.h
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/src/Mahjong.h
-string
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/stringify.h
+tile.h
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+
+C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/utils/ChineseOfficialMahjongHelper/tile.h
+stddef.h
 -
-iostream
+stdint.h
 -
 
