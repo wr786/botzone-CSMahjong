@@ -8,8 +8,10 @@
 #include <vector>
 #include <utility>
 
-#include <mahjong.h>
-#include <StateContainer.h>
+#include "mahjong.h"
+#include "StateContainer.h"
+#include "../utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.h"
+#include "../utils/Mahjong-GB-CPP/MahjongGB/MahjongGB.cpp"
 
 using namespace std;
 
@@ -20,42 +22,45 @@ using namespace std;
 //1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
 //2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
 
+class Calculator{
+public:
+    //返回一副牌的得分(番数得分和手牌得分的加权和)
+    static double MahjongScoreCalculator(
+        vector<pair<string, Mahjong> > pack,
+        //pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
+        vector<Mahjong> hand,
+        //hand:玩家的暗牌
+        int flowerCount,
+        //flowerCount:补花数
+        StateContainer state
+        //StateContainer:牌库状态
+    );
 
-//返回一副牌的得分(番数得分和手牌得分的加权和)
-double MahjongScoreCalculator(
-    vector<pair<string, Mahjong> > pack,
-    //pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
-    vector<Mahjong> hand,
-    //hand:玩家的暗牌
-    int flowerCount,
-    //flowerCount:补花数
-    StateContainer state
-    //StateContainer:牌库状态
-);
+    //利用算番器计算番数得分
+    static double FanScoreCalculator(
+        vector<pair<string, Mahjong> > pack,
+        vector<Mahjong> hand,
+        int flowerCount,
+        Mahjong winTile   
+    );
 
-//利用算番器计算番数得分
-double FanScoreCalculator(
-    vector<pair<string, Mahjong> > pack,
-    vector<Mahjong> hand,
-    int flowerCount,
-    Mahjong winTile   
-);
+    //一副牌的番数得分 
+    static double MahjongFanScore(
+        vector<pair<string, Mahjong> > pack,
+        vector<Mahjong> hand,
+        int flowerCount,
+        StateContainer state
+    );
 
-//一副牌的番数得分 
-double MahjongFanScore(
-    vector<pair<string, Mahjong> > pack,
-    vector<Mahjong> hand,
-    int flowerCount,
-    StateContainer state
-);
+    //一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
+    static double MahjongHandScore(
+        vector<pair<string, Mahjong> > pack, 
+        vector<Mahjong> hand
+    );
 
-//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
-double MahjongHandScore(
-    vector<pair<string, Mahjong> > pack, 
-    vector<Mahjong> hand
-);
+    static double HandScoreCalculator(
+        int TileAmount[70]
+    );
+};
 
-double HandScoreCalculator(
-    int TileAmount[70]
-);
 #endif
