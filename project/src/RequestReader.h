@@ -1,4 +1,6 @@
-//#pragma once
+#ifndef _BOTZONE_ONLINE
+#define pragma once
+#endif
 
 #ifndef REQUESTREADER_H
 #define REQUESTREADER_H
@@ -11,7 +13,9 @@
 #include <cassert>
 #include "Majang.h"
 #include "StateContainer.h"
+#ifdef _BOTZONE_ONLINE
 #include "MahjongGB/MahjongGB.h"
+#endif
 
 using namespace std;
 

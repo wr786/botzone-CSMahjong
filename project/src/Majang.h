@@ -1,10 +1,12 @@
-//#pragma once
+#ifndef _BOTZONE_ONLINE
+#define pragma once
+#endif
 
 #ifndef MAJANG_H
 #define MAJANG_H
 
 #include <string>
-#include <string_view>
+//#include <string_view>
 
 using namespace std;
 
@@ -36,17 +38,17 @@ public:
     Majang(const Majang& other);                                          // 复制构造函数
     Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
     explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-    explicit Majang(string_view strExpr);                                  // 通过string直接创建Majang
+    explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
     Majang& operator = (const Majang& other);
     bool operator == (const Majang& other);
 
-    void resetFromString(string_view strExpr);                              // 由此将string转换为string_view，提高速度
+    void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
     static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-    static int parseTileType(string_view strExpr);                          // 从string得到麻将牌的类型
-    static int parseTileNum(string_view strExpr);                           // 从string得到麻将牌的数字
-    static TILE parseTile(string_view strExpr);                             // 从string得到麻将牌（用TILE表示）
+    static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+    static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+    static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
     [[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
     [[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
     [[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType

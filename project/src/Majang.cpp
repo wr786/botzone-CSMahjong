@@ -21,15 +21,15 @@ TILE_T Majang::getTileTypeFromChar(char ch) {
     }
 }
 
-int Majang::parseTileType(string_view strExpr) {
+int Majang::parseTileType(const string& strExpr) {
     return getTileTypeFromChar(strExpr[0]);
 }
 
-int Majang::parseTileNum(string_view strExpr) {
+int Majang::parseTileNum(const string& strExpr) {
     return strExpr[1] - '0';
 }
 
-TILE Majang::parseTile(string_view strExpr) {
+TILE Majang::parseTile(const string& strExpr) {
     assert(strExpr.length() == 2);  // 麻将牌只能有二位
     return parseTileType(strExpr) * 10 + parseTileNum(strExpr);
 }
@@ -46,7 +46,7 @@ Majang::Majang(const char *cstrExpr) {
 
 // 通过string直接创建Majang
 // 比如Majang(H1),创建的即为61
-Majang::Majang(string_view strExpr) {
+Majang::Majang(const string& strExpr) {
     innerType = parseTile(strExpr);
 }
 
@@ -70,12 +70,13 @@ bool Majang::operator == (const Majang &other) {
  * 其他方法区
  */
 
-void Majang::resetFromString(string_view strExpr) {
+void Majang::resetFromString(const string& strExpr) {
     innerType = parseTile(strExpr);
 }
 
 char Majang::getTileType() const {
-    switch(auto tile_t = TILE_T(innerType / 10); tile_t) {
+    auto tile_t = TILE_T(innerType / 10);
+    switch(tile_t) {
         case WANN: return 'W';
         case BING: return 'B';
         case TIAO: return 'T';

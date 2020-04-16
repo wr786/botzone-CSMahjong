@@ -1,5 +1,6 @@
-
-//#pragma once
+#ifndef _BOTZONE_ONLINE
+#define pragma once
+#endif
 
 #ifndef STATECONTAINER_H
 #define STATECONTAINER_H

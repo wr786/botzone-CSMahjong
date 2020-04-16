@@ -1,3 +1,0 @@
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/project.dir
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/rebuild_cache.dir

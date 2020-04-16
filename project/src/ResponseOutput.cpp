@@ -1,6 +1,6 @@
 #include "ResponseOutput.h"
 
-void Output::Response(StateContainer state,int request){        
+void Output::Response(int request, StateContainer state){
     
     //接口不同,把valarray转化vector(优化后去掉此步骤)
     vector<Majang> hand;

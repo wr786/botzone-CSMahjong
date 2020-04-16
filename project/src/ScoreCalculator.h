@@ -1,5 +1,6 @@
-
-//#pragma once
+#ifndef _BOTZONE_ONLINE
+#define pragma once
+#endif
 
 #ifndef SCORECALCULATOR_H
 #define SCORECALCULATOR_H
@@ -15,6 +16,8 @@
 // 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
 #ifdef _BOTZONE_ONLINE
 #include "MahjongGB/MahjongGB.h"
+#else
+#include "../utils/MahjongGB/MahjongGB.h"
 #endif
 
 using namespace std;
