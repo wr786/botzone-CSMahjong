@@ -51,7 +51,10 @@ int Reader::readRequest(StateContainer &state) {
             // 读取手牌
             assert(state.getInHand().size() == 13);
             for (int i = 0; i < 13; i++) {
-                readIn(state.getInHand()[i]);
+                Majang tmpM;
+                readIn(tmpM);
+                state.getInHand()[i] = tmpM;
+//                readIn(state.getInHand()[i]);
                 state.decTileLeft(state.getInHand()[i]);
             }
             // 读取花牌
@@ -67,14 +70,13 @@ int Reader::readRequest(StateContainer &state) {
             break;
         }
         case 2: { // 我们抽牌
-            valarray<Majang>& tmpInHand = state.getInHand();
-            int pos = tmpInHand.size();
-            tmpInHand.resize(pos+1);
-            readIn(tmpInHand[pos]);
+            vector<Majang>& tmpInHand = state.getInHand();
+            Majang tmpM; readIn(tmpM);
+            tmpInHand.push_back(tmpM);
             state.setLastPlayed("D6"); // D6 -> Draw!
             state.incInHandCntOf(state.getCurPosition());
             state.setCurTurnPlayer(state.getCurPosition());
-            state.decTileLeft(tmpInHand[pos]);
+            state.decTileLeft(tmpM);
             ret = 2;
             break;
         }
@@ -85,11 +87,10 @@ int Reader::readRequest(StateContainer &state) {
             string op; readIn(op);
             if (op == "BUHUA") {
                 ret += 0;
-                valarray<Majang> &tmpHana = state.getFlowerTilesOf(playerID);
-                int pos = tmpHana.size();
-                tmpHana.resize(pos + 1);
-                readIn(tmpHana[pos]);
-                state.decTileLeft(tmpHana[pos]);
+                vector<Majang> &tmpHana = state.getFlowerTilesOf(playerID);
+                Majang tmpM; readIn(tmpM);
+                tmpHana.push_back(tmpM);
+                state.decTileLeft(tmpM);
                 state.setLastPlayed("D8");  // D8 -> 补花（8 => HAna)
             } else if (op == "DRAW") {
                 ret += 1;
@@ -99,10 +100,8 @@ int Reader::readRequest(StateContainer &state) {
                 Majang tmpPlayed; readIn(tmpPlayed);
                 state.setLastPlayed(tmpPlayed);
                 state.decInHandCntOf(playerID);
-                valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
-                int pos = tmpTilePlayed.size();
-                tmpTilePlayed.resize(pos + 1);
-                tmpTilePlayed[pos] = tmpPlayed;
+                vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+                tmpTilePlayed.push_back(tmpPlayed);
                 state.decTileLeft(tmpPlayed);
                 if(playerID == state.getCurPosition()) {
                     // 是我们打出的这张牌,这时需要从我们的手牌中去除这张牌
@@ -112,16 +111,12 @@ int Reader::readRequest(StateContainer &state) {
             } else if (op == "PENG") {
                 Majang tmpPlayed; readIn(tmpPlayed);
                 Majang pengTile = state.getLastPlayed();   // 碰的牌为上一回合打出的牌
-                valarray<Majang>& tmpPengOf = state.getPengOf(playerID);
-                int pos = tmpPengOf.size();
-                tmpPengOf.resize(pos + 1);
-                tmpPengOf[pos] = tmpPlayed;
+                vector<Majang>& tmpPengOf = state.getPengOf(playerID);
+                tmpPengOf.push_back(pengTile);
                 state.decTileLeft(pengTile);    // 被碰的牌又会打出两张
                 state.decTileLeft(pengTile);
-                valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
-                pos = tmpTilePlayed.size();
-                tmpTilePlayed.resize(pos + 1);
-                tmpTilePlayed[pos] = tmpPlayed;
+                vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+                tmpTilePlayed.push_back(tmpPlayed);
                 state.decTileLeft(tmpPlayed);     // 打出的牌也是知道的
                 state.setLastPlayed(tmpPlayed);
                 state.setInHandCntOf(playerID, state.getInHandCntOf(playerID)-3);  // 减少了三张牌
@@ -135,10 +130,8 @@ int Reader::readRequest(StateContainer &state) {
             } else if (op == "CHI") {
                 Majang tmpCHI, tmpPlayed;
                 readIn(tmpCHI); readIn(tmpPlayed);
-                valarray<Majang>& tmpChiOf = state.getChiOf(playerID);
-                int pos = tmpChiOf.size();
-                tmpChiOf.resize(pos + 1);
-                tmpChiOf[pos] = tmpCHI;
+                vector<Majang>& tmpChiOf = state.getChiOf(playerID);
+                tmpChiOf.push_back(tmpCHI);
                 // 这里需要判断出该玩家为了吃打出来的是哪两张牌
                 Majang tmpCHIprv = tmpCHI.getPrvMajang();
                 Majang tmpCHInxt = tmpCHI.getNxtMajang();
@@ -155,10 +148,8 @@ int Reader::readRequest(StateContainer &state) {
                 } else {
                     assert(strcmp("[ERROR] judge CHI failed!",""));
                 }
-                valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
-                pos = tmpTilePlayed.size();
-                tmpTilePlayed.resize(pos + 1);
-                tmpTilePlayed[pos] = tmpPlayed;
+                vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+                tmpTilePlayed.push_back(tmpPlayed);
                 state.decTileLeft(tmpPlayed);
                 state.setInHandCntOf(playerID, state.getInHandCntOf(playerID)-3);  // 减少了三张牌
                 if(playerID == state.getCurPosition()) {
@@ -187,10 +178,8 @@ int Reader::readRequest(StateContainer &state) {
                 } else {
                     // 明杠，这里假设抽牌操作和打牌操作会在之后以draw和play的request呈现
                     const Majang& gangTile = state.getLastPlayed();
-                    valarray<Majang>& tmpGangOf = state.getGangOf(playerID);
-                    int pos = tmpGangOf.size();
-                    tmpGangOf.resize(pos + 1);
-                    tmpGangOf[pos] = gangTile;
+                    vector<Majang>& tmpGangOf = state.getGangOf(playerID);
+                    tmpGangOf.push_back(gangTile);
                     // 因为要打出三张gangTile
                     state.decTileLeft(gangTile);
                     state.decTileLeft(gangTile);
@@ -204,12 +193,10 @@ int Reader::readRequest(StateContainer &state) {
                 ret += 5;
             } else if (op == "BUGANG") {
                 Majang tmpBuGang; readIn(tmpBuGang);
-                valarray<Majang>& tmpGangOf = state.getGangOf(playerID);
-                int pos = tmpGangOf.size();
-                tmpGangOf.resize(pos + 1);
-                tmpGangOf[pos] = tmpBuGang;
+                vector<Majang>& tmpGangOf = state.getGangOf(playerID);
+                tmpGangOf.push_back(tmpBuGang);
                 // 同时还要从碰中去除
-                valarray<Majang>& tmpPengOf = state.getPengOf(playerID);
+                vector<Majang>& tmpPengOf = state.getPengOf(playerID);
                 int lim = tmpPengOf.size();
                 for(int i=0; i<lim; i++) {
                     if(tmpPengOf[i] == tmpBuGang) {
@@ -217,7 +204,8 @@ int Reader::readRequest(StateContainer &state) {
                         break;
                     }
                 }
-                tmpPengOf.resize(lim-1);
+//                tmpPengOf.resize(lim-1);
+                tmpPengOf.pop_back(); // 换成这个了，但是显然有更好的做法，是优化的一个点
                 state.decTileLeft(tmpBuGang);
                 if(playerID == state.getCurPosition()) {
                     state.deleteFromInHand(tmpBuGang);

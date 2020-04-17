@@ -102,7 +102,7 @@ bool Majang::isFlowerTile() const {
 
 string Majang::getTileString() const{
     string r="";
-    r=r+getTileType()+(char)getTileNum();
+    r=r+getTileType()+(char)(getTileNum() + '0');
     return r;
 }
 

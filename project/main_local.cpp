@@ -9,6 +9,7 @@
 #include "./src/ResponseOutput.h"
 #include "./src/ResponseOutput.cpp"
 #include <iostream>
+using namespace std;
 
 int StateContainer::quan=0;
 int main() {
@@ -18,9 +19,20 @@ int main() {
     for(int i=1; i<turnID; i++) {
         Reader::readRequest(basicState);
         getline(cin, tmp);   // 过滤掉我们发出的无用的信息
+        vector<Majang>& tmpM = basicState.getInHand();
+        cout << "[DEBUG] curInHand: ";
+        for(auto& mahjong : tmpM) {
+            cout << mahjong.getTileString() << " ";
+        }
+        cout << endl;
     }
-    int tmpn = Reader::readRequest(basicState);
-    cout << "[DEBUG] " << tmpn << endl;
-    Output::Response(tmpn, basicState);
+    int forTest = Reader::readRequest(basicState);
+    cout << "[DEBUG] curInHand: ";
+    vector<Majang>& tmpM = basicState.getInHand();
+    for(auto& mahjong : tmpM) {
+        cout << mahjong.getTileString() << " ";
+    }
+    cout << endl;
+    Output::Response(forTest, basicState);
     return 0;
 }

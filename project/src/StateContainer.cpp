@@ -41,21 +41,35 @@ StateContainer::StateContainer(const StateContainer &other) {
     }
 }
 
-valarray<Majang> &StateContainer::getInHand() { return inHand; }
-valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
-valarray<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
-valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
-valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
-//valarray<Majang> &StateContainer::getDiscards() { return discards; }
-valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+//valarray<Majang> &StateContainer::getInHand() { return inHand; }
+//valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
+//valarray<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
+//valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
+//valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
+////valarray<Majang> &StateContainer::getDiscards() { return discards; }
+//valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+//
+//const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
+//const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
+//const valarray<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
+//const valarray<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
+//const valarray<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
+////const valarray<Majang> &StateContainer::getDiscards() const { return discards; }
+//const valarray<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
 
-const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
-const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
-const valarray<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
-const valarray<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
-const valarray<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
-//const valarray<Majang> &StateContainer::getDiscards() const { return discards; }
-const valarray<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
+vector<Majang> &StateContainer::getInHand() { return inHand; }
+vector<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
+vector<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
+vector<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
+vector<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
+vector<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+
+const vector<Majang> &StateContainer::getInHand() const { return inHand; }
+const vector<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
+const vector<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
+const vector<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
+const vector<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
+const vector<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
 
 void StateContainer::decTileLeft(int idx) { tileLeft[idx]--; totalLeft--; }
 void StateContainer::decTileLeft(Majang mj) {
