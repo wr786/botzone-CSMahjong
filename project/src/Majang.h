@@ -55,8 +55,8 @@ public:
     [[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
     [[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-    [[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-    [[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+    [[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+    [[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif

@@ -106,12 +106,12 @@ string Majang::getTileString() const{
     return r;
 }
 
-Majang Majang::getNxtMajang() {
+Majang Majang::getNxtMajang() const {
     //! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
     return Majang(innerType + 1);
 }
 
-Majang Majang::getPrvMajang() {
+Majang Majang::getPrvMajang() const {
     //! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
     return Majang(innerType - 1);
 }

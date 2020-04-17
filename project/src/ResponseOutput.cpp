@@ -1,4 +1,6 @@
 #include "ResponseOutput.h"
+#include <iostream>
+using namespace std;
 
 void Output::Response(int request, StateContainer state){
     
@@ -91,30 +93,33 @@ void Output::Response(int request, StateContainer state){
 bool Output::judgeHu(
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
-    //! 优化? The parameter 'winTile' is copied for each invocation but only used as a const reference; consider making it a const reference
-    Majang winTile
+    const Majang& winTile
 ){
+    cout << "[DEBUG] judgingHu\n";
     //再次转换接口(可优化)
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
         p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
     }
+    cout << "[DEBUG] p Generate Successed.\n";
     vector <string> h;
     for(unsigned int i=0;i<hand.size();++i){
         h.push_back(hand[i].getTileString());
     }
-
+    cout << "[DEBUG] h Generate Successed.\n";
     //算番器啥时候初始化呢？
     MahjongInit();
+    cout << "[DEBUG] Mahjong Init Successed.\n";
     auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
     int r=0; 
+    cout << "[DEBUG] judgeHu Successed!\n";
     for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
     return r >= 8;  // 这里简化了一下
 }
 
 int Output::judgeChi(
     int TileAmount[70],
-    Majang newTile
+    const Majang& newTile
 ){
     if(newTile.getTileInt()/10<=3){
         if(newTile.getTileNum()<=7&&TileAmount[newTile.getTileInt()+1]&&TileAmount[newTile.getTileInt()+2]) return 1;
@@ -130,7 +135,7 @@ int Output::judgeChi(
 
 bool Output::judgePeng(
     int tileAmout[70],
-    Majang newTile
+    const Majang& newTile
 ){
     if(tileAmout[newTile.getTileInt()]==2) return true;
     else return false;
@@ -141,10 +146,11 @@ bool Output::judgeGang(
     int tileAmout[70],
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
-    Majang newTile,
+    const Majang& newTile,
     StateContainer state,
     int status
 ){
+    cout << "[DEBUG] judgingGang\n";    // 没位置加判断是否成功
     if(status==3){
         if(tileAmout[newTile.getTileInt()]==3){
             //先得到不杠时的评估值
@@ -189,8 +195,9 @@ bool Output::judgeBuGang(
     StateContainer state,
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
-    Majang newTile
+    const Majang& newTile
 ){
+    cout << "[DEBUG] judgingBuGang\n";
     for(unsigned int i=0;i<pack.size();i++){ 
         if(pack[i].first=="PENG"&&pack[i].second.getTileInt()==newTile.getTileInt()){
             //如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
@@ -205,6 +212,7 @@ bool Output::judgeBuGang(
             pack.erase(pack.begin()+i);
             pack.push_back(make_pair("GANG",newTile));
             double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+            cout << "[DEBUG] judgeBuGang Successed!\n";
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
         }
@@ -237,7 +245,7 @@ const Majang Output::getBestCP(
     StateContainer state,
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
-    Majang newTile,
+    const Majang& newTile,
     int pos
 ){
     //先得到不进行操作时最优得分
