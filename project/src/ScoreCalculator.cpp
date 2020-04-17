@@ -1,4 +1,6 @@
 #include "ScoreCalculator.h"
+#include <iostream>
+using namespace std;
 
 //最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
 double Calculator::MajangScoreCalculator(
@@ -36,7 +38,7 @@ double Calculator::FanScoreCalculator(
     }
     //算番器啥时候初始化呢？
     MahjongInit();
-    auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,flowerCount,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
+    auto re=MahjongFanCalculator(p,h,winTile.getTileString(), flowerCount,1,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
     int r=0;
     for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
     return r*c;
