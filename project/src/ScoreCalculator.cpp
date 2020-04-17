@@ -14,7 +14,7 @@ double Calculator::MajangScoreCalculator(
     int k2=0.3;    // 自摸番数得分所占权重
     int k3=0.2;    // 点炮番数得分所占权重
     double r1=MajangHandScore(pack,hand);
-    double r2=MajangFanScore(pack,hand,flowerCount,state);
+    double r2=MajangFanScore(pack,hand,flowerCount,state,0);
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
     return r1*k1+r2*(k2+k3);
 }
@@ -38,17 +38,23 @@ double Calculator::FanScoreCalculator(
     }
     //算番器啥时候初始化呢？
     MahjongInit();
-    auto re=MahjongFanCalculator(p,h,winTile.getTileString(), flowerCount,1,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
-    int r=0;
-    for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-    return r*c;
+    try{
+        auto re=MahjongFanCalculator(p,h,winTile.getTileString(), flowerCount,1,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
+        int r=0;
+        for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
+        return r*c;
+    }
+    catch(const string &error){
+        return 0;
+    }
 }
 
 double Calculator::MajangFanScore(    
     vector<pair<string, Majang> > pack,
     vector<Majang> hand,
     int flowerCount,
-    StateContainer state
+    StateContainer state,
+    int depth
 ){  
     double r=0;
     for(int i=11;i<=19;i++){
@@ -76,14 +82,15 @@ double Calculator::MajangFanScore(
             r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
         }        
     }
+    if(depth>=1) return r;
     for(int i=61;i<=68;i++){
-        if(state.getTileLeft(i)){
-            StateContainer newstate=state;//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
-//            newstate.getTileLeft(i)--;
-//            newstate.getTotalLeft()--;
-            newstate.decTileLeft(i);
-            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate);
-        }
+      if(state.getTileLeft(i)){
+           StateContainer newstate(state);//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
+           //newstate.getTileLeft(i)--;
+           //newstate.getTotalLeft()--;
+           newstate.decTileLeft(i);
+           r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
+       }
     }
     return r;    
 }

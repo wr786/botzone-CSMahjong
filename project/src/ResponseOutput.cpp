@@ -103,18 +103,22 @@ bool Output::judgeHu(
     }
     cout << "[DEBUG] p Generate Successed.\n";
     vector <string> h;
-    for(unsigned int i=0;i<hand.size();++i){
+    for(unsigned int i=0;i<hand.size()-1;++i){
         h.push_back(hand[i].getTileString());
     }
     cout << "[DEBUG] h Generate Successed.\n";
     //算番器啥时候初始化呢？
     MahjongInit();
     cout << "[DEBUG] Mahjong Init Successed.\n";
-    auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
-    int r=0; 
-    cout << "[DEBUG] judgeHu Successed!\n";
-    for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
-    return r >= 8;  // 这里简化了一下
+    try{
+        auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
+        int r=0; 
+        cout << "[DEBUG] judgeHu Successed!\n";
+        for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
+        return r >= 8;  // 这里简化了一下
+    }catch(const string &error){
+        return false;
+    }
 }
 
 int Output::judgeChi(
