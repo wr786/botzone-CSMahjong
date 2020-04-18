@@ -23,7 +23,7 @@ void Output::Response(int request, StateContainer state){
     //如果是抽牌
     if(request==2){
         //此时手牌中最后一个元素即为抽到的牌
-        if(judgeHu(pack,hand,hand.back())){
+        if(judgeHu(pack,hand,hand.back(),true)){
             printf("HU");
         } 
         else if(judgeBuGang(state,pack,hand,hand.back())){
@@ -43,7 +43,7 @@ void Output::Response(int request, StateContainer state){
         Majang lastTile=state.getLastPlayed();//被打出的牌
         int chi=judgeChi(tileAmount,lastTile);
         //HU
-        if(judgeHu(pack,hand,lastTile)){
+        if(judgeHu(pack,hand,lastTile,false)){
             printf("HU");
         }
         //GANG      
@@ -79,7 +79,7 @@ void Output::Response(int request, StateContainer state){
 
     //抢杠和
     else if(request==36){
-        if(judgeHu(pack,hand,state.getLastPlayed())){
+        if(judgeHu(pack,hand,state.getLastPlayed(),false)){
             printf("HU");
         }
     }
@@ -93,7 +93,8 @@ void Output::Response(int request, StateContainer state){
 bool Output::judgeHu(
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
-    const Majang& winTile
+    const Majang& winTile,
+    bool isZIMO 
 ){
     cout << "[DEBUG] judgingHu\n";
     //再次转换接口(可优化)
@@ -103,8 +104,16 @@ bool Output::judgeHu(
     }
     cout << "[DEBUG] p Generate Successed.\n";
     vector <string> h;
-    for(unsigned int i=0;i<hand.size()-1;++i){
-        h.push_back(hand[i].getTileString());
+    //如果是摸牌,要把手牌中已经加入的摸牌去掉
+    if(isZIMO){
+        for(unsigned int i=0;i<hand.size()-1;++i){
+            h.push_back(hand[i].getTileString());
+        }
+    }
+    else{
+        for(unsigned int i=0;i<hand.size();++i){
+            h.push_back(hand[i].getTileString());
+        }        
     }
     cout << "[DEBUG] h Generate Successed.\n";
     //算番器啥时候初始化呢？

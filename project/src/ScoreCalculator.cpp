@@ -10,9 +10,9 @@ double Calculator::MajangScoreCalculator(
     StateContainer state
 ){
     //参数实际应按游戏回合分段，这里先随便写了一个
-    int k1=0.5;    // 手牌得分所占权重
-    int k2=0.3;    // 自摸番数得分所占权重
-    int k3=0.2;    // 点炮番数得分所占权重
+    double k1=0.5;    // 手牌得分所占权重
+    double k2=0.3;    // 自摸番数得分所占权重
+    double k3=0.2;    // 点炮番数得分所占权重
     double r1=MajangHandScore(pack,hand);
     double r2=MajangFanScore(pack,hand,flowerCount,state,0);
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
@@ -26,7 +26,7 @@ double Calculator::FanScoreCalculator(
     int flowerCount,
     Majang winTile
 ){  
-    double c=1;
+    double c=3;
     //将Majang类调整为适用于算番器的接口
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
