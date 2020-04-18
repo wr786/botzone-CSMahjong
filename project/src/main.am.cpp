@@ -61,8 +61,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -129,8 +129,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -236,16 +236,16 @@ bool Majang::isFlowerTile() const {
 
 string Majang::getTileString() const{
 	string r="";
-	r=r+getTileType()+(char)getTileNum();
+	r=r+getTileType()+(char)(getTileNum() + '0');
 	return r;
 }
 
-Majang Majang::getNxtMajang() {
+Majang Majang::getNxtMajang() const {
 	//! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
 	return Majang(innerType + 1);
 }
 
-Majang Majang::getPrvMajang() {
+Majang Majang::getPrvMajang() const {
 	//! 并不保证一定是合法的麻将，这一点在使用时需要注意！一般是在CHI中使用
 	return Majang(innerType - 1);
 }
@@ -262,6 +262,7 @@ Majang Majang::getPrvMajang() {
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -324,8 +325,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -348,14 +349,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -369,21 +377,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -425,6 +447,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -487,8 +510,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -511,14 +534,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -532,21 +562,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -578,7 +622,7 @@ public:
 
 #include <cassert>
 
-StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), inHand(13), curTurnPlayer(curT), totalLeft(144) {
+StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurnPlayer(curT), inHand(13),  totalLeft(144) {
 	for(int i = 1; i < 10; i++) {
 		tileLeft[10 + i] = 4;   // WANN
 		tileLeft[20 + i] = 4;   // BING
@@ -618,21 +662,35 @@ StateContainer::StateContainer(const StateContainer &other) {
 	}
 }
 
-valarray<Majang> &StateContainer::getInHand() { return inHand; }
-valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
-valarray<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
-valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
-valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
-//valarray<Majang> &StateContainer::getDiscards() { return discards; }
-valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+//valarray<Majang> &StateContainer::getInHand() { return inHand; }
+//valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
+//valarray<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
+//valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
+//valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
+////valarray<Majang> &StateContainer::getDiscards() { return discards; }
+//valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+//
+//const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
+//const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
+//const valarray<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
+//const valarray<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
+//const valarray<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
+////const valarray<Majang> &StateContainer::getDiscards() const { return discards; }
+//const valarray<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
 
-const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
-const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
-const valarray<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
-const valarray<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
-const valarray<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
-//const valarray<Majang> &StateContainer::getDiscards() const { return discards; }
-const valarray<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
+vector<Majang> &StateContainer::getInHand() { return inHand; }
+vector<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
+vector<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
+vector<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
+vector<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
+vector<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+
+const vector<Majang> &StateContainer::getInHand() const { return inHand; }
+const vector<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
+const vector<Majang> &StateContainer::getChiOf(int idx) const { return chiOf[idx]; }
+const vector<Majang> &StateContainer::getPengOf(int idx) const { return pengOf[idx]; }
+const vector<Majang> &StateContainer::getGangOf(int idx) const { return gangOf[idx]; }
+const vector<Majang> &StateContainer::getTilePlayedOf(int idx) const { return tilePlayedOf[idx]; }
 
 void StateContainer::decTileLeft(int idx) { tileLeft[idx]--; totalLeft--; }
 void StateContainer::decTileLeft(Majang mj) {
@@ -746,8 +804,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -764,6 +822,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -826,8 +885,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -850,14 +909,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -871,21 +937,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -1016,8 +1096,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -1034,6 +1114,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -1096,8 +1177,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -1120,14 +1201,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -1141,21 +1229,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -1262,7 +1364,10 @@ int Reader::readRequest(StateContainer &state) {
 			// 读取手牌
 			assert(state.getInHand().size() == 13);
 			for (int i = 0; i < 13; i++) {
-				readIn(state.getInHand()[i]);
+				Majang tmpM;
+				readIn(tmpM);
+				state.getInHand()[i] = tmpM;
+//                readIn(state.getInHand()[i]);
 				state.decTileLeft(state.getInHand()[i]);
 			}
 			// 读取花牌
@@ -1278,14 +1383,13 @@ int Reader::readRequest(StateContainer &state) {
 			break;
 		}
 		case 2: { // 我们抽牌
-			valarray<Majang>& tmpInHand = state.getInHand();
-			int pos = tmpInHand.size();
-			tmpInHand.resize(pos+1);
-			readIn(tmpInHand[pos]);
+			vector<Majang>& tmpInHand = state.getInHand();
+			Majang tmpM; readIn(tmpM);
+			tmpInHand.push_back(tmpM);
 			state.setLastPlayed("D6"); // D6 -> Draw!
 			state.incInHandCntOf(state.getCurPosition());
 			state.setCurTurnPlayer(state.getCurPosition());
-			state.decTileLeft(tmpInHand[pos]);
+			state.decTileLeft(tmpM);
 			ret = 2;
 			break;
 		}
@@ -1296,11 +1400,10 @@ int Reader::readRequest(StateContainer &state) {
 			string op; readIn(op);
 			if (op == "BUHUA") {
 				ret += 0;
-				valarray<Majang> &tmpHana = state.getFlowerTilesOf(playerID);
-				int pos = tmpHana.size();
-				tmpHana.resize(pos + 1);
-				readIn(tmpHana[pos]);
-				state.decTileLeft(tmpHana[pos]);
+				vector<Majang> &tmpHana = state.getFlowerTilesOf(playerID);
+				Majang tmpM; readIn(tmpM);
+				tmpHana.push_back(tmpM);
+				state.decTileLeft(tmpM);
 				state.setLastPlayed("D8");  // D8 -> 补花（8 => HAna)
 			} else if (op == "DRAW") {
 				ret += 1;
@@ -1310,10 +1413,8 @@ int Reader::readRequest(StateContainer &state) {
 				Majang tmpPlayed; readIn(tmpPlayed);
 				state.setLastPlayed(tmpPlayed);
 				state.decInHandCntOf(playerID);
-				valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
-				int pos = tmpTilePlayed.size();
-				tmpTilePlayed.resize(pos + 1);
-				tmpTilePlayed[pos] = tmpPlayed;
+				vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+				tmpTilePlayed.push_back(tmpPlayed);
 				state.decTileLeft(tmpPlayed);
 				if(playerID == state.getCurPosition()) {
 					// 是我们打出的这张牌,这时需要从我们的手牌中去除这张牌
@@ -1323,16 +1424,12 @@ int Reader::readRequest(StateContainer &state) {
 			} else if (op == "PENG") {
 				Majang tmpPlayed; readIn(tmpPlayed);
 				Majang pengTile = state.getLastPlayed();   // 碰的牌为上一回合打出的牌
-				valarray<Majang>& tmpPengOf = state.getPengOf(playerID);
-				int pos = tmpPengOf.size();
-				tmpPengOf.resize(pos + 1);
-				tmpPengOf[pos] = tmpPlayed;
+				vector<Majang>& tmpPengOf = state.getPengOf(playerID);
+				tmpPengOf.push_back(pengTile);
 				state.decTileLeft(pengTile);    // 被碰的牌又会打出两张
 				state.decTileLeft(pengTile);
-				valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
-				pos = tmpTilePlayed.size();
-				tmpTilePlayed.resize(pos + 1);
-				tmpTilePlayed[pos] = tmpPlayed;
+				vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+				tmpTilePlayed.push_back(tmpPlayed);
 				state.decTileLeft(tmpPlayed);     // 打出的牌也是知道的
 				state.setLastPlayed(tmpPlayed);
 				state.setInHandCntOf(playerID, state.getInHandCntOf(playerID)-3);  // 减少了三张牌
@@ -1346,10 +1443,8 @@ int Reader::readRequest(StateContainer &state) {
 			} else if (op == "CHI") {
 				Majang tmpCHI, tmpPlayed;
 				readIn(tmpCHI); readIn(tmpPlayed);
-				valarray<Majang>& tmpChiOf = state.getChiOf(playerID);
-				int pos = tmpChiOf.size();
-				tmpChiOf.resize(pos + 1);
-				tmpChiOf[pos] = tmpCHI;
+				vector<Majang>& tmpChiOf = state.getChiOf(playerID);
+				tmpChiOf.push_back(tmpCHI);
 				// 这里需要判断出该玩家为了吃打出来的是哪两张牌
 				Majang tmpCHIprv = tmpCHI.getPrvMajang();
 				Majang tmpCHInxt = tmpCHI.getNxtMajang();
@@ -1366,10 +1461,8 @@ int Reader::readRequest(StateContainer &state) {
 				} else {
 					assert(strcmp("[ERROR] judge CHI failed!",""));
 				}
-				valarray<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
-				pos = tmpTilePlayed.size();
-				tmpTilePlayed.resize(pos + 1);
-				tmpTilePlayed[pos] = tmpPlayed;
+				vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
+				tmpTilePlayed.push_back(tmpPlayed);
 				state.decTileLeft(tmpPlayed);
 				state.setInHandCntOf(playerID, state.getInHandCntOf(playerID)-3);  // 减少了三张牌
 				if(playerID == state.getCurPosition()) {
@@ -1398,10 +1491,8 @@ int Reader::readRequest(StateContainer &state) {
 				} else {
 					// 明杠，这里假设抽牌操作和打牌操作会在之后以draw和play的request呈现
 					const Majang& gangTile = state.getLastPlayed();
-					valarray<Majang>& tmpGangOf = state.getGangOf(playerID);
-					int pos = tmpGangOf.size();
-					tmpGangOf.resize(pos + 1);
-					tmpGangOf[pos] = gangTile;
+					vector<Majang>& tmpGangOf = state.getGangOf(playerID);
+					tmpGangOf.push_back(gangTile);
 					// 因为要打出三张gangTile
 					state.decTileLeft(gangTile);
 					state.decTileLeft(gangTile);
@@ -1415,12 +1506,10 @@ int Reader::readRequest(StateContainer &state) {
 				ret += 5;
 			} else if (op == "BUGANG") {
 				Majang tmpBuGang; readIn(tmpBuGang);
-				valarray<Majang>& tmpGangOf = state.getGangOf(playerID);
-				int pos = tmpGangOf.size();
-				tmpGangOf.resize(pos + 1);
-				tmpGangOf[pos] = tmpBuGang;
+				vector<Majang>& tmpGangOf = state.getGangOf(playerID);
+				tmpGangOf.push_back(tmpBuGang);
 				// 同时还要从碰中去除
-				valarray<Majang>& tmpPengOf = state.getPengOf(playerID);
+				vector<Majang>& tmpPengOf = state.getPengOf(playerID);
 				int lim = tmpPengOf.size();
 				for(int i=0; i<lim; i++) {
 					if(tmpPengOf[i] == tmpBuGang) {
@@ -1428,7 +1517,8 @@ int Reader::readRequest(StateContainer &state) {
 						break;
 					}
 				}
-				tmpPengOf.resize(lim-1);
+//                tmpPengOf.resize(lim-1);
+				tmpPengOf.pop_back(); // 换成这个了，但是显然有更好的做法，是优化的一个点
 				state.decTileLeft(tmpBuGang);
 				if(playerID == state.getCurPosition()) {
 					state.deleteFromInHand(tmpBuGang);
@@ -1522,8 +1612,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -1539,6 +1629,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -1601,8 +1692,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -1625,14 +1716,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -1646,21 +1744,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -6344,7 +6456,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state
+		StateContainer state,
+		int depth //迭代深度
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -6436,8 +6549,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -6453,6 +6566,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -6515,8 +6629,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -6539,14 +6653,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -6560,21 +6681,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -6647,7 +6782,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state
+		StateContainer state,
+		int depth //迭代深度
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -6664,6 +6800,9 @@ public:
 #endif
 /*** End of inlined file: ScoreCalculator.h ***/
 
+#include <iostream>
+using namespace std;
+
 //最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
 double Calculator::MajangScoreCalculator(
 	vector<pair<string, Majang> > pack,
@@ -6672,11 +6811,11 @@ double Calculator::MajangScoreCalculator(
 	StateContainer state
 ){
 	//参数实际应按游戏回合分段，这里先随便写了一个
-	int k1=0.5;    // 手牌得分所占权重
-	int k2=0.3;    // 自摸番数得分所占权重
-	int k3=0.2;    // 点炮番数得分所占权重
+	double k1=0.5;    // 手牌得分所占权重
+	double k2=0.3;    // 自摸番数得分所占权重
+	double k3=0.2;    // 点炮番数得分所占权重
 	double r1=MajangHandScore(pack,hand);
-	double r2=MajangFanScore(pack,hand,flowerCount,state);
+	double r2=MajangFanScore(pack,hand,flowerCount,state,0);
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
 	return r1*k1+r2*(k2+k3);
 }
@@ -6688,7 +6827,7 @@ double Calculator::FanScoreCalculator(
 	int flowerCount,
 	Majang winTile
 ){
-	double c=1;
+	double c=3;
 	//将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
@@ -6700,17 +6839,23 @@ double Calculator::FanScoreCalculator(
 	}
 	//算番器啥时候初始化呢？
 	MahjongInit();
-	auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,flowerCount,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
-	int r=0;
-	for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-	return r*c;
+	try{
+		auto re=MahjongFanCalculator(p,h,winTile.getTileString(), flowerCount,1,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
+		int r=0;
+		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
+		return r*c;
+	}
+	catch(const string &error){
+		return 0;
+	}
 }
 
 double Calculator::MajangFanScore(
 	vector<pair<string, Majang> > pack,
 	vector<Majang> hand,
 	int flowerCount,
-	StateContainer state
+	StateContainer state,
+	int depth
 ){
 	double r=0;
 	for(int i=11;i<=19;i++){
@@ -6738,14 +6883,15 @@ double Calculator::MajangFanScore(
 			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
 		}
 	}
+	if(depth>=1) return r;
 	for(int i=61;i<=68;i++){
-		if(state.getTileLeft(i)){
-			StateContainer newstate=state;//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
-//            newstate.getTileLeft(i)--;
-//            newstate.getTotalLeft()--;
-			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate);
-		}
+	  if(state.getTileLeft(i)){
+		   StateContainer newstate(state);//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
+		   //newstate.getTileLeft(i)--;
+		   //newstate.getTotalLeft()--;
+		   newstate.decTileLeft(i);
+		   r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
+	   }
 	}
 	return r;
 }
@@ -6940,8 +7086,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -6957,6 +7103,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -7019,8 +7166,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7043,14 +7190,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -7064,21 +7218,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -7181,8 +7349,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7198,6 +7366,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -7260,8 +7429,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7284,14 +7453,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -7305,21 +7481,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -7392,7 +7582,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state
+		StateContainer state,
+		int depth //迭代深度
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -7414,13 +7605,13 @@ using namespace std;
 class Output{
 public:
 	static void Response(int request, StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,Majang winTile);   //判断是否胡了
-	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
-	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
-	static bool judgePeng(int tileAmout[70],Majang newTile);    //对手出牌后判断能否碰
-	static int judgeChi(int tileAmout[70],Majang newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,bool isZIMO);   //判断是否胡了
+	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
+	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
+	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
+	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
 	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
-	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
 };
 
 #endif
@@ -7500,8 +7691,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7517,6 +7708,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -7579,8 +7771,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7603,14 +7795,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -7624,21 +7823,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -7741,8 +7954,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7758,6 +7971,7 @@ public:
 #define STATECONTAINER_H
 
 #include <valarray>
+#include <vector>
 #include <algorithm>
 
 // 使用Majang类
@@ -7820,8 +8034,8 @@ public:
 	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
 	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
 
-	[[nodiscard]] Majang getNxtMajang();                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang();                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
 };
 
 #endif
@@ -7844,14 +8058,21 @@ using namespace std;
 class StateContainer {
 private:
 	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	valarray<Majang> inHand;           // 用于存储手牌
-	valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
 	int curTurnPlayer;                  // 当前是哪个玩家的回合
-	valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
-	valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
 	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
@@ -7865,21 +8086,35 @@ public:
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
 
-	[[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-//    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-	[[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
 
-	[[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-	[[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
 
 	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
 	void decTileLeft(Majang mj);                                               // 同上
@@ -7952,7 +8187,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state
+		StateContainer state,
+		int depth //迭代深度
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -7974,17 +8210,20 @@ using namespace std;
 class Output{
 public:
 	static void Response(int request, StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,Majang winTile);   //判断是否胡了
-	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
-	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
-	static bool judgePeng(int tileAmout[70],Majang newTile);    //对手出牌后判断能否碰
-	static int judgeChi(int tileAmout[70],Majang newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,bool isZIMO);   //判断是否胡了
+	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
+	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
+	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
+	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
 	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
-	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,Majang newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
 };
 
 #endif
 /*** End of inlined file: ResponseOutput.h ***/
+
+#include <iostream>
+using namespace std;
 
 void Output::Response(int request, StateContainer state){
 
@@ -8007,7 +8246,7 @@ void Output::Response(int request, StateContainer state){
 	//如果是抽牌
 	if(request==2){
 		//此时手牌中最后一个元素即为抽到的牌
-		if(judgeHu(pack,hand,hand.back())){
+		if(judgeHu(pack,hand,hand.back(),true)){
 			printf("HU");
 		}
 		else if(judgeBuGang(state,pack,hand,hand.back())){
@@ -8027,7 +8266,7 @@ void Output::Response(int request, StateContainer state){
 		Majang lastTile=state.getLastPlayed();//被打出的牌
 		int chi=judgeChi(tileAmount,lastTile);
 		//HU
-		if(judgeHu(pack,hand,lastTile)){
+		if(judgeHu(pack,hand,lastTile,false)){
 			printf("HU");
 		}
 		//GANG
@@ -8045,7 +8284,7 @@ void Output::Response(int request, StateContainer state){
 			}
 		}
 		//chi
-		else if(chi){
+		else if((state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
 			Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi);
 			if(MajangPlay.getTileInt()==1){
 				printf("PASS");
@@ -8063,7 +8302,7 @@ void Output::Response(int request, StateContainer state){
 
 	//抢杠和
 	else if(request==36){
-		if(judgeHu(pack,hand,state.getLastPlayed())){
+		if(judgeHu(pack,hand,state.getLastPlayed(),false)){
 			printf("HU");
 		}
 	}
@@ -8077,30 +8316,46 @@ void Output::Response(int request, StateContainer state){
 bool Output::judgeHu(
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand,
-	//! 优化? The parameter 'winTile' is copied for each invocation but only used as a const reference; consider making it a const reference
-	Majang winTile
+	const Majang& winTile,
+	bool isZIMO
 ){
+	//cout << "[DEBUG] judgingHu\n";
 	//再次转换接口(可优化)
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
 	}
+	//cout << "[DEBUG] p Generate Successed.\n";
 	vector <string> h;
-	for(unsigned int i=0;i<hand.size();++i){
-		h.push_back(hand[i].getTileString());
+	//如果是摸牌,要把手牌中已经加入的摸牌去掉
+	if(isZIMO){
+		for(unsigned int i=0;i<hand.size()-1;++i){
+			h.push_back(hand[i].getTileString());
+		}
 	}
-
+	else{
+		for(unsigned int i=0;i<hand.size();++i){
+			h.push_back(hand[i].getTileString());
+		}
+	}
+	//cout << "[DEBUG] h Generate Successed.\n";
 	//算番器啥时候初始化呢？
 	MahjongInit();
-	auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
-	int r=0;
-	for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
-	return r >= 8;  // 这里简化了一下
+	//cout << "[DEBUG] Mahjong Init Successed.\n";
+	try{
+		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
+		int r=0;
+		//cout << "[DEBUG] judgeHu Successed!\n";
+		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
+		return r >= 8;  // 这里简化了一下
+	}catch(const string &error){
+		return false;
+	}
 }
 
 int Output::judgeChi(
 	int TileAmount[70],
-	Majang newTile
+	const Majang& newTile
 ){
 	if(newTile.getTileInt()/10<=3){
 		if(newTile.getTileNum()<=7&&TileAmount[newTile.getTileInt()+1]&&TileAmount[newTile.getTileInt()+2]) return 1;
@@ -8115,7 +8370,7 @@ int Output::judgeChi(
 
 bool Output::judgePeng(
 	int tileAmout[70],
-	Majang newTile
+	const Majang& newTile
 ){
 	if(tileAmout[newTile.getTileInt()]==2) return true;
 	else return false;
@@ -8125,10 +8380,11 @@ bool Output::judgeGang(
 	int tileAmout[70],
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand,
-	Majang newTile,
+	const Majang& newTile,
 	StateContainer state,
 	int status
 ){
+	//cout << "[DEBUG] judgingGang\n";    // 没位置加判断是否成功
 	if(status==3){
 		if(tileAmout[newTile.getTileInt()]==3){
 			//先得到不杠时的评估值
@@ -8172,8 +8428,9 @@ bool Output::judgeBuGang(
 	StateContainer state,
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand,
-	Majang newTile
+	const Majang& newTile
 ){
+	//cout << " judgingBuGang\n";
 	for(unsigned int i=0;i<pack.size();i++){
 		if(pack[i].first=="PENG"&&pack[i].second.getTileInt()==newTile.getTileInt()){
 			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
@@ -8188,6 +8445,7 @@ bool Output::judgeBuGang(
 			pack.erase(pack.begin()+i);
 			pack.push_back(make_pair("GANG",newTile));
 			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			//cout << "[DEBUG] judgeBuGang Successed!\n";
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 		}
@@ -8218,7 +8476,7 @@ const Majang Output::getBestCP(
 	StateContainer state,
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand,
-	Majang newTile,
+	const Majang& newTile,
 	int pos
 ){
 	//先得到不进行操作时最优得分
@@ -8310,6 +8568,11 @@ int main() {
 	for(int i=1; i<turnID; i++) {
 		Reader::readRequest(basicState);
 		getline(cin, tmp);   // 过滤掉我们发出的无用的信息
+		//valarray<Majang>& tmpM = basicState.getInHand();
+		//for(auto& mahjong : tmpM) {
+		//    cout << mahjong << " ";
+		//}
+		//cout << endl;
 	}
 	Output::Response(Reader::readRequest(basicState), basicState);
 	return 0;

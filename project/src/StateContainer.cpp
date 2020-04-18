@@ -1,7 +1,7 @@
 #include "StateContainer.h"
 #include <cassert>
 
-StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), inHand(13), curTurnPlayer(curT), totalLeft(144) {
+StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurnPlayer(curT), inHand(13),  totalLeft(144) {
     for(int i = 1; i < 10; i++) {
         tileLeft[10 + i] = 4;   // WANN
         tileLeft[20 + i] = 4;   // BING

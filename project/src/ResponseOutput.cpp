@@ -61,7 +61,7 @@ void Output::Response(int request, StateContainer state){
             }
         }
         //chi
-        else if(chi){
+        else if((state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
             Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi); 
             if(MajangPlay.getTileInt()==1){
                 printf("PASS");
@@ -96,13 +96,13 @@ bool Output::judgeHu(
     const Majang& winTile,
     bool isZIMO 
 ){
-    cout << "[DEBUG] judgingHu\n";
+    //cout << "[DEBUG] judgingHu\n";
     //再次转换接口(可优化)
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
         p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
     }
-    cout << "[DEBUG] p Generate Successed.\n";
+    //cout << "[DEBUG] p Generate Successed.\n";
     vector <string> h;
     //如果是摸牌,要把手牌中已经加入的摸牌去掉
     if(isZIMO){
@@ -115,14 +115,14 @@ bool Output::judgeHu(
             h.push_back(hand[i].getTileString());
         }        
     }
-    cout << "[DEBUG] h Generate Successed.\n";
+    //cout << "[DEBUG] h Generate Successed.\n";
     //算番器啥时候初始化呢？
     MahjongInit();
-    cout << "[DEBUG] Mahjong Init Successed.\n";
+    //cout << "[DEBUG] Mahjong Init Successed.\n";
     try{
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
         int r=0; 
-        cout << "[DEBUG] judgeHu Successed!\n";
+        //cout << "[DEBUG] judgeHu Successed!\n";
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
         return r >= 8;  // 这里简化了一下
     }catch(const string &error){
@@ -163,7 +163,7 @@ bool Output::judgeGang(
     StateContainer state,
     int status
 ){
-    cout << "[DEBUG] judgingGang\n";    // 没位置加判断是否成功
+    //cout << "[DEBUG] judgingGang\n";    // 没位置加判断是否成功
     if(status==3){
         if(tileAmout[newTile.getTileInt()]==3){
             //先得到不杠时的评估值
@@ -210,7 +210,7 @@ bool Output::judgeBuGang(
     vector<Majang> hand,
     const Majang& newTile
 ){
-    cout << "[DEBUG] judgingBuGang\n";
+    //cout << " judgingBuGang\n";
     for(unsigned int i=0;i<pack.size();i++){ 
         if(pack[i].first=="PENG"&&pack[i].second.getTileInt()==newTile.getTileInt()){
             //如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
@@ -225,7 +225,7 @@ bool Output::judgeBuGang(
             pack.erase(pack.begin()+i);
             pack.push_back(make_pair("GANG",newTile));
             double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-            cout << "[DEBUG] judgeBuGang Successed!\n";
+            //cout << "[DEBUG] judgeBuGang Successed!\n";
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
         }
