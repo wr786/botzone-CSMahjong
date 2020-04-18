@@ -15,15 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cs_mahjong.cpp">
+    <ClCompile Include="..\src\main.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Majang.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\RequestReader.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ResponseOutput.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ScoreCalculator.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\StateContainer.cpp">
+      <Filter>头文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cs_mahjong.h">
+    <ClInclude Include="..\src\Majang.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="StateContainer.h">
+    <ClInclude Include="..\src\RequestReader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ResponseOutput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ScoreCalculator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\StateContainer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

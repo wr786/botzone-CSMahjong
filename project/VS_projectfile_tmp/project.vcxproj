@@ -18,6 +18,21 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Majang.cpp" />
+    <ClCompile Include="..\src\RequestReader.cpp" />
+    <ClCompile Include="..\src\ResponseOutput.cpp" />
+    <ClCompile Include="..\src\ScoreCalculator.cpp" />
+    <ClCompile Include="..\src\StateContainer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Majang.h" />
+    <ClInclude Include="..\src\RequestReader.h" />
+    <ClInclude Include="..\src\ResponseOutput.h" />
+    <ClInclude Include="..\src\ScoreCalculator.h" />
+    <ClInclude Include="..\src\StateContainer.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{49827600-5243-4EA8-82D3-F30476798071}</ProjectGuid>
@@ -146,13 +161,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="cs_mahjong.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="cs_mahjong.h" />
-    <ClInclude Include="StateContainer.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
