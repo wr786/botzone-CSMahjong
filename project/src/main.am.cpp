@@ -364,7 +364,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -373,6 +373,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -549,7 +550,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -558,6 +559,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -924,7 +926,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -933,6 +935,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -1216,7 +1219,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -1225,6 +1228,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -1731,7 +1735,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -1740,6 +1744,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -6448,7 +6453,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		Majang winTile
+		Majang winTile,
+		StateContainer state
 	);
 
 	//一副牌的番数得分
@@ -6668,7 +6674,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -6677,6 +6683,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -6774,7 +6781,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		Majang winTile
+		Majang winTile,
+		StateContainer state
 	);
 
 	//一副牌的番数得分
@@ -6814,8 +6822,10 @@ double Calculator::MajangScoreCalculator(
 	double k1=0.5;    // 手牌得分所占权重
 	double k2=0.3;    // 自摸番数得分所占权重
 	double k3=0.2;    // 点炮番数得分所占权重
+	//freopen("D://out.txt","a",stdout);
 	double r1=MajangHandScore(pack,hand);
 	double r2=MajangFanScore(pack,hand,flowerCount,state,0);
+	//cout<<r1<<" "<<r2<<endl;
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
 	return r1*k1+r2*(k2+k3);
 }
@@ -6825,9 +6835,10 @@ double Calculator::FanScoreCalculator(
 	vector<pair<string, Majang> > pack,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
 	vector<Majang> hand,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
 	int flowerCount,
-	Majang winTile
+	Majang winTile,
+	StateContainer state
 ){
-	double c=3;
+	double c=40;
 	//将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
@@ -6840,7 +6851,10 @@ double Calculator::FanScoreCalculator(
 	//算番器啥时候初始化呢？
 	MahjongInit();
 	try{
-		auto re=MahjongFanCalculator(p,h,winTile.getTileString(), flowerCount,1,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
+		bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
+		bool isGANG=(StateContainer::lastRequest==36);
+		bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
 		int r=0;
 		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
 		return r*c;
@@ -6860,35 +6874,43 @@ double Calculator::MajangFanScore(
 	double r=0;
 	for(int i=11;i<=19;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
 		}
 	}
 	for(int i=21;i<=29;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
 		}
 	}
 	for(int i=31;i<=39;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
 		}
 	}
 	for(int i=41;i<=44;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
 		}
 	}
 	for(int i=51;i<=53;i++){
 		if(state.getTileLeft(i)){
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
 		}
 	}
 	if(depth>=1) return r;
 	for(int i=61;i<=68;i++){
 	  if(state.getTileLeft(i)){
-		   StateContainer newstate(state);//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
-		   //newstate.getTileLeft(i)--;
-		   //newstate.getTotalLeft()--;
+		   StateContainer newstate(state);
 		   newstate.decTileLeft(i);
 		   r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
 	   }
@@ -6973,7 +6995,6 @@ double Calculator::HandScoreCalculator(
 		}
 	}
 	//箭牌和风牌可能要有特殊的地位*
-	// double spAug = 0.7;	// 特 殊 地 位
 	for(int i=41;i<=44;i++){
 		if(tileAmount[i]){
 			double singleValue=0;
@@ -7206,7 +7227,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -7215,6 +7236,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -7469,7 +7491,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -7478,6 +7500,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -7575,7 +7598,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		Majang winTile
+		Majang winTile,
+		StateContainer state
 	);
 
 	//一副牌的番数得分
@@ -7605,8 +7629,8 @@ using namespace std;
 
 class Output{
 public:
-	static void Response(int request, StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,bool isZIMO);   //判断是否胡了
+	static void Response(int request,StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,StateContainer state,bool isZIMO);   //判断是否胡了
 	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
 	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
 	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
@@ -7811,7 +7835,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -7820,6 +7844,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -8074,7 +8099,7 @@ private:
 	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
 	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
 	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
 	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -8083,6 +8108,7 @@ private:
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
 	explicit StateContainer(int curP=0, int curT=0);
 	StateContainer(const StateContainer& other);
@@ -8180,7 +8206,8 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		Majang winTile
+		Majang winTile,
+		StateContainer state
 	);
 
 	//一副牌的番数得分
@@ -8210,8 +8237,8 @@ using namespace std;
 
 class Output{
 public:
-	static void Response(int request, StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,bool isZIMO);   //判断是否胡了
+	static void Response(int request,StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,StateContainer state,bool isZIMO);   //判断是否胡了
 	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
 	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
 	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
@@ -8247,7 +8274,7 @@ void Output::Response(int request, StateContainer state){
 	//如果是抽牌
 	if(request==2){
 		//此时手牌中最后一个元素即为抽到的牌
-		if(judgeHu(pack,hand,hand.back(),true)){
+		if(judgeHu(pack,hand,hand.back(),state,true)){
 			printf("HU");
 		}
 		else if(judgeBuGang(state,pack,hand,hand.back())){
@@ -8263,11 +8290,11 @@ void Output::Response(int request, StateContainer state){
 	}
 
 	//如果有别人打出的牌
-	else if(request==32||request==33||request==34){
+	else if((request==32||request==33||request==34)&&state.getCurTurnPlayer() != state.getCurPosition()){
 		Majang lastTile=state.getLastPlayed();//被打出的牌
 		int chi=judgeChi(tileAmount,lastTile);
 		//HU
-		if(state.getCurTurnPlayer() != state.getCurPosition() && judgeHu(pack,hand,lastTile,false)){
+		if(judgeHu(pack,hand,lastTile,state,false)){
 			printf("HU");
 		}
 		//GANG
@@ -8302,7 +8329,7 @@ void Output::Response(int request, StateContainer state){
 	}
 
 	//抢杠和
-	else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),false)){
+	else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),state,false)){
 		printf("HU");
 	}
 
@@ -8316,6 +8343,7 @@ bool Output::judgeHu(
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand,
 	const Majang& winTile,
+	StateContainer state,
 	bool isZIMO
 ){
 	//cout << "[DEBUG] judgingHu\n";
@@ -8342,7 +8370,10 @@ bool Output::judgeHu(
 	MahjongInit();
 	//cout << "[DEBUG] Mahjong Init Successed.\n";
 	try{
-		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
+		bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
+		bool isGANG=(StateContainer::lastRequest==36);
+		bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),state.getFlowerTilesOf(state.getCurPosition()).size(),isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
 		int r=0;
 		//cout << "[DEBUG] judgeHu Successed!\n";
 		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
@@ -8495,7 +8526,7 @@ const Majang Output::getBestCP(
 		if(pos==1){
 			int k1=1,k2=1;
 			unsigned int i=0;
-			while(k1&&k2&&i<hand.size()){
+			while((k1||k2)&&i<hand.size()){
 				if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
 					k1--;
 					hand.erase(hand.begin()+i);
@@ -8513,7 +8544,7 @@ const Majang Output::getBestCP(
 		else if(pos==2){
 			int k1=1,k2=1;
 			unsigned int i=0;
-			while(k1&&k2&&i<hand.size()){
+			while((k1||k2)&&i<hand.size()){
 				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
 					k1--;
 					hand.erase(hand.begin()+i);
@@ -8531,7 +8562,7 @@ const Majang Output::getBestCP(
 		else{
 			int k1=1,k2=1;
 			unsigned int i=0;
-			while(k1&&k2&&i<hand.size()){
+			while((k1||k2)&&i<hand.size()){
 				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
 					k1--;
 					hand.erase(hand.begin()+i);
@@ -8560,12 +8591,14 @@ const Majang Output::getBestCP(
 #include <iostream>
 
 int StateContainer::quan=0;
+int StateContainer::lastRequest=0;
 int main() {
 	int turnID; Reader::readIn(turnID);
 	string tmp;
+	int lastRequest;
 	StateContainer basicState;
 	for(int i=1; i<turnID; i++) {
-		Reader::readRequest(basicState);
+		lastRequest = Reader::readRequest(basicState);
 		getline(cin, tmp);   // 过滤掉我们发出的无用的信息
 //        vector<Majang> & tmpM=basicState.getInHand();
 //        for(auto & mahjong:tmpM){
@@ -8573,6 +8606,7 @@ int main() {
 //        }
 //        cout<<endl;
 	}
+	StateContainer::lastRequest=lastRequest;
 	int t=Reader::readRequest(basicState);
 //        vector<Majang> & tmpM=basicState.getInHand();
 //        for(auto & mahjong:tmpM){

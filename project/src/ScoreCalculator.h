@@ -48,7 +48,8 @@ public:
         vector<pair<string, Majang> > pack,
         vector<Majang> hand,
         int flowerCount,
-        Majang winTile   
+        Majang winTile,
+        StateContainer state   
     );
 
     //一副牌的番数得分 

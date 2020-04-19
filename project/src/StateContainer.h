@@ -43,7 +43,7 @@ private:
     vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
 //    valarray<Majang> discards;       // 用于存放弃牌堆
     vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-    int secretGangCntOf[4]{};           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+    int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
     // 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
     Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
     int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
@@ -52,6 +52,7 @@ private:
 
 public:
     static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+    static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
 
     explicit StateContainer(int curP=0, int curT=0);
     StateContainer(const StateContainer& other);
