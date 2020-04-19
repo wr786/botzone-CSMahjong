@@ -78,10 +78,8 @@ void Output::Response(int request, StateContainer state){
     }
 
     //抢杠和
-    else if(request==36){
-        if(judgeHu(pack,hand,state.getLastPlayed(),false)){
-            printf("HU");
-        }
+    else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),false)){
+        printf("HU");
     }
 
     //其余情况直接输出"pass"即可

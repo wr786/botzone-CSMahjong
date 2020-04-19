@@ -8301,10 +8301,8 @@ void Output::Response(int request, StateContainer state){
 	}
 
 	//抢杠和
-	else if(request==36){
-		if(judgeHu(pack,hand,state.getLastPlayed(),false)){
-			printf("HU");
-		}
+	else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),false)){
+		printf("HU");
 	}
 
 	//其余情况直接输出"pass"即可
@@ -8568,12 +8566,18 @@ int main() {
 	for(int i=1; i<turnID; i++) {
 		Reader::readRequest(basicState);
 		getline(cin, tmp);   // 过滤掉我们发出的无用的信息
-		//valarray<Majang>& tmpM = basicState.getInHand();
-		//for(auto& mahjong : tmpM) {
-		//    cout << mahjong << " ";
-		//}
-		//cout << endl;
+//        vector<Majang> & tmpM=basicState.getInHand();
+//        for(auto & mahjong:tmpM){
+//            cout<<mahjong.getTileString()<<" ";
+//        }
+//        cout<<endl;
 	}
-	Output::Response(Reader::readRequest(basicState), basicState);
+	int t=Reader::readRequest(basicState);
+//        vector<Majang> & tmpM=basicState.getInHand();
+//        for(auto & mahjong:tmpM){
+//            cout<<mahjong.getTileString()<<" ";
+//        }
+//        cout<<endl;
+	Output::Response(t, basicState);
 	return 0;
 }

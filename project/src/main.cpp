@@ -23,7 +23,18 @@ int main() {
     for(int i=1; i<turnID; i++) {
         Reader::readRequest(basicState);
         getline(cin, tmp);   // 过滤掉我们发出的无用的信息
+//        vector<Majang> & tmpM=basicState.getInHand();
+//        for(auto & mahjong:tmpM){
+//            cout<<mahjong.getTileString()<<" ";
+//        }
+//        cout<<endl;
     }
-    Output::Response(Reader::readRequest(basicState), basicState);
+    int t=Reader::readRequest(basicState);
+//        vector<Majang> & tmpM=basicState.getInHand();
+//        for(auto & mahjong:tmpM){
+//            cout<<mahjong.getTileString()<<" ";
+//        }
+//        cout<<endl;    
+    Output::Response(t, basicState);
     return 0;
 }
