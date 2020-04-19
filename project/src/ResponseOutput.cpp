@@ -43,7 +43,7 @@ void Output::Response(int request, StateContainer state){
         Majang lastTile=state.getLastPlayed();//被打出的牌
         int chi=judgeChi(tileAmount,lastTile);
         //HU
-        if(judgeHu(pack,hand,lastTile,false)){
+        if(state.getCurTurnPlayer() != state.getCurPosition() && judgeHu(pack,hand,lastTile,false)){
             printf("HU");
         }
         //GANG      

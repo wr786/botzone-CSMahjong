@@ -5,7 +5,7 @@
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -73,7 +73,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -255,7 +255,7 @@ Majang Majang::getPrvMajang() const {
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -269,7 +269,7 @@ Majang Majang::getPrvMajang() const {
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -440,7 +440,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -454,7 +454,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -733,7 +733,7 @@ void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
 
 /*** Start of inlined file: RequestReader.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef REQUESTREADER_H
@@ -748,7 +748,7 @@ void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -815,7 +815,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -829,7 +829,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -1025,7 +1025,7 @@ public:
 
 /*** Start of inlined file: RequestReader.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef REQUESTREADER_H
@@ -1040,7 +1040,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -1107,7 +1107,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -1121,7 +1121,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -1542,7 +1542,7 @@ int Reader::readRequest(StateContainer &state) {
 
 /*** Start of inlined file: ScoreCalculator.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef SCORECALCULATOR_H
@@ -1556,7 +1556,7 @@ int Reader::readRequest(StateContainer &state) {
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -1622,7 +1622,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -1636,7 +1636,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -6479,7 +6479,7 @@ public:
 
 /*** Start of inlined file: ScoreCalculator.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef SCORECALCULATOR_H
@@ -6493,7 +6493,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -6559,7 +6559,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -6573,7 +6573,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -6973,13 +6973,14 @@ double Calculator::HandScoreCalculator(
 		}
 	}
 	//箭牌和风牌可能要有特殊的地位*
+	// double spAug = 0.7;	// 特 殊 地 位
 	for(int i=41;i<=44;i++){
 		if(tileAmount[i]){
 			double singleValue=0;
-			if(i>=43) singleValue+=tileAmount[i-2]*1;
-			if(i>=42) singleValue+=tileAmount[i-1]*2;
-			if(i<=42) singleValue+=tileAmount[i+2]*1;
-			if(i<=43) singleValue+=tileAmount[i+1]*2;
+			// if(i>=43) singleValue+=tileAmount[i-2]*1;
+			// if(i>=42) singleValue+=tileAmount[i-1]*2;
+			// if(i<=42) singleValue+=tileAmount[i+2]*1;
+			// if(i<=43) singleValue+=tileAmount[i+1]*2;
 			if(tileAmount[i]==2) singleValue+=2;
 			else if(tileAmount[i]==3) singleValue+=3;
 			else if(tileAmount[i]==4) singleValue+=4;
@@ -6990,10 +6991,10 @@ double Calculator::HandScoreCalculator(
 	for(int i=51;i<=53;i++){
 		if(tileAmount[i]){
 			double singleValue=0;
-			if(i>=53) singleValue+=tileAmount[i-2]*1;
-			if(i>=52) singleValue+=tileAmount[i-1]*2;
-			if(i<=51) singleValue+=tileAmount[i+2]*1;
-			if(i<=52) singleValue+=tileAmount[i+1]*2;
+			// if(i>=53) singleValue+=tileAmount[i-2]*1;
+			// if(i>=52) singleValue+=tileAmount[i-1]*2;
+			// if(i<=51) singleValue+=tileAmount[i+2]*1;
+			// if(i<=52) singleValue+=tileAmount[i+1]*2;
 			if(tileAmount[i]==2) singleValue+=2;
 			else if(tileAmount[i]==3) singleValue+=3;
 			else if(tileAmount[i]==4) singleValue+=4;
@@ -7017,7 +7018,7 @@ double Calculator::HandScoreCalculator(
 
 /*** Start of inlined file: ResponseOutput.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef RESPONSEOUTPUT_H
@@ -7030,7 +7031,7 @@ double Calculator::HandScoreCalculator(
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7096,7 +7097,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -7110,7 +7111,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7279,7 +7280,7 @@ public:
 
 /*** Start of inlined file: ScoreCalculator.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef SCORECALCULATOR_H
@@ -7293,7 +7294,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7359,7 +7360,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -7373,7 +7374,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7622,7 +7623,7 @@ public:
 
 /*** Start of inlined file: ResponseOutput.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef RESPONSEOUTPUT_H
@@ -7635,7 +7636,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7701,7 +7702,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -7715,7 +7716,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7884,7 +7885,7 @@ public:
 
 /*** Start of inlined file: ScoreCalculator.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef SCORECALCULATOR_H
@@ -7898,7 +7899,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -7964,7 +7965,7 @@ public:
 
 /*** Start of inlined file: StateContainer.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef STATECONTAINER_H
@@ -7978,7 +7979,7 @@ public:
 
 /*** Start of inlined file: Majang.h ***/
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef MAJANG_H
@@ -8266,7 +8267,7 @@ void Output::Response(int request, StateContainer state){
 		Majang lastTile=state.getLastPlayed();//被打出的牌
 		int chi=judgeChi(tileAmount,lastTile);
 		//HU
-		if(judgeHu(pack,hand,lastTile,false)){
+		if(state.getCurTurnPlayer() != state.getCurPosition() && judgeHu(pack,hand,lastTile,false)){
 			printf("HU");
 		}
 		//GANG

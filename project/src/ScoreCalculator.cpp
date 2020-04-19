@@ -175,10 +175,10 @@ double Calculator::HandScoreCalculator(
     for(int i=41;i<=44;i++){
         if(tileAmount[i]){
             double singleValue=0;
-            if(i>=43) singleValue+=tileAmount[i-2]*1;
-            if(i>=42) singleValue+=tileAmount[i-1]*2;
-            if(i<=42) singleValue+=tileAmount[i+2]*1;
-            if(i<=43) singleValue+=tileAmount[i+1]*2;
+            // if(i>=43) singleValue+=tileAmount[i-2]*1;
+            // if(i>=42) singleValue+=tileAmount[i-1]*2;
+            // if(i<=42) singleValue+=tileAmount[i+2]*1;
+            // if(i<=43) singleValue+=tileAmount[i+1]*2;
             if(tileAmount[i]==2) singleValue+=2;
             else if(tileAmount[i]==3) singleValue+=3;
             else if(tileAmount[i]==4) singleValue+=4;
@@ -189,10 +189,10 @@ double Calculator::HandScoreCalculator(
     for(int i=51;i<=53;i++){
         if(tileAmount[i]){
             double singleValue=0;
-            if(i>=53) singleValue+=tileAmount[i-2]*1;
-            if(i>=52) singleValue+=tileAmount[i-1]*2;
-            if(i<=51) singleValue+=tileAmount[i+2]*1;
-            if(i<=52) singleValue+=tileAmount[i+1]*2;
+            // if(i>=53) singleValue+=tileAmount[i-2]*1;
+            // if(i>=52) singleValue+=tileAmount[i-1]*2;
+            // if(i<=51) singleValue+=tileAmount[i+2]*1;
+            // if(i<=52) singleValue+=tileAmount[i+1]*2;
             if(tileAmount[i]==2) singleValue+=2;
             else if(tileAmount[i]==3) singleValue+=3;
             else if(tileAmount[i]==4) singleValue+=4;

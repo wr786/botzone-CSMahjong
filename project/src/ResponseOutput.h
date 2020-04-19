@@ -1,5 +1,5 @@
 #ifndef _BOTZONE_ONLINE
-#define pragma once
+#pragma once
 #endif
 
 #ifndef RESPONSEOUTPUT_H
