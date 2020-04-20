@@ -6847,8 +6847,7 @@ double Calculator::FanScoreCalculator(
 	Majang winTile,
 	StateContainer state
 ){
-	double c=40;
-	//将Majang类调整为适用于算番器的接口
+	double k4=70.0;    //将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
@@ -6866,7 +6865,7 @@ double Calculator::FanScoreCalculator(
 		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
 		int r=0;
 		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-		return r*c;
+		return r*k4;
 	}
 	catch(const string &error){
 		return 0;

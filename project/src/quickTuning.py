@@ -15,7 +15,7 @@ for line in lines:
 		inputStr = input('>>> ')
 		try:	# 如果输入非数字，则保持原样
 			aug = float(inputStr)
-			file.write(line[:startPos] + str(aug) + line[endPos:])
+			file.write(line[:startPos] + str(aug) + line[endPos:] + '\n')
 		except ValueError:
 			file.write(line + '\n')
 	else:
