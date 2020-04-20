@@ -122,10 +122,13 @@ bool Output::judgeHu(
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
         bool isGANG=(StateContainer::lastRequest==36);
         bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
-        auto re=MahjongFanCalculator(p,h,winTile.getTileString(),state.getFlowerTilesOf(state.getCurPosition()).size(),isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
+        auto re=MahjongFanCalculator(p,h,winTile.getTileString(),0,isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
         int r=0; 
         //cout << "[DEBUG] judgeHu Successed!\n";
-        for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
+        for(unsigned int i=0;i<re.size();i++) {
+        	r+=re[i].first;
+        	// cout << "[DEBUG] " << re[i].second << " | " << re[i].first << endl;
+        }
         return r >= 8;  // 这里简化了一下
     }catch(const string &error){
         return false;

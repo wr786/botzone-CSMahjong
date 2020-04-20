@@ -99,13 +99,14 @@ int Reader::readRequest(StateContainer &state) {
             } else if (op == "PLAY") {
                 Majang tmpPlayed; readIn(tmpPlayed);
                 state.setLastPlayed(tmpPlayed);
-                state.decInHandCntOf(playerID);
                 vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
                 tmpTilePlayed.push_back(tmpPlayed);
-                state.decTileLeft(tmpPlayed);
+                state.decInHandCntOf(playerID);
                 if(playerID == state.getCurPosition()) {
                     // 是我们打出的这张牌,这时需要从我们的手牌中去除这张牌
                     state.deleteFromInHand(tmpPlayed);
+                } else {
+                    state.decTileLeft(tmpPlayed); // 如果不是我们打出的，才需要dec
                 }
                 ret += 2;
             } else if (op == "PENG") {
@@ -113,11 +114,8 @@ int Reader::readRequest(StateContainer &state) {
                 Majang pengTile = state.getLastPlayed();   // 碰的牌为上一回合打出的牌
                 vector<Majang>& tmpPengOf = state.getPengOf(playerID);
                 tmpPengOf.push_back(pengTile);
-                state.decTileLeft(pengTile);    // 被碰的牌又会打出两张
-                state.decTileLeft(pengTile);
                 vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
                 tmpTilePlayed.push_back(tmpPlayed);
-                state.decTileLeft(tmpPlayed);     // 打出的牌也是知道的
                 state.setLastPlayed(tmpPlayed);
                 state.setInHandCntOf(playerID, state.getInHandCntOf(playerID)-3);  // 减少了三张牌
                 if(playerID == state.getCurPosition()) {
@@ -125,6 +123,10 @@ int Reader::readRequest(StateContainer &state) {
                     state.deleteFromInHand(pengTile);
                     state.deleteFromInHand(pengTile);
                     state.deleteFromInHand(tmpPlayed);
+                } else {
+                    state.decTileLeft(pengTile);    // 被碰的牌又会打出两张
+                    state.decTileLeft(pengTile);
+                    state.decTileLeft(tmpPlayed);     // 打出的牌也是知道的
                 }
                 ret += 3;
             } else if (op == "CHI") {
@@ -136,21 +138,8 @@ int Reader::readRequest(StateContainer &state) {
                 Majang tmpCHIprv = tmpCHI.getPrvMajang();
                 Majang tmpCHInxt = tmpCHI.getNxtMajang();
                 const Majang& lastPlayed = state.getLastPlayed();
-                if(tmpCHIprv == lastPlayed) {
-                    state.decTileLeft(tmpCHI);
-                    state.decTileLeft(tmpCHInxt);
-                } else if(tmpCHI == lastPlayed) {
-                    state.decTileLeft(tmpCHIprv);
-                    state.decTileLeft(tmpCHInxt);
-                } else if(tmpCHInxt == lastPlayed) {
-                    state.decTileLeft(tmpCHIprv);
-                    state.decTileLeft(tmpCHI);
-                } else {
-                    assert(strcmp("[ERROR] judge CHI failed!",""));
-                }
                 vector<Majang>& tmpTilePlayed = state.getTilePlayedOf(playerID);
                 tmpTilePlayed.push_back(tmpPlayed);
-                state.decTileLeft(tmpPlayed);
                 state.setInHandCntOf(playerID, state.getInHandCntOf(playerID)-3);  // 减少了三张牌
                 if(playerID == state.getCurPosition()) {
                     // 再来一次判断
@@ -167,6 +156,20 @@ int Reader::readRequest(StateContainer &state) {
                         assert(strcmp("[ERROR] remove CHI tiles from inHand failed!",""));
                     }
                     state.deleteFromInHand(tmpPlayed);  // 以及打出的牌
+                } else {
+                    if(tmpCHIprv == lastPlayed) {
+                        state.decTileLeft(tmpCHI);
+                        state.decTileLeft(tmpCHInxt);
+                    } else if(tmpCHI == lastPlayed) {
+                        state.decTileLeft(tmpCHIprv);
+                        state.decTileLeft(tmpCHInxt);
+                    } else if(tmpCHInxt == lastPlayed) {
+                        state.decTileLeft(tmpCHIprv);
+                        state.decTileLeft(tmpCHI);
+                    } else {
+                        assert(strcmp("[ERROR] judge CHI failed!",""));
+                    }
+                    state.decTileLeft(tmpPlayed);
                 }
                 state.setLastPlayed(tmpPlayed);
                 ret += 4;
@@ -181,13 +184,14 @@ int Reader::readRequest(StateContainer &state) {
                     vector<Majang>& tmpGangOf = state.getGangOf(playerID);
                     tmpGangOf.push_back(gangTile);
                     // 因为要打出三张gangTile
-                    state.decTileLeft(gangTile);
-                    state.decTileLeft(gangTile);
-                    state.decTileLeft(gangTile);
                     if(playerID == state.getCurPosition()) {
                         state.deleteFromInHand(gangTile);
                         state.deleteFromInHand(gangTile);
                         state.deleteFromInHand(gangTile);
+                    } else {
+                        state.decTileLeft(gangTile);
+                        state.decTileLeft(gangTile);
+                        state.decTileLeft(gangTile);
                     }
                 }
                 ret += 5;
@@ -206,9 +210,10 @@ int Reader::readRequest(StateContainer &state) {
                 }
 //                tmpPengOf.resize(lim-1);
                 tmpPengOf.pop_back(); // 换成这个了，但是显然有更好的做法，是优化的一个点
-                state.decTileLeft(tmpBuGang);
                 if(playerID == state.getCurPosition()) {
                     state.deleteFromInHand(tmpBuGang);
+                } else {
+                    state.decTileLeft(tmpBuGang);
                 }
                 ret += 6;
             } else {
