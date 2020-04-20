@@ -20,11 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\Majang.cpp" />
-    <ClCompile Include="..\src\RequestReader.cpp" />
-    <ClCompile Include="..\src\ResponseOutput.cpp" />
-    <ClCompile Include="..\src\ScoreCalculator.cpp" />
-    <ClCompile Include="..\src\StateContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Majang.h" />

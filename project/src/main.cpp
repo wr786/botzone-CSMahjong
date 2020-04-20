@@ -1,4 +1,8 @@
 
+#ifdef _MSC_VER
+#pragma warning(disable:4819)
+#endif
+
 #ifdef _BOTZONE_ONLINE
 #include "MahjongGB/MahjongGB.h"
 #endif
