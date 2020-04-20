@@ -13,8 +13,10 @@ double Calculator::MajangScoreCalculator(
     double k1=0.5;    // 手牌得分所占权重
     double k2=0.3;    // 自摸番数得分所占权重
     double k3=0.2;    // 点炮番数得分所占权重
+    //freopen("D://out.txt","a",stdout);
     double r1=MajangHandScore(pack,hand);
     double r2=MajangFanScore(pack,hand,flowerCount,state,0);
+    //cout<<r1<<" "<<r2<<endl;
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
     return r1*k1+r2*(k2+k3);
 }
@@ -24,9 +26,10 @@ double Calculator::FanScoreCalculator(
     vector<pair<string, Majang> > pack,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
     vector<Majang> hand,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
     int flowerCount,
-    Majang winTile
+    Majang winTile,
+    StateContainer state
 ){  
-    double c=3;
+    double c=40;
     //将Majang类调整为适用于算番器的接口
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
@@ -39,7 +42,10 @@ double Calculator::FanScoreCalculator(
     //算番器啥时候初始化呢？
     MahjongInit();
     try{
-        auto re=MahjongFanCalculator(p,h,winTile.getTileString(), flowerCount,1,1,0,0,0,0);//算番器中有许多我未理解的参数,先用0代入——wym
+        bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
+        bool isGANG=(StateContainer::lastRequest==36);
+        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
         return r*c;
@@ -59,35 +65,43 @@ double Calculator::MajangFanScore(
     double r=0;
     for(int i=11;i<=19;i++){
         if(state.getTileLeft(i)){
-            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+            StateContainer newstate(state);
+            newstate.decTileLeft(i);            
+            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
         }
     }
     for(int i=21;i<=29;i++){
         if(state.getTileLeft(i)){
-            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+            StateContainer newstate(state);
+            newstate.decTileLeft(i);
+            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
         }        
     }
     for(int i=31;i<=39;i++){
         if(state.getTileLeft(i)){
-            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+            StateContainer newstate(state);
+            newstate.decTileLeft(i);
+            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
         }        
     }
     for(int i=41;i<=44;i++){
         if(state.getTileLeft(i)){
-            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+            StateContainer newstate(state);
+            newstate.decTileLeft(i);
+            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
         }        
     }
     for(int i=51;i<=53;i++){
         if(state.getTileLeft(i)){
-            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i));
+            StateContainer newstate(state);
+            newstate.decTileLeft(i);
+            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
         }        
     }
     if(depth>=1) return r;
     for(int i=61;i<=68;i++){
       if(state.getTileLeft(i)){
-           StateContainer newstate(state);//摸到花牌后state应发生修改,应在StateContainer.h里提供相应的修改方法——wym
-           //newstate.getTileLeft(i)--;
-           //newstate.getTotalLeft()--;
+           StateContainer newstate(state);
            newstate.decTileLeft(i);
            r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
        }
@@ -175,10 +189,10 @@ double Calculator::HandScoreCalculator(
     for(int i=41;i<=44;i++){
         if(tileAmount[i]){
             double singleValue=0;
-            if(i>=43) singleValue+=tileAmount[i-2]*1;
-            if(i>=42) singleValue+=tileAmount[i-1]*2;
-            if(i<=42) singleValue+=tileAmount[i+2]*1;
-            if(i<=43) singleValue+=tileAmount[i+1]*2;
+            // if(i>=43) singleValue+=tileAmount[i-2]*1;
+            // if(i>=42) singleValue+=tileAmount[i-1]*2;
+            // if(i<=42) singleValue+=tileAmount[i+2]*1;
+            // if(i<=43) singleValue+=tileAmount[i+1]*2;
             if(tileAmount[i]==2) singleValue+=2;
             else if(tileAmount[i]==3) singleValue+=3;
             else if(tileAmount[i]==4) singleValue+=4;
@@ -189,10 +203,10 @@ double Calculator::HandScoreCalculator(
     for(int i=51;i<=53;i++){
         if(tileAmount[i]){
             double singleValue=0;
-            if(i>=53) singleValue+=tileAmount[i-2]*1;
-            if(i>=52) singleValue+=tileAmount[i-1]*2;
-            if(i<=51) singleValue+=tileAmount[i+2]*1;
-            if(i<=52) singleValue+=tileAmount[i+1]*2;
+            // if(i>=53) singleValue+=tileAmount[i-2]*1;
+            // if(i>=52) singleValue+=tileAmount[i-1]*2;
+            // if(i<=51) singleValue+=tileAmount[i+2]*1;
+            // if(i<=52) singleValue+=tileAmount[i+1]*2;
             if(tileAmount[i]==2) singleValue+=2;
             else if(tileAmount[i]==3) singleValue+=3;
             else if(tileAmount[i]==4) singleValue+=4;

@@ -8,6 +8,7 @@ include_directories(utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm
 include_directories(utils/MahjongGB)
 
 add_executable(project
+        src/main.cpp
         src/Majang.cpp
         src/Majang.h
         src/RequestReader.cpp
@@ -27,5 +28,4 @@ add_executable(project
         utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/stringify.h
         utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/tile.h
         utils/MahjongGB/MahjongGB.cpp
-        utils/MahjongGB/MahjongGB.h
-        main_local.cpp)
+        utils/MahjongGB/MahjongGB.h)

@@ -23,7 +23,7 @@ void Output::Response(int request, StateContainer state){
     //如果是抽牌
     if(request==2){
         //此时手牌中最后一个元素即为抽到的牌
-        if(judgeHu(pack,hand,hand.back(),true)){
+        if(judgeHu(pack,hand,hand.back(),state,true)){
             printf("HU");
         } 
         else if(judgeBuGang(state,pack,hand,hand.back())){
@@ -39,11 +39,11 @@ void Output::Response(int request, StateContainer state){
     }
 
     //如果有别人打出的牌
-    else if(request==32||request==33||request==34){            
+    else if((request==32||request==33||request==34)&&state.getCurTurnPlayer() != state.getCurPosition()){            
         Majang lastTile=state.getLastPlayed();//被打出的牌
         int chi=judgeChi(tileAmount,lastTile);
         //HU
-        if(judgeHu(pack,hand,lastTile,false)){
+        if(judgeHu(pack,hand,lastTile,state,false)){
             printf("HU");
         }
         //GANG      
@@ -78,10 +78,8 @@ void Output::Response(int request, StateContainer state){
     }
 
     //抢杠和
-    else if(request==36){
-        if(judgeHu(pack,hand,state.getLastPlayed(),false)){
-            printf("HU");
-        }
+    else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),state,false)){
+        printf("HU");
     }
 
     //其余情况直接输出"pass"即可
@@ -94,6 +92,7 @@ bool Output::judgeHu(
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
     const Majang& winTile,
+    StateContainer state,
     bool isZIMO 
 ){
     //cout << "[DEBUG] judgingHu\n";
@@ -120,7 +119,10 @@ bool Output::judgeHu(
     MahjongInit();
     //cout << "[DEBUG] Mahjong Init Successed.\n";
     try{
-        auto re=MahjongFanCalculator(p,h,winTile.getTileString(),1,0,0,0,0,0,0);//此时不用考虑补花
+        bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
+        bool isGANG=(StateContainer::lastRequest==36);
+        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        auto re=MahjongFanCalculator(p,h,winTile.getTileString(),state.getFlowerTilesOf(state.getCurPosition()).size(),isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
         int r=0; 
         //cout << "[DEBUG] judgeHu Successed!\n";
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
@@ -278,7 +280,7 @@ const Majang Output::getBestCP(
         if(pos==1){
             int k1=1,k2=1;
             unsigned int i=0;
-            while(k1&&k2&&i<hand.size()){
+            while((k1||k2)&&i<hand.size()){
                 if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
                     k1--;
                     hand.erase(hand.begin()+i);
@@ -296,7 +298,7 @@ const Majang Output::getBestCP(
         else if(pos==2){
             int k1=1,k2=1;
             unsigned int i=0;
-            while(k1&&k2&&i<hand.size()){
+            while((k1||k2)&&i<hand.size()){
                 if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
                     k1--;
                     hand.erase(hand.begin()+i);
@@ -314,7 +316,7 @@ const Majang Output::getBestCP(
         else{
             int k1=1,k2=1;
             unsigned int i=0;
-            while(k1&&k2&&i<hand.size()){
+            while((k1||k2)&&i<hand.size()){
                 if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
                     k1--;
                     hand.erase(hand.begin()+i);

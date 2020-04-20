@@ -20,19 +20,28 @@
 #include <iostream>
 
 int StateContainer::quan=0;
+int StateContainer::lastRequest=0;
 int main() {
     int turnID; Reader::readIn(turnID);
     string tmp;
+    int lastRequest;
     StateContainer basicState;
     for(int i=1; i<turnID; i++) {
-        Reader::readRequest(basicState);
+        lastRequest = Reader::readRequest(basicState);
         getline(cin, tmp);   // 过滤掉我们发出的无用的信息
-        //valarray<Majang>& tmpM = basicState.getInHand();
-        //for(auto& mahjong : tmpM) {
-        //    cout << mahjong << " ";
-        //}
-        //cout << endl;
+//        vector<Majang> & tmpM=basicState.getInHand();
+//        for(auto & mahjong:tmpM){
+//            cout<<mahjong.getTileString()<<" ";
+//        }
+//        cout<<endl;
     }
-    Output::Response(Reader::readRequest(basicState), basicState);
+    StateContainer::lastRequest=lastRequest;
+    int t=Reader::readRequest(basicState);
+//        vector<Majang> & tmpM=basicState.getInHand();
+//        for(auto & mahjong:tmpM){
+//            cout<<mahjong.getTileString()<<" ";
+//        }
+//        cout<<endl;    
+    Output::Response(t, basicState);
     return 0;
 }
