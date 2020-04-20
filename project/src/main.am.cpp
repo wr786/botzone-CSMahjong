@@ -37,7 +37,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -105,7 +105,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -158,6 +158,7 @@ TILE_T Majang::getTileTypeFromChar(char ch) {
 		case 'F': return FENG;
 		case 'J': return JIAN;
 		case 'H': return HANA;
+		case 'D': return DRAW;   // 抽牌
 		default:  return NILL;
 	}
 }
@@ -222,6 +223,7 @@ char Majang::getTileType() const {
 		case FENG: return 'F';
 		case JIAN: return 'J';
 		case HANA: return 'H';
+		case DRAW: return 'D';
 		default: return 'N';        //? 一般应该不会运行到这里吧……或者可以写个错误处理？
 	}
 }
@@ -301,7 +303,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -487,7 +489,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -782,7 +784,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -863,7 +865,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -1075,7 +1077,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -1156,7 +1158,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -1321,6 +1323,8 @@ public:
 /*** End of inlined file: RequestReader.h ***/
 
 #include <cassert>
+#include <iostream>
+using namespace std;
 
 void Reader::readIn(string &str) {
 	str = ""; // 初始化
@@ -1495,10 +1499,22 @@ int Reader::readRequest(StateContainer &state) {
 				state.setLastPlayed(tmpPlayed);
 				ret += 4;
 			} else if (op == "GANG") {
+				// cout << "[DEBUG]"<< state.getLastPlayed().getTileType() << endl;
 				if(state.getLastPlayed().getTileType() == 'D') {
 					// 如果上一回合是摸牌，表示进行暗杠
 					state.incSecretGangCntOf(playerID);
 					state.setInHandCntOf(playerID, state.getInHandCntOf(playerID) - 4);
+					// cout << "[DEBUG] playerID: " << playerID <<" cp: " << state.getCurPosition() << endl;
+					if(playerID == state.getCurPosition()) {
+						// 自己GANG
+						Majang gangTile = state.getInHand()[state.getInHand().size()-1];
+						// cout << "[DEBUG]" << gangTile.getTileString() << endl;
+						state.getGangOf(playerID).push_back(gangTile); // 加入鸣牌
+						state.deleteFromInHand(gangTile);
+						state.deleteFromInHand(gangTile);
+						state.deleteFromInHand(gangTile);
+						state.deleteFromInHand(gangTile);
+					}
 				} else {
 					// 明杠，这里假设抽牌操作和打牌操作会在之后以draw和play的request呈现
 					const Majang& gangTile = state.getLastPlayed();
@@ -1597,7 +1613,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -1677,7 +1693,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -6536,7 +6552,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -6616,7 +6632,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -6828,9 +6844,9 @@ double Calculator::MajangScoreCalculator(
 	StateContainer state
 ){
 	//参数实际应按游戏回合分段，这里先随便写了一个
-	double k1=0.5;    // 手牌得分所占权重
+	double k1=0.4;    // 手牌得分所占权重
 	double k2=0.3;    // 自摸番数得分所占权重
-	double k3=0.2;    // 点炮番数得分所占权重
+	double k3=0.3;    // 点炮番数得分所占权重
 	//freopen("D://out.txt","a",stdout);
 	double r1=MajangHandScore(pack,hand);
 	double r2=MajangFanScore(pack,hand,flowerCount,state,0);
@@ -7088,7 +7104,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -7168,7 +7184,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -7352,7 +7368,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -7432,7 +7448,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -7696,7 +7712,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -7776,7 +7792,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -7960,7 +7976,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
@@ -8040,7 +8056,7 @@ typedef enum TILETYPE {
 	FENG,        // 风 4
 	JIAN,        // 箭 5
 	HANA,        // 花 6
-	TILE_T_SIZE  // 以便循环使用
+	DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {

@@ -17,6 +17,7 @@ TILE_T Majang::getTileTypeFromChar(char ch) {
         case 'F': return FENG;
         case 'J': return JIAN;
         case 'H': return HANA;
+        case 'D': return DRAW;   // 抽牌
         default:  return NILL;
     }
 }
@@ -83,6 +84,7 @@ char Majang::getTileType() const {
         case FENG: return 'F';
         case JIAN: return 'J';
         case HANA: return 'H';
+        case DRAW: return 'D';
         default: return 'N';        //? 一般应该不会运行到这里吧……或者可以写个错误处理？
     }
 }

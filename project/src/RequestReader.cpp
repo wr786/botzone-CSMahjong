@@ -1,5 +1,7 @@
 #include "RequestReader.h"
 #include <cassert>
+#include <iostream>
+using namespace std;
 
 void Reader::readIn(string &str) {
     str = ""; // 初始化
@@ -174,10 +176,22 @@ int Reader::readRequest(StateContainer &state) {
                 state.setLastPlayed(tmpPlayed);
                 ret += 4;
             } else if (op == "GANG") {
+                // cout << "[DEBUG]"<< state.getLastPlayed().getTileType() << endl;
                 if(state.getLastPlayed().getTileType() == 'D') {
                     // 如果上一回合是摸牌，表示进行暗杠
                     state.incSecretGangCntOf(playerID);
                     state.setInHandCntOf(playerID, state.getInHandCntOf(playerID) - 4);
+                    // cout << "[DEBUG] playerID: " << playerID <<" cp: " << state.getCurPosition() << endl;
+                    if(playerID == state.getCurPosition()) {
+                        // 自己GANG
+                        Majang gangTile = state.getInHand()[state.getInHand().size()-1];
+                        // cout << "[DEBUG]" << gangTile.getTileString() << endl;
+                        state.getGangOf(playerID).push_back(gangTile); // 加入鸣牌
+                        state.deleteFromInHand(gangTile);
+                        state.deleteFromInHand(gangTile);
+                        state.deleteFromInHand(gangTile);
+                        state.deleteFromInHand(gangTile);
+                    }
                 } else {
                     // 明杠，这里假设抽牌操作和打牌操作会在之后以draw和play的request呈现
                     const Majang& gangTile = state.getLastPlayed();

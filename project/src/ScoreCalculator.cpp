@@ -10,9 +10,9 @@ double Calculator::MajangScoreCalculator(
     StateContainer state
 ){
     //参数实际应按游戏回合分段，这里先随便写了一个
-    double k1=0.5;    // 手牌得分所占权重
+    double k1=0.4;    // 手牌得分所占权重
     double k2=0.3;    // 自摸番数得分所占权重
-    double k3=0.2;    // 点炮番数得分所占权重
+    double k3=0.3;    // 点炮番数得分所占权重
     //freopen("D://out.txt","a",stdout);
     double r1=MajangHandScore(pack,hand);
     double r2=MajangFanScore(pack,hand,flowerCount,state,0);

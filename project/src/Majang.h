@@ -27,7 +27,7 @@ typedef enum TILETYPE {
     FENG,        // 风 4
     JIAN,        // 箭 5
     HANA,        // 花 6
-    TILE_T_SIZE  // 以便循环使用
+    DRAW,        // 抽牌，虚牌
 } TILE_T;
 
 class Majang {
