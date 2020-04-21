@@ -115,22 +115,20 @@ double Calculator::MajangHandScore(
     vector<Majang> hand
 ){  
     double c=1;
+    double result=0;
     int tileAmount[70];
     memset(tileAmount,0,sizeof(tileAmount)); 
     for(unsigned int i=0;i<hand.size();i++){
         tileAmount[hand[i].getTileInt()]++;
     }
     for(unsigned int i=0;i<pack.size();i++){
-        if(pack[i].first=="GANG") tileAmount[pack[i].second.getTileInt()]=4;
-        else if(pack[i].first=="PENG") tileAmount[pack[i].second.getTileInt()]=3;
+        if(pack[i].first=="GANG") result+=16;
+        else if(pack[i].first=="PENG") result+=9;
         else{
-            int TileN=pack[i].second.getTileInt();
-            tileAmount[TileN-1]++;
-            tileAmount[TileN]++;
-            tileAmount[TileN+1]++;
+            result+=10;
         }
     }
-    double result=HandScoreCalculator(tileAmount);
+    result+=HandScoreCalculator(tileAmount);
     return result*c;
 }
 
