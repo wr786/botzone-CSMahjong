@@ -1,9 +1,10 @@
+import os
 
 file = open('ScoreCalculator.cpp', 'r', encoding="utf-8")
 lines = file.read().splitlines()
 file.close()
 
-file = open('ScoreCalculator.cpp', 'w', encoding="utf-8")
+file = open('ScoreCalculator_tmp.cpp', 'w', encoding="utf-8")
 
 print('[INFO] 调参说明:输入浮点数即可调参，输入非浮点数(比如空格)则保持原样')
 
@@ -22,3 +23,6 @@ for line in lines:
 		file.write(line + '\n')
 
 file.close()
+
+os.remove('ScoreCalculator.cpp')
+os.rename('ScoreCalculator_tmp.cpp', 'ScoreCalculator.cpp')
