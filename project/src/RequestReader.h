@@ -5,16 +5,21 @@
 #ifndef REQUESTREADER_H
 #define REQUESTREADER_H
 
+#ifndef _PREPROCESS_ONLY
 #include <cstdio>
 #include <cctype>
 #include <string>
 #include <cstring>
 #include <valarray>
 #include <cassert>
+#endif
+
 #include "Majang.h"
 #include "StateContainer.h"
 #ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
 #include "MahjongGB/MahjongGB.h"
+#endif
 #endif
 
 using namespace std;

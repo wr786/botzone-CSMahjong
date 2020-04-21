@@ -5,9 +5,11 @@
 #ifndef RESPONSEOUTPUT_H
 #define RESPONSEOUTPUT_H
 
+#ifndef _PREPROCESS_ONLY
 #include <string>
 #include <cstring>
 #include <vector>
+#endif
 
 #include "Majang.h"
 #include "StateContainer.h"

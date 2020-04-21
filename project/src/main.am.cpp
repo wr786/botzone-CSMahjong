@@ -6863,7 +6863,7 @@ double Calculator::FanScoreCalculator(
 	Majang winTile,
 	StateContainer state
 ){
-	double k4=70.0;    //将Majang类调整为适用于算番器的接口
+	double k4=20.0;    //将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));

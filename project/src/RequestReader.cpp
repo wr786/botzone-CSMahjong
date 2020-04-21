@@ -1,6 +1,8 @@
 #include "RequestReader.h"
+#ifndef _PREPROCESS_ONLY
 #include <cassert>
 #include <iostream>
+#endif
 using namespace std;
 
 void Reader::readIn(string &str) {

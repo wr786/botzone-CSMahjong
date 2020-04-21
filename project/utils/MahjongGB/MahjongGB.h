@@ -1,9 +1,11 @@
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
+#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
+#endif
 
 //CPP
 #include "MahjongGB.cpp"

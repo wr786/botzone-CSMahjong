@@ -1,5 +1,9 @@
+
 #include "Majang.h"
+
+#ifndef _PREPROCESS_ONLY
 #include <cassert>
+#endif
 
 // 没有注释的函数大多都是易于理解的
 // 每个函数都可以在Majang.h的声明处找到简要的注释

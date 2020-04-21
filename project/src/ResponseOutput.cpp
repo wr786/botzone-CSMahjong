@@ -1,5 +1,10 @@
+
 #include "ResponseOutput.h"
+
+#ifndef _PREPROCESS_ONLY
 #include <iostream>
+#endif
+
 using namespace std;
 
 void Output::Response(int request, StateContainer state){

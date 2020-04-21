@@ -5,8 +5,10 @@
 #ifndef MAJANG_H
 #define MAJANG_H
 
+#ifndef _PREPROCESS_ONLY
 #include <string>
 //#include <string_view>
+#endif
 
 using namespace std;
 

@@ -5,17 +5,21 @@
 #ifndef SCORECALCULATOR_H
 #define SCORECALCULATOR_H
 
+#ifndef _PREPROCESS_ONLY
 #include <string>
 #include <cstring>
 #include <vector>
 #include <utility>
+#endif
 
 #include "Majang.h"
 #include "StateContainer.h"
 
 // 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
 #ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
 #include "MahjongGB/MahjongGB.h"
+#endif
 #else
 #include "../utils/MahjongGB/MahjongGB.h"
 #endif

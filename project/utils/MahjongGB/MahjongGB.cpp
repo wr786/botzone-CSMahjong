@@ -1,12 +1,16 @@
 #include "MahjongGB.h"
+
+#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include "../ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/fan_calculator.h"
 #include <cstring>
 #include <iostream>
+#endif
+
+#include "../ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/fan_calculator.h"
 
 using namespace std;
 

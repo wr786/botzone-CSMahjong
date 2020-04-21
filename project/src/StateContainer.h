@@ -5,9 +5,11 @@
 #ifndef STATECONTAINER_H
 #define STATECONTAINER_H
 
+#ifndef _PREPROCESS_ONLY
 #include <valarray>
 #include <vector>
 #include <algorithm>
+#endif
 
 // 使用Majang类
 #include "Majang.h"

@@ -4,7 +4,9 @@
 #endif
 
 #ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
 #include "MahjongGB/MahjongGB.h"
+#endif
 #endif
 
 #include "Majang.h"
@@ -17,7 +19,10 @@
 #include "ScoreCalculator.cpp"
 #include "ResponseOutput.h"
 #include "ResponseOutput.cpp"
+
+#ifndef _PREPROCESS_ONLY
 #include <iostream>
+#endif
 
 int StateContainer::quan=0;
 int StateContainer::lastRequest=0;

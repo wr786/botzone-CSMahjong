@@ -1,5 +1,7 @@
 #include "StateContainer.h"
+#ifndef _PREPROCESS_ONLY
 #include <cassert>
+#endif
 
 StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurnPlayer(curT), inHand(13),  totalLeft(144) {
     for(int i = 1; i < 10; i++) {
