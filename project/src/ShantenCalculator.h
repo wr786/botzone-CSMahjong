@@ -322,11 +322,27 @@ mahjong::tile_t MajangToMahjong(const Majang& h){
         break;
     }
     return ret;
-};
+}
 
-// 返回值的first为shanten，second为effective tiles
-pair<int, int> ShantenCalc(const vector<pair<string, Majang> >& pack,
-    const vector<Majang>& hand
+void ClearTable(mahjong::useful_table_t& ut) {
+    memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+    int etc = 0;
+    for (auto tile : ut)
+        if (tile)
+            etc++;
+    return etc;
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    mahjong::useful_table_t useful_table = nullptr
 ) {
     using namespace mahjong;
 
@@ -419,38 +435,26 @@ pair<int, int> ShantenCalc(const vector<pair<string, Majang> >& pack,
     hand_tiles.pack_count = pack_cnt;
     // serving_tile = last_tile;
 
-    useful_table_t useful_table = { false };
+    useful_table_t useful_table_ret = { false };
     useful_table_t temp_table = { false };
     int ret0;
     int effectiveTileCount = 0;
-
-    auto ClearTable = [](useful_table_t& ut) -> void {
-        memset(ut, 0, sizeof(bool) * 72);
-    };
-
-    auto CountTable = [](useful_table_t& ut) -> int {
-        int etc = 0;
-        for (auto tile : ut)
-            if (tile)
-                etc++;
-        return etc;
-    };
 
     int ret_shanten = std::numeric_limits<int>::max();
 
     auto Check = [&]() -> void {
         if (ret0 == std::numeric_limits<int>::max())
             return;
-        if (ret0 < ret_shanten) { 
+        if (ret0 < ret_shanten) {
             // 上听数小的，直接覆盖数据
             ret_shanten = ret0;
-            memcpy(useful_table, temp_table, sizeof(useful_table));
+            memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
         }
         else if (ret_shanten == ret0) {
             // 上听数相等的，合并有效牌
-            std::transform(std::begin(useful_table), std::end(useful_table),
+            std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
                 std::begin(temp_table),
-                std::begin(useful_table),
+                std::begin(useful_table_ret),
                 [](bool u, bool t) { return u || t; });
         }
     };
@@ -472,8 +476,10 @@ pair<int, int> ShantenCalc(const vector<pair<string, Majang> >& pack,
     ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
     Check();
 
-    effectiveTileCount = CountTable(useful_table);
-    
+    effectiveTileCount = CountTable(useful_table_ret);
+    if (useful_table != nullptr)
+        memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
     return { ret_shanten, effectiveTileCount };
 }
 

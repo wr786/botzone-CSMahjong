@@ -132,16 +132,22 @@ double Calculator::MajangHandScore(
     }
     result += HandScoreCalculator(tileAmount);
 
-    // int param1, param2; // shanten, effective tiles
-    // auto p = ShantenCalc(pack, hand);
-    // param1 = p.first; param2 = p.second;
-    // 目标：可能使用shanten、达到小1shanten的可能麻将数、相似度、分数4个参量
+    // TO DO
+    // 目标：可能使用shanten、达到小1的shanten的可能麻将数、相似度、分数4个参量
+    int param1, param2, param3;
+    // shanten, effective tiles, similarity
+    mahjong::useful_table_t useful_table;
+    auto p = ShantenCalc(pack, hand, useful_table);
+    param1 = p.first; param2 = p.second;
+    // param3 = SimilarityCalc(state, useful_table);
+    // state哪里来？
 
     return result * c;
 }
 
-double ProbabilityCalc(const StateContainer& state, const Majang& aim)
-{
+double ProbabilityCalc(const StateContainer& state, 
+    const Majang& aim
+){
     const int playerIdx = state.getCurTurnPlayer();
 
     int OtherMingTilesCnt = 0;
@@ -185,6 +191,13 @@ double ProbabilityCalc(const StateContainer& state, const Majang& aim)
 
     double pRet = (4 - thisMjCnt) / allSecretCnt;
     return pRet;
+}
+
+double SimilarityCalc(const StateContainer& state, 
+    mahjong::useful_table_t useful_table
+){
+    // TO DO
+    return 1.0;
 }
 
 //得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;

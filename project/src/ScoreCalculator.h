@@ -14,6 +14,7 @@
 
 #include "Majang.h"
 #include "StateContainer.h"
+#include "ShantenCalculator.h"
 
 // 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
 #ifdef _BOTZONE_ONLINE
