@@ -46,7 +46,10 @@ int main() {
     hand.push_back(Majang(FENG * 10 + 3));
     hand.push_back(Majang(JIAN * 10 + 3));
     cout << ComplicatedShantenCalc(pack, hand) << endl;
-    cout << endl << "=== shanten test end ===" << endl;
+    cout << "=== complicated shanten test end ===" << endl;
+    cout << ShantenCalc(pack, hand) << endl;
+    cout << "=== simplified shanten test end ===" << endl;
+    cout << "=== shanten test end ===" << endl;
 #endif // !_BOTZONE_ONLINE
     int turnID; Reader::readIn(turnID);
     string tmp;
