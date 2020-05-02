@@ -31,7 +31,7 @@ double Calculator::FanScoreCalculator(
     Majang winTile,
     StateContainer state
 ){  
-    double k4=60.0;    //将Majang类调整为适用于算番器的接口    
+    double k4=120.0;    //将Majang类调整为适用于算番器的接口    
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
         p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
@@ -112,115 +112,120 @@ double Calculator::MajangFanScore(
 
 //这里采用了将手牌hand和明牌pack合并起来计算的方式,若有必要,可以分开计算并赋上权值
 //参数c是用来使番数得分与手牌得分的数值相当
-double Calculator::MajangHandScore(    
+double Calculator::MajangHandScore(
     vector<pair<string, Majang> > pack,
     vector<Majang> hand
-){  
-    double c=1;
-    double result=0;
+) {
+    double c = 1;
+    double result = 0;
     int tileAmount[70];
-    memset(tileAmount,0,sizeof(tileAmount)); 
-    for(unsigned int i=0;i<hand.size();i++){
+    memset(tileAmount, 0, sizeof(tileAmount));
+    for (unsigned int i = 0; i < hand.size(); i++) {
         tileAmount[hand[i].getTileInt()]++;
     }
-    for(unsigned int i=0;i<pack.size();i++){
-        if(pack[i].first=="GANG") result+=16;
-        else if(pack[i].first=="PENG") result+=9;
-        else{
-            result+=10;
+    for (unsigned int i = 0; i < pack.size(); i++) {
+        if (pack[i].first == "GANG") result += 16;
+        else if (pack[i].first == "PENG") result += 9;
+        else {
+            result += 10;
         }
     }
-    result+=HandScoreCalculator(tileAmount);
-    return result*c;
+    result += HandScoreCalculator(tileAmount);
+
+    // int stResult = ComplicatedShantenCalc(pack, hand);
+    // 目标：可能使用shanten、达到小1shanten的可能麻将数、相似度、分数4个参量
+
+    return result * c;
 }
+
 
 //得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
 //未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
 double Calculator::HandScoreCalculator(
     int tileAmount[70]
-){  
-    double valueW=0,valueB=0,valueT=0,valueF=0,valueJ=0; 
-    int sumW=0,sumB=0,sumT=0,sumF=0,sumJ=0;
-    double r=0;
-    for(int i=11;i<=19;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-            if(i>=13) singleValue+=tileAmount[i-2]*1;
-            if(i>=12) singleValue+=tileAmount[i-1]*2;
-            if(i<=17) singleValue+=tileAmount[i+2]*1;
-            if(i<=18) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueW+=tileAmount[i]*singleValue;
-            sumW+=tileAmount[i];
+) {
+    double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
+    int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
+    double r = 0;
+    for (int i = 11; i <= 19; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+            if (i >= 13) singleValue += tileAmount[i - 2] * 1;
+            if (i >= 12) singleValue += tileAmount[i - 1] * 2;
+            if (i <= 17) singleValue += tileAmount[i + 2] * 1;
+            if (i <= 18) singleValue += tileAmount[i + 1] * 2;
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueW += tileAmount[i] * singleValue;
+            sumW += tileAmount[i];
         }
     }
-    for(int i=21;i<=29;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-            if(i>=23) singleValue+=tileAmount[i-2]*1;
-            if(i>=22) singleValue+=tileAmount[i-1]*2;
-            if(i<=27) singleValue+=tileAmount[i+2]*1;
-            if(i<=28) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueB+=tileAmount[i]*singleValue; 
-            sumB+=tileAmount[i];           
-        }     
+    for (int i = 21; i <= 29; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+            if (i >= 23) singleValue += tileAmount[i - 2] * 1;
+            if (i >= 22) singleValue += tileAmount[i - 1] * 2;
+            if (i <= 27) singleValue += tileAmount[i + 2] * 1;
+            if (i <= 28) singleValue += tileAmount[i + 1] * 2;
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueB += tileAmount[i] * singleValue;
+            sumB += tileAmount[i];
+        }
     }
-    for(int i=31;i<=39;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-            if(i>=33) singleValue+=tileAmount[i-2]*1;
-            if(i>=32) singleValue+=tileAmount[i-1]*2;
-            if(i<=37) singleValue+=tileAmount[i+2]*1;
-            if(i<=38) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueT+=tileAmount[i]*singleValue;
-            sumT+=tileAmount[i];
-        }      
+    for (int i = 31; i <= 39; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+            if (i >= 33) singleValue += tileAmount[i - 2] * 1;
+            if (i >= 32) singleValue += tileAmount[i - 1] * 2;
+            if (i <= 37) singleValue += tileAmount[i + 2] * 1;
+            if (i <= 38) singleValue += tileAmount[i + 1] * 2;
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueT += tileAmount[i] * singleValue;
+            sumT += tileAmount[i];
+        }
     }
     //箭牌和风牌可能要有特殊的地位*
-    for(int i=41;i<=44;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
+    for (int i = 41; i <= 44; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
             // if(i>=43) singleValue+=tileAmount[i-2]*1;
             // if(i>=42) singleValue+=tileAmount[i-1]*2;
             // if(i<=42) singleValue+=tileAmount[i+2]*1;
             // if(i<=43) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueF+=tileAmount[i]*singleValue;
-            sumF+=tileAmount[i];
-        }            
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueF += tileAmount[i] * singleValue;
+            sumF += tileAmount[i];
+        }
     }
-    for(int i=51;i<=53;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
+    for (int i = 51; i <= 53; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
             // if(i>=53) singleValue+=tileAmount[i-2]*1;
             // if(i>=52) singleValue+=tileAmount[i-1]*2;
             // if(i<=51) singleValue+=tileAmount[i+2]*1;
             // if(i<=52) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueJ+=tileAmount[i]*singleValue;
-            sumJ+=tileAmount[i];
-        }                        
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueJ += tileAmount[i] * singleValue;
+            sumJ += tileAmount[i];
+        }
     }
     //手牌张数加成
-    int sum=sumW+sumB+sumT+sumF+sumJ;
-    valueW*=(1+(double)sumW/sum);
-    valueB*=(1+(double)sumB/sum);
-    valueT*=(1+(double)sumT/sum);  
-    valueF*=(1+(double)sumF/sum);
-    valueJ*=(1+(double)sumJ/sum);
-    r=valueW+valueB+valueT+valueF+valueJ;
-    return r;          
+    int sum = sumW + sumB + sumT + sumF + sumJ;
+    valueW *= (1 + (double)sumW / sum);
+    valueB *= (1 + (double)sumB / sum);
+    valueT *= (1 + (double)sumT / sum);
+    valueF *= (1 + (double)sumF / sum);
+    valueJ *= (1 + (double)sumJ / sum);
+    r = valueW + valueB + valueT + valueF + valueJ;
+    return r;
 }
 

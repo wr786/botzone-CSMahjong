@@ -26,6 +26,7 @@
     <ClInclude Include="..\src\RequestReader.h" />
     <ClInclude Include="..\src\ResponseOutput.h" />
     <ClInclude Include="..\src\ScoreCalculator.h" />
+    <ClInclude Include="..\src\ShantenCalculator.h" />
     <ClInclude Include="..\src\StateContainer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

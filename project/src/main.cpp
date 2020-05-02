@@ -19,6 +19,7 @@
 #include "ScoreCalculator.cpp"
 #include "ResponseOutput.h"
 #include "ResponseOutput.cpp"
+#include "ShantenCalculator.h"
 
 #ifndef _PREPROCESS_ONLY
 #include <iostream>
@@ -27,6 +28,26 @@
 int StateContainer::quan=0;
 int StateContainer::lastRequest=0;
 int main() {
+#ifndef _BOTZONE_ONLINE
+    ShantenTest();
+    cout << endl << "=== shanten test control group end ===" << endl;
+    // [111m]5m12p1569sSWP
+    vector<pair<string, Majang>> pack;
+    vector<Majang> hand;
+    pack.push_back({ "GANG", Majang(WANN * 10 + 1) });
+    hand.push_back(Majang(WANN * 10 + 5));
+    hand.push_back(Majang(BING * 10 + 1));
+    hand.push_back(Majang(BING * 10 + 2));
+    hand.push_back(Majang(TIAO * 10 + 1));
+    hand.push_back(Majang(TIAO * 10 + 5));
+    hand.push_back(Majang(TIAO * 10 + 6));
+    hand.push_back(Majang(TIAO * 10 + 9));
+    hand.push_back(Majang(FENG * 10 + 2));
+    hand.push_back(Majang(FENG * 10 + 3));
+    hand.push_back(Majang(JIAN * 10 + 3));
+    cout << ComplicatedShantenCalc(pack, hand) << endl;
+    cout << endl << "=== shanten test end ===" << endl;
+#endif // !_BOTZONE_ONLINE
     int turnID; Reader::readIn(turnID);
     string tmp;
     int lastRequest;

@@ -6,3 +6,6 @@
 /project/out/build/x64-Debug
 /project/VS_projectfile_tmp/.vs/project/v16
 /project/VS_projectfile_tmp/x64/Debug
+/project/VS_projectfile_tmp/Debug/project.tlog
+/project/VS_projectfile_tmp/Debug
+/project/CMakeSettings.json
