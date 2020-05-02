@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <numeric>
 #endif
+
 #ifdef _BOTZONE_ONLINE
 #ifndef _PREPROCESS_ONLY
 #include "MahjongGB/MahjongGB.h"
@@ -323,11 +324,10 @@ mahjong::tile_t MajangToMahjong(const Majang& h){
     return ret;
 };
 
-int ShantenCalc(const vector<pair<string, Majang> >& pack,
+// 返回值的first为shanten，second为effective tiles
+pair<int, int> ShantenCalc(const vector<pair<string, Majang> >& pack,
     const vector<Majang>& hand
 ) {
-    int shanten = std::numeric_limits<int>::max();
-
     using namespace mahjong;
 
     hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
@@ -337,10 +337,6 @@ int ShantenCalc(const vector<pair<string, Majang> >& pack,
     intptr_t pack_cnt = 0;
     tile_t standing_tiles[14];
     intptr_t standing_cnt = 0;
-
-    tile_t temp_tiles[14];
-    intptr_t temp_cnt = 0;
-    intptr_t max_cnt = 14; // 指立牌数最大值
 
     // tile_table_t cnt_table = { 0 };
 
@@ -424,22 +420,61 @@ int ShantenCalc(const vector<pair<string, Majang> >& pack,
     // serving_tile = last_tile;
 
     useful_table_t useful_table = { false };
+    useful_table_t temp_table = { false };
     int ret0;
-    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
-    shanten = min(shanten, ret0);
+    int effectiveTileCount = 0;
 
-    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
-    shanten = min(shanten, ret0);
+    auto ClearTable = [](useful_table_t& ut) -> void {
+        memset(ut, 0, sizeof(bool) * 72);
+    };
 
-    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
-    shanten = min(shanten, ret0);
+    auto CountTable = [](useful_table_t& ut) -> int {
+        int etc = 0;
+        for (auto tile : ut)
+            if (tile)
+                etc++;
+        return etc;
+    };
 
-    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
-    shanten = min(shanten, ret0);
+    int ret_shanten = std::numeric_limits<int>::max();
 
-    ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
-    shanten = min(shanten, ret0);
+    auto Check = [&]() -> void {
+        if (ret0 == std::numeric_limits<int>::max())
+            return;
+        if (ret0 < ret_shanten) { 
+            // 上听数小的，直接覆盖数据
+            ret_shanten = ret0;
+            memcpy(useful_table, temp_table, sizeof(useful_table));
+        }
+        else if (ret_shanten == ret0) {
+            // 上听数相等的，合并有效牌
+            std::transform(std::begin(useful_table), std::end(useful_table),
+                std::begin(temp_table),
+                std::begin(useful_table),
+                [](bool u, bool t) { return u || t; });
+        }
+    };
 
-    return shanten;
+    // 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    effectiveTileCount = CountTable(useful_table);
+    
+    return { ret_shanten, effectiveTileCount };
 }
+
 #endif // !Shanten_Calculator_H

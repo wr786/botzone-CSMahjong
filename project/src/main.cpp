@@ -47,7 +47,11 @@ int main() {
     hand.push_back(Majang(JIAN * 10 + 3));
     cout << ComplicatedShantenCalc(pack, hand) << endl;
     cout << "=== complicated shanten test end ===" << endl;
-    cout << ShantenCalc(pack, hand) << endl;
+    int param1, param2; // shanten, effective tiles
+    auto p = ShantenCalc(pack, hand);
+    param1 = p.first; param2 = p.second;
+    cout << "shanten: " << param1 << endl
+        << "effective tiles: " << param2 << endl;
     cout << "=== simplified shanten test end ===" << endl;
     cout << "=== shanten test end ===" << endl;
 #endif // !_BOTZONE_ONLINE
@@ -55,7 +59,7 @@ int main() {
     string tmp;
     int lastRequest;
     StateContainer basicState;
-    for(int i=1; i<turnID; i++) {
+    for (int i = 1; i < turnID; i++) {
         lastRequest = Reader::readRequest(basicState);
         getline(cin, tmp);   // 过滤掉我们发出的无用的信息
 //        vector<Majang> & tmpM=basicState.getInHand();
@@ -64,13 +68,13 @@ int main() {
 //        }
 //        cout<<endl;
     }
-    StateContainer::lastRequest=lastRequest;
-    int t=Reader::readRequest(basicState);
-//        vector<Majang> & tmpM=basicState.getInHand();
-//        for(auto & mahjong:tmpM){
-//            cout<<mahjong.getTileString()<<" ";
-//        }
-//        cout<<endl;    
+    StateContainer::lastRequest = lastRequest;
+    int t = Reader::readRequest(basicState);
+    //        vector<Majang> & tmpM=basicState.getInHand();
+    //        for(auto & mahjong:tmpM){
+    //            cout<<mahjong.getTileString()<<" ";
+    //        }
+    //        cout<<endl;    
     Output::Response(t, basicState);
     return 0;
 }
