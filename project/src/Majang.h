@@ -43,7 +43,7 @@ public:
     explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
     Majang& operator = (const Majang& other);
-    bool operator == (const Majang& other);
+    bool operator == (const Majang& other) const;
 
     void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 

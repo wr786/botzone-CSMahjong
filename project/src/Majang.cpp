@@ -65,7 +65,7 @@ Majang& Majang::operator = (const Majang& other) {
     return *this;
 }
 
-bool Majang::operator == (const Majang &other) {
+bool Majang::operator == (const Majang &other) const {
     return innerType == other.innerType;
 }
 

@@ -132,12 +132,60 @@ double Calculator::MajangHandScore(
     }
     result += HandScoreCalculator(tileAmount);
 
-    // int stResult = ComplicatedShantenCalc(pack, hand);
+    // int param1, param2; // shanten, effective tiles
+    // auto p = ShantenCalc(pack, hand);
+    // param1 = p.first; param2 = p.second;
     // 目标：可能使用shanten、达到小1shanten的可能麻将数、相似度、分数4个参量
 
     return result * c;
 }
 
+double ProbabilityCalc(const StateContainer& state, const Majang& aim)
+{
+    const int playerIdx = state.getCurTurnPlayer();
+
+    int OtherMingTilesCnt = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (i != playerIdx) {
+            // 他人鸣牌总数
+            OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+            OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+            OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+        }
+    }
+    int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+    int thisMjCnt = 0;
+    auto& MyMj = state.getInHand();
+    for (auto& mj : MyMj) {
+        // 自己手中的该麻将
+        if (mj == aim)
+            thisMjCnt++;
+    }
+    for (int i = 0; i < 4; ++i) {
+        if (i != playerIdx) {
+            // 他人鸣牌中的该麻将
+            for (auto& mj : state.getPengOf(i)) {
+                if (mj == aim)
+                    thisMjCnt += 3;
+            }
+            for (auto& mj : state.getChiOf(i)) {
+                if (mj == aim
+                    || mj.getPrvMajang() == aim
+                    || mj.getNxtMajang() == aim) {
+                    thisMjCnt++;
+                }
+            }
+            for (auto& mj : state.getGangOf(i)) {
+                if (mj == aim)
+                    thisMjCnt += 4;
+            }
+        }
+    }
+
+    double pRet = (4 - thisMjCnt) / allSecretCnt;
+    return pRet;
+}
 
 //得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
 //未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
