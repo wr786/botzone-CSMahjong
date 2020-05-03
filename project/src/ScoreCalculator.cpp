@@ -134,6 +134,7 @@ double Calculator::MajangHandScore(
 
     // TO DO
     // 目标：可能使用shanten、达到小1的shanten的可能麻将数、相似度、分数4个参量
+    double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
     int param1, param2, param3;
     // shanten, effective tiles, similarity
     mahjong::useful_table_t useful_table;
