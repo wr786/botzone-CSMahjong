@@ -61,6 +61,11 @@ int Reader::readRequest(StateContainer &state) {
 //                readIn(state.getInHand()[i]);
                 state.decTileLeft(state.getInHand()[i]);
             }
+            // 设置牌墙
+            for(int i = 0; i < 4; i++) {
+                assert(state.getTileWallLeftOf(i) == 34);
+                state.decTileWallLeftOf(i, 13); // 每个人都抽了13张起始手牌
+            }
             // 读取花牌
             for (int i = 0; i < 4; i++) {
                 int lim = state.getFlowerTilesOf(i).size();
@@ -82,6 +87,7 @@ int Reader::readRequest(StateContainer &state) {
             state.setCurTurnPlayer(state.getCurPosition());
             state.decTileLeft(tmpM);
             ret = 2;
+            state.decTileWallLeftOf(state.getCurPosition());
             break;
         }
         case 3: { // 其他情况
@@ -100,6 +106,7 @@ int Reader::readRequest(StateContainer &state) {
                 ret += 1;
                 state.incInHandCntOf(playerID);
                 state.setLastPlayed("D0");  // D0 -> 其他玩家抽牌
+                state.decTileWallLeftOf(playerID);  // 抽牌减牌
             } else if (op == "PLAY") {
                 Majang tmpPlayed; readIn(tmpPlayed);
                 state.setLastPlayed(tmpPlayed);

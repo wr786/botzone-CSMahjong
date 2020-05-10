@@ -1,13 +1,0 @@
-Determining if the C compiler works failed with the following output:
-Change Dir: C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/CMakeTmp
-
-Run Build Command(s):C:/PROGRA~1/mingw64/bin/mingw32-make.exe cmTC_d2b0b/fast && C:/PROGRA~1/mingw64/bin/mingw32-make.exe -f CMakeFiles\cmTC_d2b0b.dir\build.make CMakeFiles/cmTC_d2b0b.dir/build
-mingw32-make.exe[1]: Entering directory 'C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/CMakeTmp'
-process_begin: CreateProcess(C:\Program Files\JetBrains\CLion 2019.3.4\bin\cmake\win\bin\cmake.exe, "C:\Program Files\JetBrains\CLion 2019.3.4\bin\cmake\win\bin\cmake.exe" -E cmake_echo_color --switch= --progress-dir=C:\Users\Konja\Documents\GitHub\botzone-CSMahjong\project\cmake-build-debug\CMakeFiles\CMakeTmp\CMakeFiles --progress-num=1 "Building C object CMakeFiles/cmTC_d2b0b.dir/testCCompiler.c.obj", ...) failed.
-make (e=5): 拒绝访问。
-mingw32-make.exe[1]: *** [CMakeFiles\cmTC_d2b0b.dir\build.make:64: CMakeFiles/cmTC_d2b0b.dir/testCCompiler.c.obj] Error 5
-mingw32-make.exe[1]: Leaving directory 'C:/Users/Konja/Documents/GitHub/botzone-CSMahjong/project/cmake-build-debug/CMakeFiles/CMakeTmp'
-mingw32-make.exe: *** [Makefile:120: cmTC_d2b0b/fast] Error 2
-
-
-

@@ -51,6 +51,7 @@ private:
     int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
     int totalLeft;                      // 没出现过的牌的总数（初始144）
     int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+    int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
 
 public:
     static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
@@ -112,6 +113,10 @@ public:
 
     void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
     void nxtTurn();                                                             // 进入下一回合
+
+    int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+    bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+    void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
 };
 
 #endif
