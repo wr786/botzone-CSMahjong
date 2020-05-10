@@ -282,11 +282,76 @@ int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
     return shanten;
 }
 
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+    using namespace mahjong;
+    auto tileType = h / 16;
+    auto num = h & 15;
+    int ret = 0;
+    switch (tileType)
+    {
+    case 1:
+    case 2:
+    case 3:
+        ret = num;
+    }
+    switch (tileType)
+    {
+    case 1:
+        ret += WANN * 10;
+        break;
+    case 2:
+        ret += TIAO * 10;
+        break;
+    case 3:
+        ret += BING * 10; 
+        break;
+    case 4:
+        switch (h)
+        {
+        case TILE_E:
+            ret = FENG * 10 + 1;
+            break;
+        case TILE_S:
+            ret = FENG * 10 + 2;
+            break;
+        case TILE_W:
+            ret = FENG * 10 + 3;
+            break;
+        case TILE_N:
+            ret = FENG * 10 + 4;
+            break;
+        case TILE_C:
+            ret = JIAN * 10 + 1;
+            break;
+        case TILE_F:
+            ret = JIAN * 10 + 2;
+            break;
+        case TILE_P:
+            ret = JIAN * 10 + 3;
+            break;
+        }
+        break;
+    }
+    return Majang(ret);
+}
 
 mahjong::tile_t MajangToMahjong(const Majang& h){
     using namespace mahjong;
     auto tileType = TILE_T(h.getTileInt() / 10);
-    tile_t ret;
+    tile_t ret = 0;
     switch (tileType) {
     case WANN:
     case BING:

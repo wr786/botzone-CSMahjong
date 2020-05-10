@@ -132,8 +132,7 @@ double Calculator::MajangHandScore(
     }
     result += HandScoreCalculator(tileAmount);
 
-    // TO DO
-    // 目标：可能使用shanten、达到小1的shanten的可能麻将数、相似度、分数4个参量
+    // shanten、达到小1的shanten的可能麻将数、相似度 三个参量
     double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
     int param1, param2, param3;
     // shanten, effective tiles, similarity
@@ -144,6 +143,12 @@ double Calculator::MajangHandScore(
     // state哪里来？
 
     return result * c;
+}
+
+double SimilarityCalc(const StateContainer& state,
+    const UsefulTableT& aim
+){
+
 }
 
 double ProbabilityCalc(const StateContainer& state, 
