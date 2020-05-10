@@ -20,6 +20,8 @@ StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurn
     for(int& i : inHandCnt) { // 初始化手牌数量
         i = 13;
     }
+    for(int i = 0; i < 4; i++)
+        tileWallLeft[i] = 34;
 }
 
 StateContainer::StateContainer(const StateContainer &other) {
@@ -37,6 +39,7 @@ StateContainer::StateContainer(const StateContainer &other) {
         tilePlayedOf[i] = other.tilePlayedOf[i];
         secretGangCntOf[i] = other.secretGangCntOf[i];
         inHandCnt[i] = other.inHandCnt[i];
+        tileWallLeft[i] = other.tileWallLeft[i];
     }
     for (int i = 0; i < 70; i++) {
         tileLeft[i] = other.tileLeft[i];
@@ -108,6 +111,10 @@ void StateContainer::deleteFromInHand(const Majang &toDelete) {
 
 void StateContainer::nxtPosition() { curPosition = (curPosition + 1) % 4; }
 void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
+
+int StateContainer::getTileWallLeftOf(int idx) const {return tileWallLeft[idx];}
+bool StateContainer::isTileWallEmpty(int idx) const {return tileWallLeft[idx] == 0;}
+void StateContainer::decTileWallLeftOf(int idx, int amount) {tileWallLeft[idx] -= amount;}
 
 
 
