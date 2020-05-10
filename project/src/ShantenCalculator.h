@@ -298,7 +298,7 @@ int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
 Majang MahjongToMajang(mahjong::tile_t h) {
     using namespace mahjong;
     auto tileType = h / 16;
-    auto num = h & 15;
+    auto num = h % 16;
     int ret = 0;
     switch (tileType)
     {
@@ -306,6 +306,7 @@ Majang MahjongToMajang(mahjong::tile_t h) {
     case 2:
     case 3:
         ret = num;
+        break;
     }
     switch (tileType)
     {
@@ -342,8 +343,12 @@ Majang MahjongToMajang(mahjong::tile_t h) {
         case TILE_P:
             ret = JIAN * 10 + 3;
             break;
+        default:
+            assert(false);
         }
         break;
+    default:
+        assert(false);
     }
     return Majang(ret);
 }
@@ -373,6 +378,8 @@ mahjong::tile_t MajangToMahjong(const Majang& h){
             ret = TILE_W; break;
         case 4:
             ret = TILE_N; break;
+        default:
+            assert(false);
         }
         break;
     case JIAN:
@@ -383,6 +390,8 @@ mahjong::tile_t MajangToMahjong(const Majang& h){
             ret = TILE_F; break;
         case 3:
             ret = TILE_P; break;
+        default:
+            assert(false);
         }
         break;
     }

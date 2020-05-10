@@ -48,6 +48,16 @@ public:
         //StateContainer:牌库状态
     );
 
+    // 可能性计算器（被相似度计算器调用）
+    static double ProbabilityCalc(const StateContainer& state,
+        const Majang& aim
+    );
+
+    // 相似度计算器
+    static double SimilarityCalc(const StateContainer& state,
+        const UsefulTableT& aim
+    );
+
     //利用算番器计算番数得分
     static double FanScoreCalculator(
         vector<pair<string, Majang> > pack,
