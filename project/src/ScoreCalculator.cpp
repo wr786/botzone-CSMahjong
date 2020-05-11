@@ -74,7 +74,7 @@ double Calculator::FanScoreCalculator(
     try{
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
         bool isGANG=(StateContainer::lastRequest==36);
-        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
