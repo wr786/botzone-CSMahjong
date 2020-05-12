@@ -12,9 +12,10 @@
 #endif
 
 #ifdef _BOTZONE_ONLINE
-#ifndef _PREPROCESS_ONLY
-#include "MahjongGB/MahjongGB.h"
-#endif
+//#ifndef _PREPROCESS_ONLY
+#include "../utils/MahjongGB/MahjongGB.h"
+#include "../utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/stringify.cpp"
+//#endif
 #else
 #include "../utils/MahjongGB/MahjongGB.h"
 #include "../utils/ChineseOfficialMahjongHelper/Classes/mahjong-algorithm/stringify.cpp"
