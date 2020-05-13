@@ -12,10 +12,10 @@ double Calculator::MajangScoreCalculator(
     StateContainer state
 ) {
     //参数实际应按游戏回合分段，这里先随便写了一个
-    const double k1=0.4;    // 手牌得分所占权重
-    const double k2=0.3;    // 自摸番数得分所占权重
-    const double k3=0.3;    // 点炮番数得分所占权重
-    const double k4=0.5;    // 复合上听数所占权重
+    double k1=0.4;    // 手牌得分所占权重
+    double k2=0.3;    // 自摸番数得分所占权重
+    double k3=0.3;    // 点炮番数得分所占权重
+    double k4=0.0;    // 复合上听数所占权重
     //freopen("D://out.txt","a",stdout);
     double r1 = MajangHandScore(pack, hand);
     double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
@@ -44,7 +44,7 @@ double Calculator::MajangScoreCalculator(
     // 另外，此时概率大概要取对数（？）
     // 所以暂时令
     double k5=0.5;
-    resultShanten = -(param1 - 1 - log(param3) * k5);
+    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
     //cout<<r1<<" "<<r2<<endl;
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
@@ -229,7 +229,7 @@ double Calculator::ProbabilityCalc(const StateContainer& state,
         }
     }
 
-    double pRet = (4 - thisMjCnt) / allSecretCnt;
+    double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
     return pRet;
 }
 
