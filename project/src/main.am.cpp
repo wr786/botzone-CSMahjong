@@ -3230,18 +3230,25 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
+#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
+#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <cstring>
+#include <iostream>
+#endif
+
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -3998,10 +4005,6 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 #endif
 
 /*** End of inlined file: fan_calculator.h ***/
-
-
-#include <cstring>
-#include <iostream>
 
 using namespace std;
 
@@ -10763,10 +10766,10 @@ double Calculator::MajangScoreCalculator(
 	StateContainer state
 ) {
 	//参数实际应按游戏回合分段，这里先随便写了一个
-	const double k1 = 0.4;    // 手牌得分所占权重
-	const double k2 = 0.3;    // 自摸番数得分所占权重
-	const double k3 = 0.3;    // 点炮番数得分所占权重
-	const double k4 = 0.0;    // 复合上听数所占权重
+	const double k1=0.4;    // 手牌得分所占权重
+	const double k2=0.3;    // 自摸番数得分所占权重
+	const double k3=0.3;    // 点炮番数得分所占权重
+	const double k4=0.5;    // 复合上听数所占权重
 	//freopen("D://out.txt","a",stdout);
 	double r1 = MajangHandScore(pack, hand);
 	double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
@@ -10794,10 +10797,9 @@ double Calculator::MajangScoreCalculator(
 	// 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
 	// 另外，此时概率大概要取对数（？）
 	// 所以暂时令
-	double k5 = 1 / 2;
+	double k5=0.5;
 	resultShanten = -(param1 - 1 - log(param3) * k5);
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-
 	//cout<<r1<<" "<<r2<<endl;
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
 	return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
@@ -10811,7 +10813,7 @@ double Calculator::FanScoreCalculator(
 	Majang winTile,
 	StateContainer state
 ){
-	double k4=120.0;    //将Majang类调整为适用于算番器的接口
+	double k6=120.0;    //将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
@@ -10829,7 +10831,7 @@ double Calculator::FanScoreCalculator(
 		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
 		int r=0;
 		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-		return r*k4;
+		return r*k6;
 	}
 	catch(const string &error){
 		return 0;

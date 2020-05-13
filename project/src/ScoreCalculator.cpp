@@ -15,7 +15,7 @@ double Calculator::MajangScoreCalculator(
     const double k1=0.4;    // 手牌得分所占权重
     const double k2=0.3;    // 自摸番数得分所占权重
     const double k3=0.3;    // 点炮番数得分所占权重
-    const double k4=0.0;    // 复合上听数所占权重
+    const double k4=0.5;    // 复合上听数所占权重
     //freopen("D://out.txt","a",stdout);
     double r1 = MajangHandScore(pack, hand);
     double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
@@ -77,7 +77,7 @@ double Calculator::FanScoreCalculator(
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-        return r*k4;
+        return r*k6;
     }
     catch(const string &error){
         return 0;
