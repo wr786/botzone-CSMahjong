@@ -32,7 +32,7 @@ public:
     explicit Majang(const string& strExpr);
 
     Majang& operator = (const Majang& other);
-    bool operator == (const Majang& other);
+    bool operator == (const Majang& other) const;
 
     void resetFromString(const string& strExpr);
 
@@ -108,7 +108,7 @@ Majang& Majang::operator = (const Majang& other) {
     return *this;
 }
 
-bool Majang::operator == (const Majang &other) {
+bool Majang::operator == (const Majang &other) const {
     return innerType == other.innerType;
 }
 
@@ -196,6 +196,7 @@ private:
     int tileLeft[70];
     int totalLeft;
     int inHandCnt[4];
+    int tileWallLeft[4];
 
 public:
     static int quan;
@@ -203,7 +204,7 @@ public:
 
     explicit StateContainer(int curP=0, int curT=0);
     StateContainer(const StateContainer& other);
-# 78 ".\\StateContainer.h"
+# 79 ".\\StateContainer.h"
     [[nodiscard]] vector<Majang>& getInHand();
     [[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);
     [[nodiscard]] vector<Majang>& getChiOf(int idx);
@@ -241,6 +242,10 @@ public:
 
     void nxtPosition();
     void nxtTurn();
+
+    int getTileWallLeftOf(int idx) const;
+    bool isTileWallEmpty(int idx) const;
+    void decTileWallLeftOf(int idx, int amount=1);
 };
 # 15 ".\\main.cpp" 2
 # 1 ".\\StateContainer.cpp" 1
@@ -267,6 +272,8 @@ StateContainer::StateContainer(int curP, int curT) : curPosition(curP), curTurnP
     for(int& i : inHandCnt) {
         i = 13;
     }
+    for(int i = 0; i < 4; i++)
+        tileWallLeft[i] = 34;
 }
 
 StateContainer::StateContainer(const StateContainer &other) {
@@ -284,12 +291,13 @@ StateContainer::StateContainer(const StateContainer &other) {
         tilePlayedOf[i] = other.tilePlayedOf[i];
         secretGangCntOf[i] = other.secretGangCntOf[i];
         inHandCnt[i] = other.inHandCnt[i];
+        tileWallLeft[i] = other.tileWallLeft[i];
     }
     for (int i = 0; i < 70; i++) {
         tileLeft[i] = other.tileLeft[i];
     }
 }
-# 62 ".\\StateContainer.cpp"
+# 65 ".\\StateContainer.cpp"
 vector<Majang> &StateContainer::getInHand() { return inHand; }
 vector<Majang> &StateContainer::getFlowerTilesOf(int idx) { return flowerTilesOf[idx]; }
 vector<Majang> &StateContainer::getChiOf(int idx) { return chiOf[idx]; }
@@ -339,6 +347,10 @@ void StateContainer::deleteFromInHand(const Majang &toDelete) {
 
 void StateContainer::nxtPosition() { curPosition = (curPosition + 1) % 4; }
 void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
+
+int StateContainer::getTileWallLeftOf(int idx) const {return tileWallLeft[idx];}
+bool StateContainer::isTileWallEmpty(int idx) const {return tileWallLeft[idx] == 0;}
+void StateContainer::decTileWallLeftOf(int idx, int amount) {tileWallLeft[idx] -= amount;}
 # 16 ".\\main.cpp" 2
 # 1 ".\\RequestReader.h" 1
 # 17 ".\\RequestReader.h"
@@ -435,6 +447,11 @@ int Reader::readRequest(StateContainer &state) {
                 state.decTileLeft(state.getInHand()[i]);
             }
 
+            for(int i = 0; i < 4; i++) {
+                assert(state.getTileWallLeftOf(i) == 34);
+                state.decTileWallLeftOf(i, 13);
+            }
+
             for (int i = 0; i < 4; i++) {
                 int lim = state.getFlowerTilesOf(i).size();
                 for (int j = 0; j < lim; j++) {
@@ -455,6 +472,7 @@ int Reader::readRequest(StateContainer &state) {
             state.setCurTurnPlayer(state.getCurPosition());
             state.decTileLeft(tmpM);
             ret = 2;
+            state.decTileWallLeftOf(state.getCurPosition());
             break;
         }
         case 3: {
@@ -473,6 +491,7 @@ int Reader::readRequest(StateContainer &state) {
                 ret += 1;
                 state.incInHandCntOf(playerID);
                 state.setLastPlayed("D0");
+                state.decTileWallLeftOf(playerID);
             } else if (op == "PLAY") {
                 Majang tmpPlayed; readIn(tmpPlayed);
                 state.setLastPlayed(tmpPlayed);
@@ -624,9 +643,495 @@ int Reader::readRequest(StateContainer &state) {
 # 16 ".\\ScoreCalculator.h" 2
 # 1 ".\\StateContainer.h" 1
 # 17 ".\\ScoreCalculator.h" 2
-# 27 ".\\ScoreCalculator.h"
+# 1 ".\\ShantenCalculator.h" 1
+
+       
+# 26 ".\\ShantenCalculator.h"
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+    int cnt = 0;
+    for (int i = 0; i < 34; ++i) {
+        TileT t = mahjong::all_tiles[i];
+        if (useful_table[t]) {
+            cnt += 4 - used_table[t];
+        }
+    }
+    return cnt;
+}
+
+void ShantenTest()
+{
+    auto str = "[111m]5m12p1569sSWP";
+
+    using namespace mahjong;
+    hand_tiles_t hand_tiles;
+    tile_t serving_tile;
+    long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+    if (ret != 0) {
+        printf("error at line %d error = %ld\n", 50, ret);
+        return;
+    }
+
+    char buf[20];
+    ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+    for (size_t i = 0; i < ret; i++) {
+        cout << buf[i];
+    }
+    cout << endl;
+
+    auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+        char buf[64];
+        for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+            if (useful_table[t]) {
+                tiles_to_string(&t, 1, buf, sizeof(buf));
+                printf("%s ", buf);
+            }
+        }
+
+        tile_table_t cnt_table;
+        map_hand_tiles(hand_tiles, &cnt_table);
+
+        printf("%d", CountUsefulTiles(cnt_table, useful_table));
+    };
+
+    puts(str);
+    useful_table_t useful_table ;
+    int ret0;
+    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    printf("13 orphans ===> %d shanten\n", ret0);
+    if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    printf("7 pairs ===> %d shanten\n", ret0);
+    if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    printf("honors and knitted tiles ===> %d shanten\n", ret0);
+    if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    printf("knitted straight in basic form ===> %d shanten\n", ret0);
+    if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+    puts("\n");
+
+    ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    printf("basic form ===> %d shanten\n", ret0);
+    if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+    puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+    auto& h = t;
+    auto tileType = TILE_T(h.getTileInt() / 10);
+    string s;
+    switch (tileType) {
+    case WANN:
+    case BING:
+    case TIAO:
+        s.push_back('0' + h.getTileNum());
+    }
+    switch (tileType) {
+    case WANN: s += 'm'; break;
+    case BING: s += 'p'; break;
+    case TIAO: s += 's'; break;
+    case FENG:
+        switch (h.getTileNum()) {
+        case 1:
+            return "E";
+        case 2:
+            return "S";
+        case 3:
+            return "W";
+        case 4:
+            return "N";
+        }
+    case JIAN:
+        switch (h.getTileNum()) {
+        case 1:
+            return "C";
+        case 2:
+            return "F";
+        case 3:
+            return "P";
+        }
+    }
+    return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand
+){
+    int shanten = std::numeric_limits<int>::max();
+
+    using namespace mahjong;
+    hand_tiles_t hand_tiles;
+    tile_t serving_tile;
+
+#pragma region 转换成字符串
+    string s;
+    for (size_t i = 0; i < pack.size(); i++) {
+        auto& m = pack[i].second;
+        auto& t = pack[i].first;
+        auto tileType = TILE_T(m.getTileInt() / 10);
+        s += '[';
+        if (t == "CHI") {
+            s += tileToStr(m.getPrvMajang());
+            s += tileToStr(m);
+            s += tileToStr(m.getNxtMajang());
+        }
+        else if (t == "PENG" || t == "GANG") {
+            s += tileToStr(m);
+            s += tileToStr(m);
+            s += tileToStr(m);
+            if (t == "GANG") {
+                s += tileToStr(m);
+            }
+        }
+        s += ']';
+    }
+    for (size_t i = 0; i < hand.size(); i++) {
+        s += tileToStr(hand[i]);
+    }
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+    size_t len = s.size();
+
+    pack_t packs[4];
+    intptr_t pack_cnt = 0;
+    tile_t standing_tiles[14];
+    intptr_t standing_cnt = 0;
+
+    bool in_brackets = false;
+    tile_t temp_tiles[14];
+    intptr_t temp_cnt = 0;
+    intptr_t max_cnt = 14;
+    uint8_t offer = 0;
+
+    tile_table_t cnt_table = { 0 };
+
+    const char* p = s.c_str();
+    while (char c = *p) {
+        const char* q;
+        switch (c) {
+        case ',': {
+            offer = static_cast<uint8_t>(*++p - '0');
+            q = ++p;
+            break;
+        }
+        case '[': {
+            if (temp_cnt > 0) {
+
+                memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+                standing_cnt += temp_cnt;
+                temp_cnt = 0;
+            }
+
+            q = ++p;
+            in_brackets = true;
+            offer = 0;
+            max_cnt = 4;
+            break;
+        }
+        case ']': {
+
+            intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+            if (ret < 0) {
+                return ret;
+            }
+
+            q = ++p;
+            temp_cnt = 0;
+            in_brackets = false;
+            ++pack_cnt;
+            max_cnt = 14 - standing_cnt - pack_cnt * 3;
+            break;
+        }
+        default: {
+
+            intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+
+            for (intptr_t i = 0; i < temp_cnt; ++i) {
+                ++cnt_table[temp_tiles[i]];
+            }
+            q = p + ret;
+            break;
+        }
+        }
+        p = q;
+    }
+
+    max_cnt = 14 - pack_cnt * 3;
+    if (temp_cnt > 0) {
+
+        memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+        standing_cnt += temp_cnt;
+    }
+
+
+    tile_t last_tile = 0;
+    if (standing_cnt == max_cnt) {
+        memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+        hand_tiles.tile_count = max_cnt - 1;
+        last_tile = standing_tiles[max_cnt - 1];
+    }
+    else {
+        memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+        hand_tiles.tile_count = standing_cnt;
+    }
+
+    memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+    hand_tiles.pack_count = pack_cnt;
+    serving_tile = last_tile;
+#pragma endregion
+
+    useful_table_t useful_table = {false};
+    int ret0;
+    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    shanten = min(shanten, ret0);
+
+    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    shanten = min(shanten, ret0);
+
+    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    shanten = min(shanten, ret0);
+
+    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    shanten = min(shanten, ret0);
+
+    ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+    shanten = min(shanten, ret0);
+
+    return shanten;
+}
+# 301 ".\\ShantenCalculator.h"
+Majang MahjongToMajang(mahjong::tile_t h) {
+    using namespace mahjong;
+    auto tileType = h / 16;
+    auto num = h % 16;
+    int ret = 0;
+    switch (tileType)
+    {
+    case 1:
+    case 2:
+    case 3:
+        ret = num;
+        break;
+    }
+    switch (tileType)
+    {
+    case 1:
+        ret += WANN * 10;
+        break;
+    case 2:
+        ret += TIAO * 10;
+        break;
+    case 3:
+        ret += BING * 10;
+        break;
+    case 4:
+        switch (h)
+        {
+        case TILE_E:
+            ret = FENG * 10 + 1;
+            break;
+        case TILE_S:
+            ret = FENG * 10 + 2;
+            break;
+        case TILE_W:
+            ret = FENG * 10 + 3;
+            break;
+        case TILE_N:
+            ret = FENG * 10 + 4;
+            break;
+        case TILE_C:
+            ret = JIAN * 10 + 1;
+            break;
+        case TILE_F:
+            ret = JIAN * 10 + 2;
+            break;
+        case TILE_P:
+            ret = JIAN * 10 + 3;
+            break;
+        default:
+            assert(false);
+        }
+        break;
+    default:
+        assert(false);
+    }
+    return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+    using namespace mahjong;
+    auto tileType = TILE_T(h.getTileInt() / 10);
+    tile_t ret = 0;
+    switch (tileType) {
+    case WANN:
+    case BING:
+    case TIAO:
+        ret = h.getTileNum();
+    }
+    switch (tileType) {
+    case WANN: ret |= 0x10; break;
+    case BING: ret |= 0x30; break;
+    case TIAO: ret |= 0x20; break;
+
+    case FENG:
+        switch (h.getTileNum()) {
+        case 1:
+            ret = TILE_E; break;
+        case 2:
+            ret = TILE_S; break;
+        case 3:
+            ret = TILE_W; break;
+        case 4:
+            ret = TILE_N; break;
+        default:
+            assert(false);
+        }
+        break;
+    case JIAN:
+        switch (h.getTileNum()) {
+        case 1:
+            ret = TILE_C; break;
+        case 2:
+            ret = TILE_F; break;
+        case 3:
+            ret = TILE_P; break;
+        default:
+            assert(false);
+        }
+        break;
+    }
+    return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+    memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+    int etc = 0;
+    for (auto tile : ut)
+        if (tile)
+            etc++;
+    return etc;
+}
+
+
+
+
+pair<int, int> ShantenCalc(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    mahjong::useful_table_t useful_table = nullptr
+) {
+    using namespace mahjong;
+
+    hand_tiles_t hand_tiles;
+
+
+    pack_t packs[4];
+    intptr_t pack_cnt = 0;
+    tile_t standing_tiles[14];
+    intptr_t standing_cnt = 0;
+
+
+
+    const int offer = 0;
+
+    for (size_t i = 0; i < pack.size(); i++) {
+        auto& m = pack[i].second;
+        auto& t = pack[i].first;
+        auto tileType = TILE_T(m.getTileInt() / 10);
+        auto tt = MajangToMahjong(m);
+        if (t == "CHI") {
+            packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+        }
+        else if (t == "PENG") {
+            packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+        }
+        else if (t == "GANG") {
+            packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+        }
+        ++pack_cnt;
+    }
+
+    for (size_t i = 0; i < hand.size(); i++) {
+# 499 ".\\ShantenCalculator.h"
+        standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+        ++standing_cnt;
+    }
+
+
+
+
+
+    memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+    hand_tiles.tile_count = standing_cnt;
+
+
+    memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+    hand_tiles.pack_count = pack_cnt;
+
+
+    useful_table_t useful_table_ret = { false };
+    useful_table_t temp_table = { false };
+    int ret0;
+    int effectiveTileCount = 0;
+
+    int ret_shanten = std::numeric_limits<int>::max();
+
+    auto Check = [&]() -> void {
+        if (ret0 == std::numeric_limits<int>::max())
+            return;
+        if (ret0 < ret_shanten) {
+
+            ret_shanten = ret0;
+            memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+        }
+        else if (ret_shanten == ret0) {
+
+            std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+                std::begin(temp_table),
+                std::begin(useful_table_ret),
+                [](bool u, bool t) { return u || t; });
+        }
+    };
+
+
+
+    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check();
+
+    effectiveTileCount = CountTable(useful_table_ret);
+    if (useful_table != nullptr)
+        memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+    return { ret_shanten, effectiveTileCount };
+}
+# 18 ".\\ScoreCalculator.h" 2
+# 28 ".\\ScoreCalculator.h"
 using namespace std;
-# 36 ".\\ScoreCalculator.h"
+# 37 ".\\ScoreCalculator.h"
 class Calculator{
 public:
 
@@ -639,6 +1144,16 @@ public:
 
         StateContainer state
 
+    );
+
+
+    static double ProbabilityCalc(const StateContainer& state,
+        const Majang& aim
+    );
+
+
+    static double SimilarityCalc(const StateContainer& state,
+        const UsefulTableT& aim
     );
 
 
@@ -684,17 +1199,32 @@ double Calculator::MajangScoreCalculator(
     vector<Majang> hand,
     int flowerCount,
     StateContainer state
-){
+) {
 
-    double k1=0.4;
-    double k2=0.3;
-    double k3=0.3;
+    const double k1 = 0.4;
+    const double k2 = 0.3;
+    const double k3 = 0.3;
+    const double k4 = 0.0;
 
-    double r1=MajangHandScore(pack,hand);
-    double r2=MajangFanScore(pack,hand,flowerCount,state,0);
+    double r1 = MajangHandScore(pack, hand);
+    double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
+
+    double resultShanten = 0;
+
+    int param1, param2, param3;
+    mahjong::useful_table_t useful_table;
+    auto p = ShantenCalc(pack, hand, useful_table);
+    param1 = p.first;
+    param2 = p.second;
+    param3 = SimilarityCalc(state, useful_table);
+# 46 ".\\ScoreCalculator.cpp"
+    double k5 = 1 / 2;
+    resultShanten = -(param1 - 1 - log(param3) * k5);
 
 
-    return r1*k1+r2*(k2+k3);
+
+
+    return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
 }
 
 
@@ -719,7 +1249,7 @@ double Calculator::FanScoreCalculator(
     try{
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
         bool isGANG=(StateContainer::lastRequest==36);
-        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;
@@ -789,112 +1319,190 @@ double Calculator::MajangFanScore(
 double Calculator::MajangHandScore(
     vector<pair<string, Majang> > pack,
     vector<Majang> hand
-){
-    double c=1;
-    double result=0;
+) {
+    double c = 1;
+    double result = 0;
     int tileAmount[70];
-    memset(tileAmount,0,sizeof(tileAmount));
-    for(unsigned int i=0;i<hand.size();i++){
+    memset(tileAmount, 0, sizeof(tileAmount));
+    for (unsigned int i = 0; i < hand.size(); i++) {
         tileAmount[hand[i].getTileInt()]++;
     }
-    for(unsigned int i=0;i<pack.size();i++){
-        if(pack[i].first=="GANG") result+=16;
-        else if(pack[i].first=="PENG") result+=9;
-        else{
-            result+=10;
+    for (unsigned int i = 0; i < pack.size(); i++) {
+        if (pack[i].first == "GANG") result += 16;
+        else if (pack[i].first == "PENG") result += 9;
+        else {
+            result += 10;
         }
     }
-    result+=HandScoreCalculator(tileAmount);
-    return result*c;
+    result += HandScoreCalculator(tileAmount);
+
+    return result * c;
+}
+
+
+double Calculator::SimilarityCalc(const StateContainer& state,
+    const UsefulTableT& aim
+){
+    using namespace mahjong;
+    vector<Majang> vct;
+    for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+    {
+        if (aim[i])
+        {
+            auto mj = MahjongToMajang(i);
+            vct.push_back(mj);
+        }
+    }
+    double sim = 0;
+    for (size_t i = 0; i < vct.size(); i++)
+    {
+        sim += ProbabilityCalc(state, vct[i]);
+    }
+    return sim;
+}
+
+double Calculator::ProbabilityCalc(const StateContainer& state,
+    const Majang& aim
+){
+    const int playerIdx = state.getCurTurnPlayer();
+
+    int OtherMingTilesCnt = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (i != playerIdx) {
+
+            OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+            OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+            OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+        }
+    }
+    int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+    int thisMjCnt = 0;
+    auto& MyMj = state.getInHand();
+    for (auto& mj : MyMj) {
+
+        if (mj == aim)
+            thisMjCnt++;
+    }
+    for (int i = 0; i < 4; ++i) {
+        if (i != playerIdx) {
+
+            for (auto& mj : state.getPengOf(i)) {
+                if (mj == aim)
+                    thisMjCnt += 3;
+            }
+            for (auto& mj : state.getChiOf(i)) {
+                if (mj == aim
+                    || mj.getPrvMajang() == aim
+                    || mj.getNxtMajang() == aim) {
+                    thisMjCnt++;
+                }
+            }
+            for (auto& mj : state.getGangOf(i)) {
+                if (mj == aim)
+                    thisMjCnt += 4;
+            }
+        }
+    }
+
+    double pRet = (4 - thisMjCnt) / allSecretCnt;
+    return pRet;
+}
+
+double SimilarityCalc(const StateContainer& state,
+    mahjong::useful_table_t useful_table
+){
+
+    return 1.0;
 }
 
 
 
 double Calculator::HandScoreCalculator(
     int tileAmount[70]
-){
-    double valueW=0,valueB=0,valueT=0,valueF=0,valueJ=0;
-    int sumW=0,sumB=0,sumT=0,sumF=0,sumJ=0;
-    double r=0;
-    for(int i=11;i<=19;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-            if(i>=13) singleValue+=tileAmount[i-2]*1;
-            if(i>=12) singleValue+=tileAmount[i-1]*2;
-            if(i<=17) singleValue+=tileAmount[i+2]*1;
-            if(i<=18) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueW+=tileAmount[i]*singleValue;
-            sumW+=tileAmount[i];
+) {
+    double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
+    int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
+    double r = 0;
+    for (int i = 11; i <= 19; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+            if (i >= 13) singleValue += tileAmount[i - 2] * 1;
+            if (i >= 12) singleValue += tileAmount[i - 1] * 2;
+            if (i <= 17) singleValue += tileAmount[i + 2] * 1;
+            if (i <= 18) singleValue += tileAmount[i + 1] * 2;
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueW += tileAmount[i] * singleValue;
+            sumW += tileAmount[i];
         }
     }
-    for(int i=21;i<=29;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-            if(i>=23) singleValue+=tileAmount[i-2]*1;
-            if(i>=22) singleValue+=tileAmount[i-1]*2;
-            if(i<=27) singleValue+=tileAmount[i+2]*1;
-            if(i<=28) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueB+=tileAmount[i]*singleValue;
-            sumB+=tileAmount[i];
+    for (int i = 21; i <= 29; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+            if (i >= 23) singleValue += tileAmount[i - 2] * 1;
+            if (i >= 22) singleValue += tileAmount[i - 1] * 2;
+            if (i <= 27) singleValue += tileAmount[i + 2] * 1;
+            if (i <= 28) singleValue += tileAmount[i + 1] * 2;
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueB += tileAmount[i] * singleValue;
+            sumB += tileAmount[i];
         }
     }
-    for(int i=31;i<=39;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-            if(i>=33) singleValue+=tileAmount[i-2]*1;
-            if(i>=32) singleValue+=tileAmount[i-1]*2;
-            if(i<=37) singleValue+=tileAmount[i+2]*1;
-            if(i<=38) singleValue+=tileAmount[i+1]*2;
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueT+=tileAmount[i]*singleValue;
-            sumT+=tileAmount[i];
-        }
-    }
-
-    for(int i=41;i<=44;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-
-
-
-
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueF+=tileAmount[i]*singleValue;
-            sumF+=tileAmount[i];
-        }
-    }
-    for(int i=51;i<=53;i++){
-        if(tileAmount[i]){
-            double singleValue=0;
-
-
-
-
-            if(tileAmount[i]==2) singleValue+=2;
-            else if(tileAmount[i]==3) singleValue+=3;
-            else if(tileAmount[i]==4) singleValue+=4;
-            valueJ+=tileAmount[i]*singleValue;
-            sumJ+=tileAmount[i];
+    for (int i = 31; i <= 39; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+            if (i >= 33) singleValue += tileAmount[i - 2] * 1;
+            if (i >= 32) singleValue += tileAmount[i - 1] * 2;
+            if (i <= 37) singleValue += tileAmount[i + 2] * 1;
+            if (i <= 38) singleValue += tileAmount[i + 1] * 2;
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueT += tileAmount[i] * singleValue;
+            sumT += tileAmount[i];
         }
     }
 
-    int sum=sumW+sumB+sumT+sumF+sumJ;
-    valueW*=(1+(double)sumW/sum);
-    valueB*=(1+(double)sumB/sum);
-    valueT*=(1+(double)sumT/sum);
-    valueF*=(1+(double)sumF/sum);
-    valueJ*=(1+(double)sumJ/sum);
-    r=valueW+valueB+valueT+valueF+valueJ;
+    for (int i = 41; i <= 44; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+
+
+
+
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueF += tileAmount[i] * singleValue;
+            sumF += tileAmount[i];
+        }
+    }
+    for (int i = 51; i <= 53; i++) {
+        if (tileAmount[i]) {
+            double singleValue = 0;
+
+
+
+
+            if (tileAmount[i] == 2) singleValue += 2;
+            else if (tileAmount[i] == 3) singleValue += 3;
+            else if (tileAmount[i] == 4) singleValue += 4;
+            valueJ += tileAmount[i] * singleValue;
+            sumJ += tileAmount[i];
+        }
+    }
+
+    int sum = sumW + sumB + sumT + sumF + sumJ;
+    valueW *= (1 + (double)sumW / sum);
+    valueB *= (1 + (double)sumB / sum);
+    valueT *= (1 + (double)sumT / sum);
+    valueF *= (1 + (double)sumF / sum);
+    valueJ *= (1 + (double)sumJ / sum);
+    r = valueW + valueB + valueT + valueF + valueJ;
     return r;
 }
 # 20 ".\\main.cpp" 2
@@ -950,16 +1558,18 @@ void Output::Response(int request, StateContainer state){
     for(const auto& item: hand)
         tileAmount[item.getTileInt()]++;
 
+    bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+    bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
 
     if(request==2){
 
         if(judgeHu(pack,hand,hand.back(),state,true)){
             printf("HU");
         }
-        else if(judgeBuGang(state,pack,hand,hand.back())){
+        else if(!myEmpty&&!isLast&&judgeBuGang(state,pack,hand,hand.back())){
             printf("BUGANG %s",hand.back().getTileString().c_str());
         }
-        else if(judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
+        else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
             printf("GANG %s",hand.back().getTileString().c_str());
         }
         else{
@@ -977,11 +1587,11 @@ void Output::Response(int request, StateContainer state){
             printf("HU");
         }
 
-        else if(judgeGang(tileAmount,pack,hand,lastTile,state,3)){
+        else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
             printf("GANG");
         }
 
-        else if(judgePeng(tileAmount,lastTile)){
+        else if(!isLast&&judgePeng(tileAmount,lastTile)){
             Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
             if(MajangPlay.getTileInt()==1){
                 printf("PASS");
@@ -991,7 +1601,7 @@ void Output::Response(int request, StateContainer state){
             }
         }
 
-        else if((state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
+        else if((!isLast&&state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
             Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi);
             if(MajangPlay.getTileInt()==1){
                 printf("PASS");
@@ -1051,7 +1661,8 @@ bool Output::judgeHu(
     try{
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
         bool isGANG=(StateContainer::lastRequest==36);
-        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),0,isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
         int r=0;
 
@@ -1279,14 +1890,16 @@ const Majang Output::getBestCP(
 
 
 
+
 int StateContainer::quan=0;
 int StateContainer::lastRequest=0;
 int main() {
+# 58 ".\\main.cpp"
     int turnID; Reader::readIn(turnID);
     string tmp;
     int lastRequest;
     StateContainer basicState;
-    for(int i=1; i<turnID; i++) {
+    for (int i = 1; i < turnID; i++) {
         lastRequest = Reader::readRequest(basicState);
         getline(cin, tmp);
 
@@ -1295,8 +1908,8 @@ int main() {
 
 
     }
-    StateContainer::lastRequest=lastRequest;
-    int t=Reader::readRequest(basicState);
+    StateContainer::lastRequest = lastRequest;
+    int t = Reader::readRequest(basicState);
 
 
 

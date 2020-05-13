@@ -12,10 +12,10 @@ double Calculator::MajangScoreCalculator(
     StateContainer state
 ) {
     //参数实际应按游戏回合分段，这里先随便写了一个
-    const double k1 = 0.4;    // 手牌得分所占权重
-    const double k2 = 0.3;    // 自摸番数得分所占权重
-    const double k3 = 0.3;    // 点炮番数得分所占权重
-    const double k4 = 0.0;    // 复合上听数所占权重
+    const double k1=0.4;    // 手牌得分所占权重
+    const double k2=0.3;    // 自摸番数得分所占权重
+    const double k3=0.3;    // 点炮番数得分所占权重
+    const double k4=0.0;    // 复合上听数所占权重
     //freopen("D://out.txt","a",stdout);
     double r1 = MajangHandScore(pack, hand);
     double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
@@ -43,10 +43,9 @@ double Calculator::MajangScoreCalculator(
     // 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
     // 另外，此时概率大概要取对数（？）
     // 所以暂时令
-    double k5 = 1 / 2;
+    double k5=0.5;
     resultShanten = -(param1 - 1 - log(param3) * k5);
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-
     //cout<<r1<<" "<<r2<<endl;
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
     return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
@@ -60,7 +59,7 @@ double Calculator::FanScoreCalculator(
     Majang winTile,
     StateContainer state
 ){  
-    double k4=120.0;    //将Majang类调整为适用于算番器的接口    
+    double k6=120.0;    //将Majang类调整为适用于算番器的接口    
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
         p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
