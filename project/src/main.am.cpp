@@ -15259,7 +15259,7 @@ void Output::Response(int request, StateContainer state){
 			}
 		}
 		//chi
-		else if((!isLast&&state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
+		else if(!isLast&&(state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
 			Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi);
 			if(MajangPlay.getTileInt()==1){
 				printf("PASS");
