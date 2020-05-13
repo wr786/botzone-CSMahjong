@@ -55,7 +55,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -125,7 +125,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -210,7 +210,7 @@ Majang& Majang::operator = (const Majang& other) {
 	return *this;
 }
 
-bool Majang::operator == (const Majang &other) {
+bool Majang::operator == (const Majang &other) const {
 	return innerType == other.innerType;
 }
 
@@ -329,7 +329,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -388,6 +388,7 @@ private:
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
 	int totalLeft;                      // 没出现过的牌的总数（初始144）
 	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
@@ -449,6 +450,10 @@ public:
 
 	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
 	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
 };
 
 #endif
@@ -519,7 +524,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -578,6 +583,7 @@ private:
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
 	int totalLeft;                      // 没出现过的牌的总数（初始144）
 	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
@@ -639,6 +645,10 @@ public:
 
 	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
 	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
 };
 
 #endif
@@ -665,6 +675,8 @@ StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurn
 	for(int& i : inHandCnt) { // 初始化手牌数量
 		i = 13;
 	}
+	for(int i = 0; i < 4; i++)
+		tileWallLeft[i] = 34;
 }
 
 StateContainer::StateContainer(const StateContainer &other) {
@@ -682,6 +694,7 @@ StateContainer::StateContainer(const StateContainer &other) {
 		tilePlayedOf[i] = other.tilePlayedOf[i];
 		secretGangCntOf[i] = other.secretGangCntOf[i];
 		inHandCnt[i] = other.inHandCnt[i];
+		tileWallLeft[i] = other.tileWallLeft[i];
 	}
 	for (int i = 0; i < 70; i++) {
 		tileLeft[i] = other.tileLeft[i];
@@ -754,6 +767,10 @@ void StateContainer::deleteFromInHand(const Majang &toDelete) {
 void StateContainer::nxtPosition() { curPosition = (curPosition + 1) % 4; }
 void StateContainer::nxtTurn() { curTurnPlayer = (curTurnPlayer + 1) % 4; }
 
+int StateContainer::getTileWallLeftOf(int idx) const {return tileWallLeft[idx];}
+bool StateContainer::isTileWallEmpty(int idx) const {return tileWallLeft[idx] == 0;}
+void StateContainer::decTileWallLeftOf(int idx, int amount) {tileWallLeft[idx] -= amount;}
+
 /*** End of inlined file: StateContainer.cpp ***/
 
 
@@ -821,7 +838,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -905,7 +922,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -964,6 +981,7 @@ private:
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
 	int totalLeft;                      // 没出现过的牌的总数（初始144）
 	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
@@ -1025,6 +1043,10 @@ public:
 
 	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
 	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
 };
 
 #endif
@@ -1124,7 +1146,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -1208,7 +1230,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -1267,6 +1289,7 @@ private:
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
 	int totalLeft;                      // 没出现过的牌的总数（初始144）
 	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
@@ -1328,6 +1351,10 @@ public:
 
 	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
 	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
 };
 
 #endif
@@ -1422,6 +1449,11 @@ int Reader::readRequest(StateContainer &state) {
 //                readIn(state.getInHand()[i]);
 				state.decTileLeft(state.getInHand()[i]);
 			}
+			// 设置牌墙
+			for(int i = 0; i < 4; i++) {
+				assert(state.getTileWallLeftOf(i) == 34);
+				state.decTileWallLeftOf(i, 13); // 每个人都抽了13张起始手牌
+			}
 			// 读取花牌
 			for (int i = 0; i < 4; i++) {
 				int lim = state.getFlowerTilesOf(i).size();
@@ -1443,6 +1475,7 @@ int Reader::readRequest(StateContainer &state) {
 			state.setCurTurnPlayer(state.getCurPosition());
 			state.decTileLeft(tmpM);
 			ret = 2;
+			state.decTileWallLeftOf(state.getCurPosition());
 			break;
 		}
 		case 3: { // 其他情况
@@ -1461,6 +1494,7 @@ int Reader::readRequest(StateContainer &state) {
 				ret += 1;
 				state.incInHandCntOf(playerID);
 				state.setLastPlayed("D0");  // D0 -> 其他玩家抽牌
+				state.decTileWallLeftOf(playerID);  // 抽牌减牌
 			} else if (op == "PLAY") {
 				Majang tmpPlayed; readIn(tmpPlayed);
 				state.setLastPlayed(tmpPlayed);
@@ -1671,7 +1705,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -1755,7 +1789,7 @@ public:
 	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
 
 	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
+	bool operator == (const Majang& other) const;
 
 	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
@@ -1814,6 +1848,7 @@ private:
 	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
 	int totalLeft;                      // 没出现过的牌的总数（初始144）
 	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
 
 public:
 	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
@@ -1875,15 +1910,1319 @@ public:
 
 	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
 	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
 };
 
 #endif
 /*** End of inlined file: StateContainer.h ***/
 
-// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
 #ifdef _BOTZONE_ONLINE
 #ifndef _PREPROCESS_ONLY
 #include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+
+/*** Start of inlined file: stringify.h ***/
+#ifndef __MAHJONG_ALGORITHM__STRINGIFY_H__
+#define __MAHJONG_ALGORITHM__STRINGIFY_H__
+
+
+/*** Start of inlined file: tile.h ***/
+#ifndef __MAHJONG_ALGORITHM__TILE_H__
+#define __MAHJONG_ALGORITHM__TILE_H__
+
+#include <stddef.h>
+#include <stdint.h>
+
+ // force inline
+#ifndef FORCE_INLINE
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+#define FORCE_INLINE __forceinline
+#elif defined(__GNUC__) && ((__GNUC__ << 8 | __GNUC_MINOR__) >= 0x301)
+#define FORCE_INLINE __inline__ __attribute__((__always_inline__))
+#else
+#define FORCE_INLINE inline
+#endif
+#endif
+
+ // unreachable
+#ifndef UNREACHABLE
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#define UNREACHABLE() __assume(0)
+#elif defined(__clang__) || (defined(__GNUC__) && ((__GNUC__ << 8 | __GNUC_MINOR__) >= 0x405))
+#define UNREACHABLE() __builtin_unreachable()
+#else
+#define UNREACHABLE() assert(0)
+#endif
+#endif
+
+namespace mahjong {
+
+/**
+ * @brief 代码注释中用到的术语简介
+ * - 顺子：数牌中，花色相同序数相连的3张牌。
+ * - 刻子：三张相同的牌。碰出的为明刻，未碰出的为暗刻。俗称坎。杠也算刻子，明杠算明刻，暗杠算暗刻。
+ * - 面子：顺子和刻子的统称。俗称一句话、一坎牌。
+ * - 雀头：基本和牌形式中，单独组合的对子，也叫将、眼。
+ * - 基本和型：4面子1雀头的和牌形式。
+ * - 特殊和型：非4面子1雀头的和牌形式，在国标规则中，有七对、十三幺、全不靠等特殊和型。
+ * - 门清：也叫门前清，指不吃、不碰、不明杠的状态。特殊和型必然是门清状态。暗杠虽然不破门清，但会暴露出手牌不是特殊和型的信息。
+ * - 副露：吃牌、碰牌、杠牌的统称，即利用其他选手打出的牌完成自己手牌面子的行为，一般不包括暗杠，也叫鸣牌，俗称动牌。
+ *     副露有时候也包括暗杠，此时将暗杠称为之暗副露，而吃、碰、明杠称为明副露。
+ * - 立牌：整个手牌除去吃、碰、杠之后的牌。
+ * - 手牌：包括立牌和吃、碰、杠的牌，有时仅指立牌。
+ * - 听牌：只差所需要的一张牌即能和牌的状态。俗称下叫、落叫、叫和（糊）。
+ * - 一上听：指差一张就能听牌的状态，也叫一向听、一入听。以此类推有二上听、三上听、N上听。
+ * - 上听数：达到听牌状态需要牌的张数。
+ * - 有效牌：能使上听数减少的牌，也称进张牌、上张牌。
+ * - 改良牌：能使有效牌增加的牌。通俗来说就是能使进张面变宽的牌。
+ * - 对子：两张相同的牌。雀头一定是对子，但对子不一定是雀头。
+ * - 两面：数牌中，花色相同数字相邻的两张牌，如45m，与两侧的牌都构成顺子。也叫两头。
+ * - 嵌张：数牌中，花色相同数字相隔1的两张牌，如57s，只能与中间的牌构成顺子，中间的这张牌称为嵌张。
+ * - 边张：也是数字相邻的两张牌，但由于处在边界位置，只能与一侧的牌能构成顺子，如12只能与3构成顺子、89只能与7构成顺子，这张3或者7便称为边张。
+ * - 搭子：指差一张牌就能构成1组面子的两张牌。其形态有刻子搭子（即对子）、两面搭子、嵌张搭子、边张搭子。
+ * - 复合搭子：多张牌构成的搭子。常见的有：连嵌张、两面带对子、嵌张带对子、边张带对子等等形态。
+ * - 对倒：听牌时，其他牌都已经构成面子，剩余两对，只需任意一对成刻即可和牌，此时另一对充当雀头，这种听牌形态叫对倒，也叫双碰、对碰、对杵。
+ */
+
+/**
+ * @addtogroup tile
+ * @{
+ */
+
+/**
+ * @brief 花色
+ */
+typedef uint8_t suit_t;
+
+/**
+ * @brief 点数
+ */
+typedef uint8_t rank_t;
+
+#define TILE_SUIT_NONE          0  ///< 无效
+#define TILE_SUIT_CHARACTERS    1  ///< 万子（CHARACTERS）
+#define TILE_SUIT_BAMBOO        2  ///< 条子（BAMBOO）
+#define TILE_SUIT_DOTS          3  ///< 饼子（DOTS）
+#define TILE_SUIT_HONORS        4  ///< 字牌（HONORS）
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+typedef uint8_t tile_t;
+
+/**
+ * @brief 生成一张牌
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] suit 花色
+ * @param [in] rank 点数
+ * @return tile_t 牌
+ */
+static FORCE_INLINE tile_t make_tile(suit_t suit, rank_t rank) {
+	return (((suit & 0xF) << 4) | (rank & 0xF));
+}
+
+/**
+ * @brief 获取牌的花色
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile 牌
+ * @return suit_t 花色
+ */
+static FORCE_INLINE suit_t tile_get_suit(tile_t tile) {
+	return ((tile >> 4) & 0xF);
+}
+
+/**
+ * @brief 判断是否为花牌
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_flower(tile_t tile) {
+	return ((tile >> 4) & 0xF) == 5;
+}
+
+/**
+ * @brief 获取牌的点数
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile 牌
+ * @return rank_t 点数
+ */
+static FORCE_INLINE rank_t tile_get_rank(tile_t tile) {
+	return (tile & 0xF);
+}
+
+/**
+ * @brief 所有牌的值，不包括花牌
+ */
+enum tile_value_t {
+	TILE_1m = 0x11, TILE_2m, TILE_3m, TILE_4m, TILE_5m, TILE_6m, TILE_7m, TILE_8m, TILE_9m,
+	TILE_1s = 0x21, TILE_2s, TILE_3s, TILE_4s, TILE_5s, TILE_6s, TILE_7s, TILE_8s, TILE_9s,
+	TILE_1p = 0x31, TILE_2p, TILE_3p, TILE_4p, TILE_5p, TILE_6p, TILE_7p, TILE_8p, TILE_9p,
+	TILE_E  = 0x41, TILE_S , TILE_W , TILE_N , TILE_C , TILE_F , TILE_P ,
+	TILE_TABLE_SIZE
+};
+
+/**
+ * @brief 所有合法的牌，不包括花牌
+ */
+static const tile_t all_tiles[] = {
+	TILE_1m, TILE_2m, TILE_3m, TILE_4m, TILE_5m, TILE_6m, TILE_7m, TILE_8m, TILE_9m,
+	TILE_1s, TILE_2s, TILE_3s, TILE_4s, TILE_5s, TILE_6s, TILE_7s, TILE_8s, TILE_9s,
+	TILE_1p, TILE_2p, TILE_3p, TILE_4p, TILE_5p, TILE_6p, TILE_7p, TILE_8p, TILE_9p,
+	TILE_E , TILE_S , TILE_W , TILE_N , TILE_C , TILE_F , TILE_P
+};
+
+/**
+ * @brief 牌表类型
+ *
+ * 说明：在判断听牌、计算上听数等算法中，主流的对于牌有两种存储方式：
+ * - 一种是用牌表，各索引表示各种牌拥有的枚数，这种存储方式的优点是在递归计算时削减面子只需要修改表中相应下标的值，缺点是一手牌的总数不方便确定
+ * - 另一种是直接用牌的数组，这种存储方式的优点是很容易确定一手牌的总数，缺点是在递归计算时削减面子不方便，需要进行数组删除元素操作
+ */
+typedef uint16_t tile_table_t[TILE_TABLE_SIZE];
+
+#define PACK_TYPE_NONE 0  ///< 无效
+#define PACK_TYPE_CHOW 1  ///< 顺子
+#define PACK_TYPE_PUNG 2  ///< 刻子
+#define PACK_TYPE_KONG 3  ///< 杠
+#define PACK_TYPE_PAIR 4  ///< 雀头
+
+/**
+ * @brief 牌组
+ *  用于表示一组面子或者雀头
+ *
+ * 内存结构：
+ * - 0-7 8bit tile 牌（对于顺子，则表示中间那张牌，比如234p，那么牌为3p）
+ * - 8-11 4bit type 牌组类型，使用PACK_TYPE_xxx宏
+ * - 12-13 2bit offer 供牌信息，取值范围为0123\n
+ * - 14 1bit promoted 是否为加杠
+ *       0表示暗手（暗顺、暗刻、暗杠），非0表示明手（明顺、明刻、明杠）
+ *
+ *       对于牌组是刻子和杠时，123分别来表示是上家/对家/下家供的\n
+ *       对于牌组为顺子时，由于吃牌只能是上家供，这里用123分别来表示第几张是上家供的
+ */
+typedef uint16_t pack_t;
+
+/**
+ * @brief 生成一个牌组
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] offer 供牌信息
+ * @param [in] type 牌组类型
+ * @param [in] tile 牌（对于顺子，为中间那张牌）
+ */
+static FORCE_INLINE pack_t make_pack(uint8_t offer, uint8_t type, tile_t tile) {
+	return (offer << 12 | (type << 8) | tile);
+}
+
+/**
+ * @brief 牌组是否为明的
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] pack 牌组
+ * @return bool
+ */
+static FORCE_INLINE bool is_pack_melded(pack_t pack) {
+	return !!(pack & 0x3000);
+}
+
+/**
+ * @brief 牌组是否为加杠
+ *  当牌组不是PACK_TYPE_KONG时，结果是无意义的
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] pack 牌组
+ * @return bool
+ */
+static FORCE_INLINE bool is_promoted_kong(pack_t pack) {
+	return !!(pack & 0x4000);
+}
+
+/**
+ * @brief 碰的牌组转换为加杠
+ *  当牌组不是PACK_TYPE_PUNG时，结果是无意义的
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] pack 碰的牌组
+ * @return pack_t 加杠的牌组
+ */
+static FORCE_INLINE pack_t promote_pung_to_kong(pack_t pack) {
+	return pack | 0x4300;
+}
+
+/**
+ * @brief 牌组的供牌信息
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] pack 牌组
+ * @return uint8_t
+ */
+static FORCE_INLINE uint8_t pack_get_offer(pack_t pack) {
+	return ((pack >> 12) & 0x3);
+}
+
+/**
+ * @brief 获取牌组的类型
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] pack 牌组
+ * @return uint8_t 牌组类型
+ */
+static FORCE_INLINE uint8_t pack_get_type(pack_t pack) {
+	return ((pack >> 8) & 0xF);
+}
+
+/**
+ * @brief 获取牌的点数
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] pack 牌组
+ * @return tile_t 牌（对于顺子，为中间那张牌）
+ */
+static FORCE_INLINE tile_t pack_get_tile(pack_t pack) {
+	return (pack & 0xFF);
+}
+
+/**
+ * @brief 手牌结构
+ *  手牌结构一定满足等式：3*副露的牌组数+立牌数=13
+ */
+struct hand_tiles_t {
+	pack_t fixed_packs[5];      ///< 副露的牌组（面子），包括暗杠
+	intptr_t pack_count;        ///< 副露的牌组（面子）数，包括暗杠
+	tile_t standing_tiles[13];  ///< 立牌
+	intptr_t tile_count;        ///< 立牌数
+};
+
+/**
+ * @brief 判断是否为绿一色构成牌
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_green(tile_t tile) {
+	// 最基本的逐个判断，23468s及发财为绿一色构成牌
+	//return (tile == TILE_2s || tile == TILE_3s || tile == TILE_4s || tile == TILE_6s || tile == TILE_8s || tile == TILE_F);
+
+	// 算法原理：
+	// 0x48-0x11=0x37=55刚好在一个64位整型的范围内，
+	// 用uint64_t的每一位表示一张牌的标记，事先得到一个魔数，
+	// 然后每次测试相应位即可
+	return !!(0x0020000000AE0000ULL & (1ULL << (tile - TILE_1m)));
+}
+
+/**
+ * @brief 判断是否为推不倒构成牌
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_reversible(tile_t tile) {
+	// 最基本的逐个判断：245689s、1234589p及白板为推不倒构成牌
+	//return (tile == TILE_2s || tile == TILE_4s || tile == TILE_5s || tile == TILE_6s || tile == TILE_8s || tile == TILE_9s ||
+	//    tile == TILE_1p || tile == TILE_2p || tile == TILE_3p || tile == TILE_4p || tile == TILE_5p || tile == TILE_8p || tile == TILE_9p ||
+	//    tile == TILE_P);
+
+	// 算法原理同绿一色构成牌判断函数
+	return !!(0x0040019F01BA0000ULL & (1ULL << (tile - TILE_1m)));
+}
+
+/**
+ * @brief 判断是否为数牌幺九（老头牌）
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_terminal(tile_t tile) {
+	// 最基本的逐个判断
+	//return (tile == TILE_1m || tile == TILE_9m || tile == TILE_1s || tile == TILE_9s || tile == TILE_1p || tile == TILE_9p);
+
+	// 算法原理：观察数牌幺九的二进制位：
+	// 0x11：0001 0001
+	// 0x19：0001 1001
+	// 0x21：0010 0001
+	// 0x29：0010 1001
+	// 0x31：0011 0001
+	// 0x39：0011 1001
+	// 所有牌的低4bit只会出现在0001到1001之间，跟0111位与，只有0001和1001的结果为1
+	// 所有数牌的高4bit只会出现在0001到0011之间，跟1100位与，必然为0
+	// 于是构造魔数0xC7（1100 0111）跟牌位与，结果为1的，就为数牌幺九
+	// 缺陷：低4bit的操作会对0xB、0xD、0xF产生误判，高4bit的操作会对0x01和0x09产生误判
+	return ((tile & 0xC7) == 1);
+}
+
+/**
+ * @brief 判断是否为风牌
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_winds(tile_t tile) {
+	return (tile > 0x40 && tile < 0x45);
+}
+
+/**
+ * @brief 判断是否为箭牌（三元牌）
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_dragons(tile_t tile) {
+	return (tile > 0x44 && tile < 0x48);
+}
+
+/**
+ * @brief 判断是否为字牌
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_honor(tile_t tile) {
+	return (tile > 0x40 && tile < 0x48);
+}
+
+/**
+ * @brief 判断是否为数牌
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_numbered_suit(tile_t tile) {
+	if (tile < 0x1A) return (tile > 0x10);
+	if (tile < 0x2A) return (tile > 0x20);
+	if (tile < 0x3A) return (tile > 0x30);
+	return false;
+}
+
+/**
+ * @brief 判断是否为数牌（更快）
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @see is_numbered_suit
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_numbered_suit_quick(tile_t tile) {
+	// 算法原理：数牌为0x11-0x19，0x21-0x29，0x31-0x39，跟0xC0位与，结果为0
+	return !(tile & 0xC0);
+}
+
+/**
+ * @brief 判断是否为幺九牌（包括数牌幺九和字牌）
+ * @param [in] tile 牌
+ * @return bool
+ */
+static FORCE_INLINE bool is_terminal_or_honor(tile_t tile) {
+	return is_terminal(tile) || is_honor(tile);
+}
+
+/**
+ * @brief 判断两张牌花色是否相同（更快）
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile0 牌0
+ * @param [in] tile1 牌1
+ * @return bool
+ */
+static FORCE_INLINE bool is_suit_equal_quick(tile_t tile0, tile_t tile1) {
+	// 算法原理：高4bit表示花色
+	return ((tile0 & 0xF0) == (tile1 & 0xF0));
+}
+
+/**
+ * @brief 判断两张牌点数是否相同（更快）
+ *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
+ * @param [in] tile0 牌0
+ * @param [in] tile1 牌1
+ * @return bool
+ */
+static FORCE_INLINE bool is_rank_equal_quick(tile_t tile0, tile_t tile1) {
+	// 算法原理：低4bit表示花色。高4bit设置为C是为了过滤掉字牌
+	return ((tile0 & 0xCF) == (tile1 & 0xCF));
+}
+
+/**
+ * end group
+ * @}
+ */
+
+}
+
+#endif
+
+/*** End of inlined file: tile.h ***/
+
+namespace mahjong {
+
+/**
+ * @brief 字符串格式：
+ * - 数牌：万=m 条=s 饼=p。后缀使用小写字母，一连串同花色的数牌可合并使用用一个后缀，如123m、678s等等。
+ * - 字牌：东南西北=ESWN，中发白=CFP。使用大写字母。亦兼容天凤风格的后缀z，但按中国习惯顺序567z为中发白。
+ * - 吃、碰、杠用英文[]，可选用逗号+数字表示供牌来源。数字的具体规则如下：
+ *    - 吃：表示第几张牌是由上家打出，如[567m,2]表示57万吃6万（第2张）。对于不指定数字的，默认为吃第1张。
+ *    - 碰：表示由哪家打出，1为上家，2为对家，3为下家，如[999s,3]表示碰下家的9条。对于不指定数字的，默认为碰上家。
+ *    - 杠：与碰类似，但对于不指定数字的，则认为是暗杠。例如：[SSSS]表示暗杠南；[8888p,1]表示大明杠上家的8饼。当数字为5、6、7时，表示加杠。例如：[1111s,6]表示碰对家的1条后，又摸到1条加杠。
+ * - 范例
+ *    - [EEEE][CCCC][FFFF][PPPP]NN
+ *    - 1112345678999s9s
+ *    - [WWWW,1][444s]45m678pFF6m
+ *    - [EEEE]288s349pSCFF2p
+ *    - [123p,1][345s,2][999s,3]6m6pEW1m
+ *    - 356m18s1579pWNFF9p
+ */
+
+/**
+ * @addtogroup stringify
+ * @{
+ */
+
+/**
+ * @name error codes
+ * @{
+ *  解析牌的错误码
+ */
+#define PARSE_NO_ERROR 0                                ///< 无错误
+#define PARSE_ERROR_ILLEGAL_CHARACTER -1                ///< 非法字符
+#define PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT -2            ///< 数字后面缺少后缀
+#define PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK -3 ///< 副露包含错误的牌数目
+#define PARSE_ERROR_CANNOT_MAKE_FIXED_PACK -4           ///< 无法正确解析副露
+#define PARSE_ERROR_TOO_MANY_FIXED_PACKS -5             ///< 过多组副露（一副合法手牌最多4副露）
+#define PARSE_ERROR_TOO_MANY_TILES -6                   ///< 过多牌
+#define PARSE_ERROR_TILE_COUNT_GREATER_THAN_4 -7        ///< 某张牌出现超过4枚
+
+ /**
+  * @}
+  */
+
+/**
+ * @brief 解析牌
+ * @param [in] str 字符串
+ * @param [out] tiles 牌
+ * @param [in] max_cnt 牌的最大数量
+ * @retval > 0 实际牌的数量
+ * @retval == 0 失败
+ */
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt);
+
+/**
+ * @brief 字符串转换为手牌结构和上牌
+ * @param [in] str 字符串
+ * @param [out] hand_tiles 手牌结构
+ * @param [out] serving_tile 上的牌
+ * @retval PARSE_NO_ERROR 无错误
+ * @retval PARSE_ERROR_ILLEGAL_CHARACTER 非法字符
+ * @retval PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT 数字后面缺少后缀
+ * @retval PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK 副露包含错误的牌数目
+ * @retval PARSE_ERROR_CANNOT_MAKE_FIXED_PACK 无法正确解析副露
+ * @retval PARSE_ERROR_TOO_MANY_FIXED_PACKS 过多组副露（一副合法手牌最多4副露）
+ * @retval PARSE_ERROR_TOO_MANY_TILES 过多牌
+ * @retval PARSE_ERROR_TILE_COUNT_GREATER_THAN_4 某张牌出现超过4枚
+ */
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile);
+
+/**
+ * @brief 牌转换为字符串
+ * @param [in] tiles 牌
+ * @param [in] tile_cnt 牌的数量
+ * @param [out] str 字符串
+ * @param [in] max_size 字符串最大长度
+ * @return intptr_t 写入的字符串数
+ */
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size);
+
+/**
+ * @brief 牌组转换为字符串
+ * @param [in] packs 牌组
+ * @param [in] pack_cnt 牌组的数量
+ * @param [out] str 字符串
+ * @param [in] max_size 字符串最大长度
+ * @return intptr_t 写入的字符串数
+ */
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size);
+
+/**
+ * @brief 手牌结构转换为字符串
+ * @param [in] hand_tiles 手牌结构
+ * @param [out] str 字符串
+ * @param [in] max_size 字符串最大长度
+ * @return intptr_t 写入的字符串数
+ */
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size);
+
+/**
+ * end group
+ * @}
+ */
+
+}
+
+#endif
+
+/*** End of inlined file: stringify.h ***/
+
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+
+/*** Start of inlined file: shanten.h ***/
+#ifndef __MAHJONG_ALGORITHM__SHANTEN_H__
+#define __MAHJONG_ALGORITHM__SHANTEN_H__
+
+namespace mahjong {
+
+/**
+ * @brief 牌组转换成牌
+ *
+ * @param [in] packs 牌组
+ * @param [in] pack_cnt 牌组的数量
+ * @param [out] tiles 牌
+ * @param [in] tile_cnt 牌的最大数量
+ * @return intptr_t 牌的实际数量
+ */
+intptr_t packs_to_tiles(const pack_t *packs, intptr_t pack_cnt, tile_t *tiles, intptr_t tile_cnt);
+
+/**
+ * @brief 将牌打表
+ *
+ * @param [in] tiles 牌
+ * @param [in] cnt 牌的数量
+ * @param [out] cnt_table 牌的数量表
+ */
+void map_tiles(const tile_t *tiles, intptr_t cnt, tile_table_t *cnt_table);
+
+/**
+ * @brief 将手牌打表
+ *
+ * @param [in] hand_tiles 手牌
+ * @param [out] cnt_table 牌的数量表
+ * @return bool 手牌结构是否正确。即是否符合：副露组数*3+立牌数=13
+ */
+bool map_hand_tiles(const hand_tiles_t *hand_tiles, tile_table_t *cnt_table);
+
+/**
+ * @brief 将表转换成牌
+ *
+ * @param [in] cnt_table 牌的数量表
+ * @param [out] tiles 牌
+ * @param [in] max_cnt 牌的最大数量
+ * @return intptr_t 牌的实际数量
+ */
+intptr_t table_to_tiles(const tile_table_t &cnt_table, tile_t *tiles, intptr_t max_cnt);
+
+/**
+ * @brief 有效牌标记表类型
+ */
+typedef bool useful_table_t[TILE_TABLE_SIZE];
+
+/**
+ * @addtogroup shanten
+ * @{
+ */
+
+/**
+ * @addtogroup basic_form
+ * @{
+ */
+
+/**
+ * @brief 基本和型上听数
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] useful_table 有效牌标记表（可为null）
+ * @return int 上听数
+ */
+int basic_form_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
+
+/**
+ * @brief 基本和型是否听牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] waiting_table 听牌标记表（可为null）
+ * @return bool 是否听牌
+ */
+bool is_basic_form_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
+
+/**
+ * @brief 基本和型是否和牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [in] test_tile 测试的牌
+ * @return bool 是否和牌
+ */
+bool is_basic_form_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
+
+/**
+ * end group
+ * @}
+ */
+
+/**
+ * @addtogroup seven_pairs
+ * @{
+ */
+
+/**
+ * @brief 七对上听数
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] useful_table 有效牌标记表（可为null）
+ * @return int 上听数
+ */
+int seven_pairs_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
+
+/**
+ * @brief 七对是否听牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] waiting_table 听牌标记表（可为null）
+ * @return bool 是否听牌
+ */
+bool is_seven_pairs_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
+
+/**
+ * @brief 七对是否和牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [in] test_tile 测试的牌
+ * @return bool 是否和牌
+ */
+bool is_seven_pairs_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
+
+/**
+ * end group
+ * @}
+ */
+
+/**
+ * @addtogroup thirteen_orphans
+ * @{
+ */
+
+/**
+ * @brief 十三幺上听数
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] useful_table 有效牌标记表（可为null）
+ * @return int 上听数
+ */
+int thirteen_orphans_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
+
+/**
+ * @brief 十三幺是否听牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] waiting_table 听牌标记表（可为null）
+ * @return bool 是否听牌
+ */
+bool is_thirteen_orphans_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
+
+/**
+ * @brief 十三幺是否和牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [in] test_tile 测试的牌
+ * @return bool 是否和牌
+ */
+bool is_thirteen_orphans_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
+
+/**
+ * end group
+ * @}
+ */
+
+/**
+ * @addtogroup knitted_straight
+ * @{
+ */
+
+/**
+ * @brief 组合龙上听数
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] useful_table 有效牌标记表（可为null）
+ * @return int 上听数
+ */
+int knitted_straight_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
+
+/**
+ * @brief 组合龙是否听牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] waiting_table 听牌标记表（可为null）
+ * @return bool 是否听牌
+ */
+bool is_knitted_straight_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
+
+/**
+ * @brief 组合龙是否和牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [in] test_tile 测试的牌
+ * @return bool 是否和牌
+ */
+bool is_knitted_straight_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
+
+/**
+ * end group
+ * @}
+ */
+
+/**
+ * @addtogroup honors_and_knitted_tiles
+ * @{
+ */
+
+/**
+ * @brief 全不靠上听数
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] useful_table 有效牌标记表（可为null）
+ * @return int 上听数
+ */
+int honors_and_knitted_tiles_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
+
+/**
+ * @brief 全不靠是否听牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [out] waiting_table 听牌标记表（可为null）
+ * @return bool 是否听牌
+ */
+bool is_honors_and_knitted_tiles_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
+
+/**
+ * @brief 全不靠是否和牌
+ *
+ * @param [in] standing_tiles 立牌
+ * @param [in] standing_cnt 立牌数
+ * @param [in] test_tile 测试的牌
+ * @return bool 是否和牌
+ */
+bool is_honors_and_knitted_tiles_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
+
+/**
+ * end group
+ * @}
+ */
+
+/**
+ * @brief 是否听牌
+ *
+ * @param [in] hand_tiles 手牌结构
+ * @param [out] useful_table 有效牌标记表（可为null）
+ * @return bool 是否听牌
+ */
+bool is_waiting(const hand_tiles_t &hand_tiles, useful_table_t *useful_table);
+
+/**
+ * end group
+ * @}
+ */
+
+/**
+ * @name form flags
+ * @{
+ *  和型
+ */
+#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+/**
+ * @}
+ */
+
+/**
+ * @brief 枚举打哪张牌的计算结果信息
+ */
+struct enum_result_t {
+	tile_t discard_tile;                    ///< 打这张牌
+	uint8_t form_flag;                      ///< 和牌形式
+	int shanten;                            ///< 上听数
+	useful_table_t useful_table;            ///< 有效牌标记表
+};
+
+/**
+ * @brief 枚举打哪张牌的计算回调函数
+ *
+ * @param [in] context 从enum_discard_tile传过来的context原样传回
+ * @param [in] result 计算结果
+ * @retval true 继续枚举
+ * @retval false 结束枚举
+ */
+typedef bool (*enum_callback_t)(void *context, const enum_result_t *result);
+
+/**
+ * @brief 枚举打哪张牌
+ *
+ * @param [in] hand_tiles 手牌结构
+ * @param [in] serving_tile 上牌（可为0，此时仅计算手牌的信息）
+ * @param [in] form_flag 计算哪些和型
+ * @param [in] context 用户自定义参数，将原样从回调函数传回
+ * @param [in] enum_callback 回调函数
+ */
+void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint8_t form_flag,
+	void *context, enum_callback_t enum_callback);
+
+}
+
+/**
+ * end group
+ * @}
+ */
+
+#endif
+
+/*** End of inlined file: shanten.h ***/
+
 #endif
 #else
 
@@ -6498,3533 +7837,6 @@ vector<pair<int, string> > MahjongFanCalculator(
 /*** End of inlined file: MahjongGB.h ***/
 
 
-#endif
-
-using namespace std;
-
-//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
-//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
-
-//如何使用(仅供参考)：
-//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
-//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
-
-class Calculator{
-public:
-	//返回一副牌的得分(番数得分和手牌得分的加权和)
-	static double MajangScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
-		vector<Majang> hand,
-		//hand:玩家的暗牌
-		int flowerCount,
-		//flowerCount:补花数
-		StateContainer state
-		//StateContainer:牌库状态
-	);
-
-	//利用算番器计算番数得分
-	static double FanScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		Majang winTile,
-		StateContainer state
-	);
-
-	//一副牌的番数得分
-	static double MajangFanScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
-	);
-
-	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
-	static double MajangHandScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
-	);
-
-	static double HandScoreCalculator(
-		int TileAmount[70]
-	);
-};
-
-#endif
-/*** End of inlined file: ScoreCalculator.h ***/
-
-
-/*** Start of inlined file: ScoreCalculator.cpp ***/
-
-/*** Start of inlined file: ScoreCalculator.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef SCORECALCULATOR_H
-#define SCORECALCULATOR_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-#include <cstring>
-#include <vector>
-#include <utility>
-#endif
-
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-/*** Start of inlined file: StateContainer.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef STATECONTAINER_H
-#define STATECONTAINER_H
-
-#ifndef _PREPROCESS_ONLY
-#include <valarray>
-#include <vector>
-#include <algorithm>
-#endif
-
-// 使用Majang类
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-using namespace std;
-
-//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
-
-// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
-// 0. 我们的位置、当前的风圈
-// 1. 我们的起始手牌、四名玩家各人的花牌
-// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
-// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
-// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
-
-// 用于存放当前的局面
-// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
-class StateContainer {
-private:
-	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	int curTurnPlayer;                  // 当前是哪个玩家的回合
-//    valarray<Majang> inHand;           // 用于存储手牌
-//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-////    valarray<Majang> discards;       // 用于存放弃牌堆
-//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	vector<Majang> inHand;           // 用于存储手牌
-	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-//    valarray<Majang> discards;       // 用于存放弃牌堆
-	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
-	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
-	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
-	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
-	int totalLeft;                      // 没出现过的牌的总数（初始144）
-	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
-
-public:
-	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
-	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
-
-	explicit StateContainer(int curP=0, int curT=0);
-	StateContainer(const StateContainer& other);
-
-//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-//
-//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
-
-	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-
-	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
-
-	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
-	void decTileLeft(Majang mj);                                               // 同上
-	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
-	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
-
-	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
-	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
-
-	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
-	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
-	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
-	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
-	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
-	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
-	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
-	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
-	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
-	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
-
-	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
-
-	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
-	void nxtTurn();                                                             // 进入下一回合
-};
-
-#endif
-/*** End of inlined file: StateContainer.h ***/
-
-// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
-#ifdef _BOTZONE_ONLINE
-#ifndef _PREPROCESS_ONLY
-#include "MahjongGB/MahjongGB.h"
-#endif
-#else
-
-#endif
-
-using namespace std;
-
-//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
-//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
-
-//如何使用(仅供参考)：
-//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
-//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
-
-class Calculator{
-public:
-	//返回一副牌的得分(番数得分和手牌得分的加权和)
-	static double MajangScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
-		vector<Majang> hand,
-		//hand:玩家的暗牌
-		int flowerCount,
-		//flowerCount:补花数
-		StateContainer state
-		//StateContainer:牌库状态
-	);
-
-	//利用算番器计算番数得分
-	static double FanScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		Majang winTile,
-		StateContainer state
-	);
-
-	//一副牌的番数得分
-	static double MajangFanScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
-	);
-
-	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
-	static double MajangHandScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
-	);
-
-	static double HandScoreCalculator(
-		int TileAmount[70]
-	);
-};
-
-#endif
-/*** End of inlined file: ScoreCalculator.h ***/
-
-#ifndef _PREPROCESS_ONLY
-#include <iostream>
-#endif
-using namespace std;
-
-//最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
-double Calculator::MajangScoreCalculator(
-	vector<pair<string, Majang> > pack,
-	vector<Majang> hand,
-	int flowerCount,
-	StateContainer state
-){
-	//参数实际应按游戏回合分段，这里先随便写了一个
-	double k1=0.4;    // 手牌得分所占权重
-	double k2=0.3;    // 自摸番数得分所占权重
-	double k3=0.3;    // 点炮番数得分所占权重
-	//freopen("D://out.txt","a",stdout);
-	double r1=MajangHandScore(pack,hand);
-	double r2=MajangFanScore(pack,hand,flowerCount,state,0);
-	//cout<<r1<<" "<<r2<<endl;
-	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
-	return r1*k1+r2*(k2+k3);
-}
-
-//参数c是用来使番数得分与手牌得分的数值相当
-double Calculator::FanScoreCalculator(
-	vector<pair<string, Majang> > pack,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
-	vector<Majang> hand,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
-	int flowerCount,
-	Majang winTile,
-	StateContainer state
-){
-	double k4=120.0;    //将Majang类调整为适用于算番器的接口
-	vector <pair<string,pair<string,int> > > p;
-	for(unsigned int i=0;i<pack.size();++i){
-		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
-	}
-	vector <string> h;
-	for(unsigned int i=0;i<hand.size();++i){
-		h.push_back(hand[i].getTileString());
-	}
-	//算番器啥时候初始化呢？
-	MahjongInit();
-	try{
-		bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
-		bool isGANG=(StateContainer::lastRequest==36);
-		bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
-		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
-		int r=0;
-		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-		return r*k4;
-	}
-	catch(const string &error){
-		return 0;
-	}
-}
-
-double Calculator::MajangFanScore(
-	vector<pair<string, Majang> > pack,
-	vector<Majang> hand,
-	int flowerCount,
-	StateContainer state,
-	int depth
-){
-	double r=0;
-	for(int i=11;i<=19;i++){
-		if(state.getTileLeft(i)){
-			StateContainer newstate(state);
-			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
-		}
-	}
-	for(int i=21;i<=29;i++){
-		if(state.getTileLeft(i)){
-			StateContainer newstate(state);
-			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
-		}
-	}
-	for(int i=31;i<=39;i++){
-		if(state.getTileLeft(i)){
-			StateContainer newstate(state);
-			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
-		}
-	}
-	for(int i=41;i<=44;i++){
-		if(state.getTileLeft(i)){
-			StateContainer newstate(state);
-			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
-		}
-	}
-	for(int i=51;i<=53;i++){
-		if(state.getTileLeft(i)){
-			StateContainer newstate(state);
-			newstate.decTileLeft(i);
-			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
-		}
-	}
-	if(depth>=1) return r;
-	for(int i=61;i<=68;i++){
-	  if(state.getTileLeft(i)){
-		   StateContainer newstate(state);
-		   newstate.decTileLeft(i);
-		   r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
-	   }
-	}
-	return r;
-}
-
-//这里采用了将手牌hand和明牌pack合并起来计算的方式,若有必要,可以分开计算并赋上权值
-//参数c是用来使番数得分与手牌得分的数值相当
-double Calculator::MajangHandScore(
-	vector<pair<string, Majang> > pack,
-	vector<Majang> hand
-) {
-	double c = 1;
-	double result = 0;
-	int tileAmount[70];
-	memset(tileAmount, 0, sizeof(tileAmount));
-	for (unsigned int i = 0; i < hand.size(); i++) {
-		tileAmount[hand[i].getTileInt()]++;
-	}
-	for (unsigned int i = 0; i < pack.size(); i++) {
-		if (pack[i].first == "GANG") result += 16;
-		else if (pack[i].first == "PENG") result += 9;
-		else {
-			result += 10;
-		}
-	}
-	result += HandScoreCalculator(tileAmount);
-
-	// int stResult = ComplicatedShantenCalc(pack, hand);
-	// 目标：可能使用shanten、达到小1shanten的可能麻将数、相似度、分数4个参量
-
-	return result * c;
-}
-
-//得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
-//未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
-double Calculator::HandScoreCalculator(
-	int tileAmount[70]
-) {
-	double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
-	int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
-	double r = 0;
-	for (int i = 11; i <= 19; i++) {
-		if (tileAmount[i]) {
-			double singleValue = 0;
-			if (i >= 13) singleValue += tileAmount[i - 2] * 1;
-			if (i >= 12) singleValue += tileAmount[i - 1] * 2;
-			if (i <= 17) singleValue += tileAmount[i + 2] * 1;
-			if (i <= 18) singleValue += tileAmount[i + 1] * 2;
-			if (tileAmount[i] == 2) singleValue += 2;
-			else if (tileAmount[i] == 3) singleValue += 3;
-			else if (tileAmount[i] == 4) singleValue += 4;
-			valueW += tileAmount[i] * singleValue;
-			sumW += tileAmount[i];
-		}
-	}
-	for (int i = 21; i <= 29; i++) {
-		if (tileAmount[i]) {
-			double singleValue = 0;
-			if (i >= 23) singleValue += tileAmount[i - 2] * 1;
-			if (i >= 22) singleValue += tileAmount[i - 1] * 2;
-			if (i <= 27) singleValue += tileAmount[i + 2] * 1;
-			if (i <= 28) singleValue += tileAmount[i + 1] * 2;
-			if (tileAmount[i] == 2) singleValue += 2;
-			else if (tileAmount[i] == 3) singleValue += 3;
-			else if (tileAmount[i] == 4) singleValue += 4;
-			valueB += tileAmount[i] * singleValue;
-			sumB += tileAmount[i];
-		}
-	}
-	for (int i = 31; i <= 39; i++) {
-		if (tileAmount[i]) {
-			double singleValue = 0;
-			if (i >= 33) singleValue += tileAmount[i - 2] * 1;
-			if (i >= 32) singleValue += tileAmount[i - 1] * 2;
-			if (i <= 37) singleValue += tileAmount[i + 2] * 1;
-			if (i <= 38) singleValue += tileAmount[i + 1] * 2;
-			if (tileAmount[i] == 2) singleValue += 2;
-			else if (tileAmount[i] == 3) singleValue += 3;
-			else if (tileAmount[i] == 4) singleValue += 4;
-			valueT += tileAmount[i] * singleValue;
-			sumT += tileAmount[i];
-		}
-	}
-	//箭牌和风牌可能要有特殊的地位*
-	for (int i = 41; i <= 44; i++) {
-		if (tileAmount[i]) {
-			double singleValue = 0;
-			// if(i>=43) singleValue+=tileAmount[i-2]*1;
-			// if(i>=42) singleValue+=tileAmount[i-1]*2;
-			// if(i<=42) singleValue+=tileAmount[i+2]*1;
-			// if(i<=43) singleValue+=tileAmount[i+1]*2;
-			if (tileAmount[i] == 2) singleValue += 2;
-			else if (tileAmount[i] == 3) singleValue += 3;
-			else if (tileAmount[i] == 4) singleValue += 4;
-			valueF += tileAmount[i] * singleValue;
-			sumF += tileAmount[i];
-		}
-	}
-	for (int i = 51; i <= 53; i++) {
-		if (tileAmount[i]) {
-			double singleValue = 0;
-			// if(i>=53) singleValue+=tileAmount[i-2]*1;
-			// if(i>=52) singleValue+=tileAmount[i-1]*2;
-			// if(i<=51) singleValue+=tileAmount[i+2]*1;
-			// if(i<=52) singleValue+=tileAmount[i+1]*2;
-			if (tileAmount[i] == 2) singleValue += 2;
-			else if (tileAmount[i] == 3) singleValue += 3;
-			else if (tileAmount[i] == 4) singleValue += 4;
-			valueJ += tileAmount[i] * singleValue;
-			sumJ += tileAmount[i];
-		}
-	}
-	//手牌张数加成
-	int sum = sumW + sumB + sumT + sumF + sumJ;
-	valueW *= (1 + (double)sumW / sum);
-	valueB *= (1 + (double)sumB / sum);
-	valueT *= (1 + (double)sumT / sum);
-	valueF *= (1 + (double)sumF / sum);
-	valueJ *= (1 + (double)sumJ / sum);
-	r = valueW + valueB + valueT + valueF + valueJ;
-	return r;
-}
-
-/*** End of inlined file: ScoreCalculator.cpp ***/
-
-
-/*** Start of inlined file: ResponseOutput.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef RESPONSEOUTPUT_H
-#define RESPONSEOUTPUT_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-#include <cstring>
-#include <vector>
-#endif
-
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-/*** Start of inlined file: StateContainer.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef STATECONTAINER_H
-#define STATECONTAINER_H
-
-#ifndef _PREPROCESS_ONLY
-#include <valarray>
-#include <vector>
-#include <algorithm>
-#endif
-
-// 使用Majang类
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-using namespace std;
-
-//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
-
-// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
-// 0. 我们的位置、当前的风圈
-// 1. 我们的起始手牌、四名玩家各人的花牌
-// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
-// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
-// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
-
-// 用于存放当前的局面
-// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
-class StateContainer {
-private:
-	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	int curTurnPlayer;                  // 当前是哪个玩家的回合
-//    valarray<Majang> inHand;           // 用于存储手牌
-//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-////    valarray<Majang> discards;       // 用于存放弃牌堆
-//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	vector<Majang> inHand;           // 用于存储手牌
-	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-//    valarray<Majang> discards;       // 用于存放弃牌堆
-	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
-	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
-	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
-	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
-	int totalLeft;                      // 没出现过的牌的总数（初始144）
-	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
-
-public:
-	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
-	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
-
-	explicit StateContainer(int curP=0, int curT=0);
-	StateContainer(const StateContainer& other);
-
-//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-//
-//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
-
-	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-
-	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
-
-	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
-	void decTileLeft(Majang mj);                                               // 同上
-	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
-	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
-
-	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
-	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
-
-	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
-	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
-	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
-	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
-	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
-	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
-	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
-	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
-	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
-	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
-
-	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
-
-	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
-	void nxtTurn();                                                             // 进入下一回合
-};
-
-#endif
-/*** End of inlined file: StateContainer.h ***/
-
-
-/*** Start of inlined file: ScoreCalculator.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef SCORECALCULATOR_H
-#define SCORECALCULATOR_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-#include <cstring>
-#include <vector>
-#include <utility>
-#endif
-
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-/*** Start of inlined file: StateContainer.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef STATECONTAINER_H
-#define STATECONTAINER_H
-
-#ifndef _PREPROCESS_ONLY
-#include <valarray>
-#include <vector>
-#include <algorithm>
-#endif
-
-// 使用Majang类
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-using namespace std;
-
-//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
-
-// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
-// 0. 我们的位置、当前的风圈
-// 1. 我们的起始手牌、四名玩家各人的花牌
-// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
-// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
-// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
-
-// 用于存放当前的局面
-// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
-class StateContainer {
-private:
-	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	int curTurnPlayer;                  // 当前是哪个玩家的回合
-//    valarray<Majang> inHand;           // 用于存储手牌
-//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-////    valarray<Majang> discards;       // 用于存放弃牌堆
-//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	vector<Majang> inHand;           // 用于存储手牌
-	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-//    valarray<Majang> discards;       // 用于存放弃牌堆
-	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
-	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
-	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
-	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
-	int totalLeft;                      // 没出现过的牌的总数（初始144）
-	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
-
-public:
-	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
-	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
-
-	explicit StateContainer(int curP=0, int curT=0);
-	StateContainer(const StateContainer& other);
-
-//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-//
-//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
-
-	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-
-	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
-
-	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
-	void decTileLeft(Majang mj);                                               // 同上
-	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
-	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
-
-	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
-	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
-
-	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
-	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
-	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
-	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
-	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
-	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
-	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
-	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
-	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
-	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
-
-	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
-
-	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
-	void nxtTurn();                                                             // 进入下一回合
-};
-
-#endif
-/*** End of inlined file: StateContainer.h ***/
-
-// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
-#ifdef _BOTZONE_ONLINE
-#ifndef _PREPROCESS_ONLY
-#include "MahjongGB/MahjongGB.h"
-#endif
-#else
-
-#endif
-
-using namespace std;
-
-//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
-//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
-
-//如何使用(仅供参考)：
-//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
-//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
-
-class Calculator{
-public:
-	//返回一副牌的得分(番数得分和手牌得分的加权和)
-	static double MajangScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
-		vector<Majang> hand,
-		//hand:玩家的暗牌
-		int flowerCount,
-		//flowerCount:补花数
-		StateContainer state
-		//StateContainer:牌库状态
-	);
-
-	//利用算番器计算番数得分
-	static double FanScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		Majang winTile,
-		StateContainer state
-	);
-
-	//一副牌的番数得分
-	static double MajangFanScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
-	);
-
-	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
-	static double MajangHandScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
-	);
-
-	static double HandScoreCalculator(
-		int TileAmount[70]
-	);
-};
-
-#endif
-/*** End of inlined file: ScoreCalculator.h ***/
-
-using namespace std;
-
-class Output{
-public:
-	static void Response(int request,StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,StateContainer state,bool isZIMO);   //判断是否胡了
-	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
-	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
-	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
-	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
-	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
-	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
-};
-
-#endif
-/*** End of inlined file: ResponseOutput.h ***/
-
-
-/*** Start of inlined file: ResponseOutput.cpp ***/
-
-/*** Start of inlined file: ResponseOutput.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef RESPONSEOUTPUT_H
-#define RESPONSEOUTPUT_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-#include <cstring>
-#include <vector>
-#endif
-
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-/*** Start of inlined file: StateContainer.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef STATECONTAINER_H
-#define STATECONTAINER_H
-
-#ifndef _PREPROCESS_ONLY
-#include <valarray>
-#include <vector>
-#include <algorithm>
-#endif
-
-// 使用Majang类
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-using namespace std;
-
-//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
-
-// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
-// 0. 我们的位置、当前的风圈
-// 1. 我们的起始手牌、四名玩家各人的花牌
-// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
-// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
-// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
-
-// 用于存放当前的局面
-// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
-class StateContainer {
-private:
-	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	int curTurnPlayer;                  // 当前是哪个玩家的回合
-//    valarray<Majang> inHand;           // 用于存储手牌
-//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-////    valarray<Majang> discards;       // 用于存放弃牌堆
-//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	vector<Majang> inHand;           // 用于存储手牌
-	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-//    valarray<Majang> discards;       // 用于存放弃牌堆
-	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
-	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
-	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
-	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
-	int totalLeft;                      // 没出现过的牌的总数（初始144）
-	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
-
-public:
-	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
-	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
-
-	explicit StateContainer(int curP=0, int curT=0);
-	StateContainer(const StateContainer& other);
-
-//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-//
-//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
-
-	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-
-	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
-
-	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
-	void decTileLeft(Majang mj);                                               // 同上
-	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
-	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
-
-	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
-	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
-
-	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
-	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
-	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
-	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
-	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
-	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
-	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
-	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
-	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
-	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
-
-	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
-
-	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
-	void nxtTurn();                                                             // 进入下一回合
-};
-
-#endif
-/*** End of inlined file: StateContainer.h ***/
-
-
-/*** Start of inlined file: ScoreCalculator.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef SCORECALCULATOR_H
-#define SCORECALCULATOR_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-#include <cstring>
-#include <vector>
-#include <utility>
-#endif
-
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-/*** Start of inlined file: StateContainer.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef STATECONTAINER_H
-#define STATECONTAINER_H
-
-#ifndef _PREPROCESS_ONLY
-#include <valarray>
-#include <vector>
-#include <algorithm>
-#endif
-
-// 使用Majang类
-
-/*** Start of inlined file: Majang.h ***/
-#ifndef _BOTZONE_ONLINE
-#pragma once
-#endif
-
-#ifndef MAJANG_H
-#define MAJANG_H
-
-#ifndef _PREPROCESS_ONLY
-#include <string>
-//#include <string_view>
-#endif
-
-using namespace std;
-
-// 为了节省内存，用一个int来存麻将的信息
-// 由botzone所给的表示法：
-// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
-// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
-// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
-// 而以十位来存牌的种类，其中:（可直接看下面的enum
-// 1 => W, 2 => B, 3 => T
-// 4 => F, 5 => J, 6 => H
-typedef int TILE;
-typedef enum TILETYPE {
-	NILL = 0,    // 无，一般出现这个就是没初始化过
-	WANN,        // 万 1
-	BING,        // 筒 2
-	TIAO,        // 条 3
-	FENG,        // 风 4
-	JIAN,        // 箭 5
-	HANA,        // 花 6
-	DRAW,        // 抽牌，虚牌
-} TILE_T;
-
-class Majang {
-private:
-	TILE innerType;                                                         // 储存麻将对应的类型
-public:
-	Majang(): innerType(0) {}                                              // 未初始化
-	Majang(const Majang& other);                                          // 复制构造函数
-	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
-	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
-	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
-
-	Majang& operator = (const Majang& other);
-	bool operator == (const Majang& other);
-
-	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
-
-	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
-	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
-	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
-	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
-	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
-	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
-	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
-	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
-	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
-
-	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
-	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
-};
-
-#endif
-/*** End of inlined file: Majang.h ***/
-
-
-using namespace std;
-
-//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
-
-// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
-// 0. 我们的位置、当前的风圈
-// 1. 我们的起始手牌、四名玩家各人的花牌
-// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
-// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
-// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
-
-// 用于存放当前的局面
-// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
-class StateContainer {
-private:
-	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
-	int curTurnPlayer;                  // 当前是哪个玩家的回合
-//    valarray<Majang> inHand;           // 用于存储手牌
-//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-////    valarray<Majang> discards;       // 用于存放弃牌堆
-//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	vector<Majang> inHand;           // 用于存储手牌
-	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
-	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
-	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
-	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
-//    valarray<Majang> discards;       // 用于存放弃牌堆
-	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
-	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
-	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
-	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
-	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
-	int totalLeft;                      // 没出现过的牌的总数（初始144）
-	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
-
-public:
-	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
-	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
-
-	explicit StateContainer(int curP=0, int curT=0);
-	StateContainer(const StateContainer& other);
-
-//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
-//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
-//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-//
-//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
-//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
-////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
-//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
-
-	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
-	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
-	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
-	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
-	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
-	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
-
-	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
-	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
-	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
-
-	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
-	void decTileLeft(Majang mj);                                               // 同上
-	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
-	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
-
-	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
-	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
-
-	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
-	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
-	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
-	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
-	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
-	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
-	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
-	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
-	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
-	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
-
-	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
-
-	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
-	void nxtTurn();                                                             // 进入下一回合
-};
-
-#endif
-/*** End of inlined file: StateContainer.h ***/
-
-// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
-#ifdef _BOTZONE_ONLINE
-#ifndef _PREPROCESS_ONLY
-#include "MahjongGB/MahjongGB.h"
-#endif
-#else
-
-#endif
-
-using namespace std;
-
-//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
-//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
-
-//如何使用(仅供参考)：
-//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
-//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
-
-class Calculator{
-public:
-	//返回一副牌的得分(番数得分和手牌得分的加权和)
-	static double MajangScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
-		vector<Majang> hand,
-		//hand:玩家的暗牌
-		int flowerCount,
-		//flowerCount:补花数
-		StateContainer state
-		//StateContainer:牌库状态
-	);
-
-	//利用算番器计算番数得分
-	static double FanScoreCalculator(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		Majang winTile,
-		StateContainer state
-	);
-
-	//一副牌的番数得分
-	static double MajangFanScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand,
-		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
-	);
-
-	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
-	static double MajangHandScore(
-		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
-	);
-
-	static double HandScoreCalculator(
-		int TileAmount[70]
-	);
-};
-
-#endif
-/*** End of inlined file: ScoreCalculator.h ***/
-
-using namespace std;
-
-class Output{
-public:
-	static void Response(int request,StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
-	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,StateContainer state,bool isZIMO);   //判断是否胡了
-	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
-	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
-	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
-	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
-	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
-	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
-};
-
-#endif
-/*** End of inlined file: ResponseOutput.h ***/
-
-#ifndef _PREPROCESS_ONLY
-#include <iostream>
-#endif
-
-using namespace std;
-
-void Output::Response(int request, StateContainer state){
-
-	//接口不同,把valarray转化vector(优化后去掉此步骤)
-	vector<Majang> hand;
-	for(size_t i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
-	vector<pair<string,Majang> > pack;
-	for(size_t i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
-	for(size_t i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
-	for(size_t i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
-
-	//注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
-	int tileAmount[70];
-	memset(tileAmount,0,sizeof(tileAmount));
-	//! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
-//    for(size_t i=0;i<hand.size();i++){
-	for(const auto& item: hand)
-		tileAmount[item.getTileInt()]++;
-
-	//如果是抽牌
-	if(request==2){
-		//此时手牌中最后一个元素即为抽到的牌
-		if(judgeHu(pack,hand,hand.back(),state,true)){
-			printf("HU");
-		}
-		else if(judgeBuGang(state,pack,hand,hand.back())){
-			printf("BUGANG %s",hand.back().getTileString().c_str());
-		}
-		else if(judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
-			printf("GANG %s",hand.back().getTileString().c_str());
-		}
-		else{
-			Majang Tileplay=getBestPlay(state,pack,hand).second;
-			printf("PLAY %s",Tileplay.getTileString().c_str());
-		}
-	}
-
-	//如果有别人打出的牌
-	else if((request==32||request==33||request==34)&&state.getCurTurnPlayer() != state.getCurPosition()){
-		Majang lastTile=state.getLastPlayed();//被打出的牌
-		int chi=judgeChi(tileAmount,lastTile);
-		//HU
-		if(judgeHu(pack,hand,lastTile,state,false)){
-			printf("HU");
-		}
-		//GANG
-		else if(judgeGang(tileAmount,pack,hand,lastTile,state,3)){
-			printf("GANG");
-		}
-		//PENG
-		else if(judgePeng(tileAmount,lastTile)){
-			Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
-			if(MajangPlay.getTileInt()==1){
-				printf("PASS");
-			}
-			else{
-				printf("PENG %s",MajangPlay.getTileString().c_str());
-			}
-		}
-		//chi
-		else if((state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
-			Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi);
-			if(MajangPlay.getTileInt()==1){
-				printf("PASS");
-			}
-			else{
-				if(chi==1) printf("CHI %s %s",lastTile.getNxtMajang().getTileString().c_str(),MajangPlay.getTileString().c_str());
-				else if(chi==2) printf("CHI %s %s",lastTile.getTileString().c_str(),MajangPlay.getTileString().c_str());
-				else printf("CHI %s %s",lastTile.getPrvMajang().getTileString().c_str(),MajangPlay.getTileString().c_str());
-			}
-		}
-		else{
-			printf("PASS");
-		}
-	}
-
-	//抢杠和
-	else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),state,false)){
-		printf("HU");
-	}
-
-	//其余情况直接输出"pass"即可
-	else{
-		printf("PASS");
-	}
-}
-
-bool Output::judgeHu(
-	vector<pair<string,Majang> > pack,
-	vector<Majang> hand,
-	const Majang& winTile,
-	StateContainer state,
-	bool isZIMO
-){
-	//cout << "[DEBUG] judgingHu\n";
-	//再次转换接口(可优化)
-	vector <pair<string,pair<string,int> > > p;
-	for(unsigned int i=0;i<pack.size();++i){
-		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
-	}
-	//cout << "[DEBUG] p Generate Successed.\n";
-	vector <string> h;
-	//如果是摸牌,要把手牌中已经加入的摸牌去掉
-	if(isZIMO){
-		for(unsigned int i=0;i<hand.size()-1;++i){
-			h.push_back(hand[i].getTileString());
-		}
-	}
-	else{
-		for(unsigned int i=0;i<hand.size();++i){
-			h.push_back(hand[i].getTileString());
-		}
-	}
-	//cout << "[DEBUG] h Generate Successed.\n";
-	//算番器啥时候初始化呢？
-	MahjongInit();
-	//cout << "[DEBUG] Mahjong Init Successed.\n";
-	try{
-		bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
-		bool isGANG=(StateContainer::lastRequest==36);
-		bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
-		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),0,isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
-		int r=0;
-		//cout << "[DEBUG] judgeHu Successed!\n";
-		for(unsigned int i=0;i<re.size();i++) {
-			r+=re[i].first;
-			// cout << "[DEBUG] " << re[i].second << " | " << re[i].first << endl;
-		}
-		return r >= 8;  // 这里简化了一下
-	}catch(const string &error){
-		return false;
-	}
-}
-
-int Output::judgeChi(
-	int TileAmount[70],
-	const Majang& newTile
-){
-	if(newTile.getTileInt()/10<=3){
-		if(newTile.getTileNum()<=7&&TileAmount[newTile.getTileInt()+1]&&TileAmount[newTile.getTileInt()+2]) return 1;
-		else if(newTile.getTileNum()>=2&&newTile.getTileNum()<=8&&TileAmount[newTile.getTileInt()-1]&&TileAmount[newTile.getTileInt()+1]) return 2;
-		else if(newTile.getTileNum()>=3&&TileAmount[newTile.getTileInt()-1]&&TileAmount[newTile.getTileInt()-2]) return 3;
-		else return 0;
-	}
-	//风牌、箭牌不能吃，吗？
-	else
-		return 0;
-}
-
-bool Output::judgePeng(
-	int tileAmout[70],
-	const Majang& newTile
-){
-	if(tileAmout[newTile.getTileInt()]==2) return true;
-	else return false;
-}
-
-bool Output::judgeGang(
-	int tileAmout[70],
-	vector<pair<string,Majang> > pack,
-	vector<Majang> hand,
-	const Majang& newTile,
-	StateContainer state,
-	int status
-){
-	//cout << "[DEBUG] judgingGang\n";    // 没位置加判断是否成功
-	if(status==3){
-		if(tileAmout[newTile.getTileInt()]==3){
-			//先得到不杠时的评估值
-			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-			//杠后修改pack,hand;
-			for(unsigned int i=0;i<hand.size();i++){
-				if(hand[i].getTileInt()==newTile.getTileInt()){
-					hand.erase(hand.begin()+i);
-					i--;
-			}
-		}
-			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-			if(maxResult2-maxResult1>=1e-5) return true;
-			else return false;
-		}
-		else return false;
-	}
-	else if(status==2){
-		if(tileAmout[newTile.getTileInt()]==4){
-			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
-			double maxResult1=getBestPlay(state,pack,hand).first;
-			//杠后修改pack,hand;
-			for(unsigned int i=0;i<hand.size();i++){
-				if(hand[i].getTileInt()==newTile.getTileInt()){
-					hand.erase(hand.begin()+i);
-					i--;
-			}
-			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-			if(maxResult2-maxResult1>=1e-5) return true;
-			else return false;
-			}
-		}
-		else return false;
-	}
-	return false;
-}
-
-bool Output::judgeBuGang(
-	StateContainer state,
-	vector<pair<string,Majang> > pack,
-	vector<Majang> hand,
-	const Majang& newTile
-){
-	//cout << " judgingBuGang\n";
-	for(unsigned int i=0;i<pack.size();i++){
-		if(pack[i].first=="PENG"&&pack[i].second.getTileInt()==newTile.getTileInt()){
-			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
-			double maxResult1=getBestPlay(state,pack,hand).first;
-			//如果杠,先把手牌中的这张牌去掉,再在pack中去掉peng,增加gang
-			for(unsigned int k=0;k<hand.size();k++){
-				if(hand[k].getTileInt()==newTile.getTileInt()){
-					hand.erase(hand.begin()+k);
-					break;
-				}
-			}
-			pack.erase(pack.begin()+i);
-			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-			//cout << "[DEBUG] judgeBuGang Successed!\n";
-			if(maxResult2-maxResult1>=1e-5) return true;
-			else return false;
-		}
-	}
-	return false;
-}
-
-const pair<double,Majang> Output::getBestPlay(
-	StateContainer state,
-	vector<pair<string,Majang> > pack,
-	vector<Majang> hand
-){
-	int bestChoice=0;
-	double maxResult=-1e5;
-	for(unsigned int i=0;i<hand.size();i++){
-		vector<Majang> newHand(hand);
-		newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-		double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-		if(ans>maxResult){
-			maxResult=ans;
-			bestChoice=i;
-		}
-	}
-	return make_pair(maxResult,hand[bestChoice]);
-}
-
-const Majang Output::getBestCP(
-	StateContainer state,
-	vector<pair<string,Majang> > pack,
-	vector<Majang> hand,
-	const Majang& newTile,
-	int pos
-){
-	//先得到不进行操作时最优得分
-	double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
-	//进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
-	if(pos==0){
-		for(unsigned int i=0;i<hand.size();i++){
-			if(hand[i].getTileInt()==newTile.getTileInt()){
-				hand.erase(hand.begin()+i);
-				i--;
-			}
-		}
-			pack.push_back(make_pair("PENG",newTile));
-	}
-	else{
-		//把吃掉的牌从手牌hand中去掉,再把顺子加到pack中
-		if(pos==1){
-			int k1=1,k2=1;
-			unsigned int i=0;
-			while((k1||k2)&&i<hand.size()){
-				if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
-					k1--;
-					hand.erase(hand.begin()+i);
-				}
-				else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+2){
-					k2--;
-					hand.erase(hand.begin()+i);
-				}
-				else{
-					i++;
-				}
-			}
-			pack.push_back(make_pair("CHI",newTile.getNxtMajang()));
-		}
-		else if(pos==2){
-			int k1=1,k2=1;
-			unsigned int i=0;
-			while((k1||k2)&&i<hand.size()){
-				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
-					k1--;
-					hand.erase(hand.begin()+i);
-				}
-				else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+1){
-					k2--;
-					hand.erase(hand.begin()+i);
-				}
-				else{
-					i++;
-				}
-			}
-			pack.push_back(make_pair("CHI",newTile));
-		}
-		else{
-			int k1=1,k2=1;
-			unsigned int i=0;
-			while((k1||k2)&&i<hand.size()){
-				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
-					k1--;
-					hand.erase(hand.begin()+i);
-				}
-				else if(k2&&hand[i].getTileInt()==newTile.getTileInt()-2){
-					k2--;
-					hand.erase(hand.begin()+i);
-				}
-				else{
-					i++;
-				}
-			}
-			pack.push_back(make_pair("CHI",newTile.getPrvMajang()));
-		}
-	}
-	//得到操作过后的最优解
-	pair<double,Majang> r=getBestPlay(state,pack,hand);
-	double maxResult2=r.first;
-	if(maxResult2-maxResult1>=1e-5){
-		return r.second;
-	}
-	else return Majang(1);
-}
-/*** End of inlined file: ResponseOutput.cpp ***/
-
-
-/*** Start of inlined file: ShantenCalculator.h ***/
-#pragma once
-
-#ifndef Shanten_Calculator_H
-#define Shanten_Calculator_H
-
-#ifndef _PREPROCESS_ONLY
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <numeric>
-#endif
-#ifdef _BOTZONE_ONLINE
-
-#ifndef _PREPROCESS_ONLY
-
-/*** Start of inlined file: shanten.h ***/
-#ifndef __MAHJONG_ALGORITHM__SHANTEN_H__
-#define __MAHJONG_ALGORITHM__SHANTEN_H__
-
-
-/*** Start of inlined file: tile.h ***/
-#ifndef __MAHJONG_ALGORITHM__TILE_H__
-#define __MAHJONG_ALGORITHM__TILE_H__
-
-#include <stddef.h>
-#include <stdint.h>
-
- // force inline
-#ifndef FORCE_INLINE
-#if defined(_MSC_VER) && (_MSC_VER >= 1200)
-#define FORCE_INLINE __forceinline
-#elif defined(__GNUC__) && ((__GNUC__ << 8 | __GNUC_MINOR__) >= 0x301)
-#define FORCE_INLINE __inline__ __attribute__((__always_inline__))
-#else
-#define FORCE_INLINE inline
-#endif
-#endif
-
- // unreachable
-#ifndef UNREACHABLE
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
-#define UNREACHABLE() __assume(0)
-#elif defined(__clang__) || (defined(__GNUC__) && ((__GNUC__ << 8 | __GNUC_MINOR__) >= 0x405))
-#define UNREACHABLE() __builtin_unreachable()
-#else
-#define UNREACHABLE() assert(0)
-#endif
-#endif
-
-namespace mahjong {
-
-/**
- * @brief 代码注释中用到的术语简介
- * - 顺子：数牌中，花色相同序数相连的3张牌。
- * - 刻子：三张相同的牌。碰出的为明刻，未碰出的为暗刻。俗称坎。杠也算刻子，明杠算明刻，暗杠算暗刻。
- * - 面子：顺子和刻子的统称。俗称一句话、一坎牌。
- * - 雀头：基本和牌形式中，单独组合的对子，也叫将、眼。
- * - 基本和型：4面子1雀头的和牌形式。
- * - 特殊和型：非4面子1雀头的和牌形式，在国标规则中，有七对、十三幺、全不靠等特殊和型。
- * - 门清：也叫门前清，指不吃、不碰、不明杠的状态。特殊和型必然是门清状态。暗杠虽然不破门清，但会暴露出手牌不是特殊和型的信息。
- * - 副露：吃牌、碰牌、杠牌的统称，即利用其他选手打出的牌完成自己手牌面子的行为，一般不包括暗杠，也叫鸣牌，俗称动牌。
- *     副露有时候也包括暗杠，此时将暗杠称为之暗副露，而吃、碰、明杠称为明副露。
- * - 立牌：整个手牌除去吃、碰、杠之后的牌。
- * - 手牌：包括立牌和吃、碰、杠的牌，有时仅指立牌。
- * - 听牌：只差所需要的一张牌即能和牌的状态。俗称下叫、落叫、叫和（糊）。
- * - 一上听：指差一张就能听牌的状态，也叫一向听、一入听。以此类推有二上听、三上听、N上听。
- * - 上听数：达到听牌状态需要牌的张数。
- * - 有效牌：能使上听数减少的牌，也称进张牌、上张牌。
- * - 改良牌：能使有效牌增加的牌。通俗来说就是能使进张面变宽的牌。
- * - 对子：两张相同的牌。雀头一定是对子，但对子不一定是雀头。
- * - 两面：数牌中，花色相同数字相邻的两张牌，如45m，与两侧的牌都构成顺子。也叫两头。
- * - 嵌张：数牌中，花色相同数字相隔1的两张牌，如57s，只能与中间的牌构成顺子，中间的这张牌称为嵌张。
- * - 边张：也是数字相邻的两张牌，但由于处在边界位置，只能与一侧的牌能构成顺子，如12只能与3构成顺子、89只能与7构成顺子，这张3或者7便称为边张。
- * - 搭子：指差一张牌就能构成1组面子的两张牌。其形态有刻子搭子（即对子）、两面搭子、嵌张搭子、边张搭子。
- * - 复合搭子：多张牌构成的搭子。常见的有：连嵌张、两面带对子、嵌张带对子、边张带对子等等形态。
- * - 对倒：听牌时，其他牌都已经构成面子，剩余两对，只需任意一对成刻即可和牌，此时另一对充当雀头，这种听牌形态叫对倒，也叫双碰、对碰、对杵。
- */
-
-/**
- * @addtogroup tile
- * @{
- */
-
-/**
- * @brief 花色
- */
-typedef uint8_t suit_t;
-
-/**
- * @brief 点数
- */
-typedef uint8_t rank_t;
-
-#define TILE_SUIT_NONE          0  ///< 无效
-#define TILE_SUIT_CHARACTERS    1  ///< 万子（CHARACTERS）
-#define TILE_SUIT_BAMBOO        2  ///< 条子（BAMBOO）
-#define TILE_SUIT_DOTS          3  ///< 饼子（DOTS）
-#define TILE_SUIT_HONORS        4  ///< 字牌（HONORS）
-
-/**
- * @brief 牌\n
- * 内存结构：
- * - 0-3 4bit 牌的点数
- * - 4-7 4bit 牌的花色
- * 合法的牌为：
- * - 0x11 - 0x19 万子（CHARACTERS）
- * - 0x21 - 0x29 条子（BAMBOO）
- * - 0x31 - 0x39 饼子（DOTS）
- * - 0x41 - 0x47 字牌（HONORS）
- * - 0x51 - 0x58 花牌（FLOWER）
- */
-typedef uint8_t tile_t;
-
-/**
- * @brief 生成一张牌
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] suit 花色
- * @param [in] rank 点数
- * @return tile_t 牌
- */
-static FORCE_INLINE tile_t make_tile(suit_t suit, rank_t rank) {
-	return (((suit & 0xF) << 4) | (rank & 0xF));
-}
-
-/**
- * @brief 获取牌的花色
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile 牌
- * @return suit_t 花色
- */
-static FORCE_INLINE suit_t tile_get_suit(tile_t tile) {
-	return ((tile >> 4) & 0xF);
-}
-
-/**
- * @brief 判断是否为花牌
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_flower(tile_t tile) {
-	return ((tile >> 4) & 0xF) == 5;
-}
-
-/**
- * @brief 获取牌的点数
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile 牌
- * @return rank_t 点数
- */
-static FORCE_INLINE rank_t tile_get_rank(tile_t tile) {
-	return (tile & 0xF);
-}
-
-/**
- * @brief 所有牌的值，不包括花牌
- */
-enum tile_value_t {
-	TILE_1m = 0x11, TILE_2m, TILE_3m, TILE_4m, TILE_5m, TILE_6m, TILE_7m, TILE_8m, TILE_9m,
-	TILE_1s = 0x21, TILE_2s, TILE_3s, TILE_4s, TILE_5s, TILE_6s, TILE_7s, TILE_8s, TILE_9s,
-	TILE_1p = 0x31, TILE_2p, TILE_3p, TILE_4p, TILE_5p, TILE_6p, TILE_7p, TILE_8p, TILE_9p,
-	TILE_E  = 0x41, TILE_S , TILE_W , TILE_N , TILE_C , TILE_F , TILE_P ,
-	TILE_TABLE_SIZE
-};
-
-/**
- * @brief 所有合法的牌，不包括花牌
- */
-static const tile_t all_tiles[] = {
-	TILE_1m, TILE_2m, TILE_3m, TILE_4m, TILE_5m, TILE_6m, TILE_7m, TILE_8m, TILE_9m,
-	TILE_1s, TILE_2s, TILE_3s, TILE_4s, TILE_5s, TILE_6s, TILE_7s, TILE_8s, TILE_9s,
-	TILE_1p, TILE_2p, TILE_3p, TILE_4p, TILE_5p, TILE_6p, TILE_7p, TILE_8p, TILE_9p,
-	TILE_E , TILE_S , TILE_W , TILE_N , TILE_C , TILE_F , TILE_P
-};
-
-/**
- * @brief 牌表类型
- *
- * 说明：在判断听牌、计算上听数等算法中，主流的对于牌有两种存储方式：
- * - 一种是用牌表，各索引表示各种牌拥有的枚数，这种存储方式的优点是在递归计算时削减面子只需要修改表中相应下标的值，缺点是一手牌的总数不方便确定
- * - 另一种是直接用牌的数组，这种存储方式的优点是很容易确定一手牌的总数，缺点是在递归计算时削减面子不方便，需要进行数组删除元素操作
- */
-typedef uint16_t tile_table_t[TILE_TABLE_SIZE];
-
-#define PACK_TYPE_NONE 0  ///< 无效
-#define PACK_TYPE_CHOW 1  ///< 顺子
-#define PACK_TYPE_PUNG 2  ///< 刻子
-#define PACK_TYPE_KONG 3  ///< 杠
-#define PACK_TYPE_PAIR 4  ///< 雀头
-
-/**
- * @brief 牌组
- *  用于表示一组面子或者雀头
- *
- * 内存结构：
- * - 0-7 8bit tile 牌（对于顺子，则表示中间那张牌，比如234p，那么牌为3p）
- * - 8-11 4bit type 牌组类型，使用PACK_TYPE_xxx宏
- * - 12-13 2bit offer 供牌信息，取值范围为0123\n
- * - 14 1bit promoted 是否为加杠
- *       0表示暗手（暗顺、暗刻、暗杠），非0表示明手（明顺、明刻、明杠）
- *
- *       对于牌组是刻子和杠时，123分别来表示是上家/对家/下家供的\n
- *       对于牌组为顺子时，由于吃牌只能是上家供，这里用123分别来表示第几张是上家供的
- */
-typedef uint16_t pack_t;
-
-/**
- * @brief 生成一个牌组
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] offer 供牌信息
- * @param [in] type 牌组类型
- * @param [in] tile 牌（对于顺子，为中间那张牌）
- */
-static FORCE_INLINE pack_t make_pack(uint8_t offer, uint8_t type, tile_t tile) {
-	return (offer << 12 | (type << 8) | tile);
-}
-
-/**
- * @brief 牌组是否为明的
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] pack 牌组
- * @return bool
- */
-static FORCE_INLINE bool is_pack_melded(pack_t pack) {
-	return !!(pack & 0x3000);
-}
-
-/**
- * @brief 牌组是否为加杠
- *  当牌组不是PACK_TYPE_KONG时，结果是无意义的
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] pack 牌组
- * @return bool
- */
-static FORCE_INLINE bool is_promoted_kong(pack_t pack) {
-	return !!(pack & 0x4000);
-}
-
-/**
- * @brief 碰的牌组转换为加杠
- *  当牌组不是PACK_TYPE_PUNG时，结果是无意义的
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] pack 碰的牌组
- * @return pack_t 加杠的牌组
- */
-static FORCE_INLINE pack_t promote_pung_to_kong(pack_t pack) {
-	return pack | 0x4300;
-}
-
-/**
- * @brief 牌组的供牌信息
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] pack 牌组
- * @return uint8_t
- */
-static FORCE_INLINE uint8_t pack_get_offer(pack_t pack) {
-	return ((pack >> 12) & 0x3);
-}
-
-/**
- * @brief 获取牌组的类型
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] pack 牌组
- * @return uint8_t 牌组类型
- */
-static FORCE_INLINE uint8_t pack_get_type(pack_t pack) {
-	return ((pack >> 8) & 0xF);
-}
-
-/**
- * @brief 获取牌的点数
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] pack 牌组
- * @return tile_t 牌（对于顺子，为中间那张牌）
- */
-static FORCE_INLINE tile_t pack_get_tile(pack_t pack) {
-	return (pack & 0xFF);
-}
-
-/**
- * @brief 手牌结构
- *  手牌结构一定满足等式：3*副露的牌组数+立牌数=13
- */
-struct hand_tiles_t {
-	pack_t fixed_packs[5];      ///< 副露的牌组（面子），包括暗杠
-	intptr_t pack_count;        ///< 副露的牌组（面子）数，包括暗杠
-	tile_t standing_tiles[13];  ///< 立牌
-	intptr_t tile_count;        ///< 立牌数
-};
-
-/**
- * @brief 判断是否为绿一色构成牌
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_green(tile_t tile) {
-	// 最基本的逐个判断，23468s及发财为绿一色构成牌
-	//return (tile == TILE_2s || tile == TILE_3s || tile == TILE_4s || tile == TILE_6s || tile == TILE_8s || tile == TILE_F);
-
-	// 算法原理：
-	// 0x48-0x11=0x37=55刚好在一个64位整型的范围内，
-	// 用uint64_t的每一位表示一张牌的标记，事先得到一个魔数，
-	// 然后每次测试相应位即可
-	return !!(0x0020000000AE0000ULL & (1ULL << (tile - TILE_1m)));
-}
-
-/**
- * @brief 判断是否为推不倒构成牌
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_reversible(tile_t tile) {
-	// 最基本的逐个判断：245689s、1234589p及白板为推不倒构成牌
-	//return (tile == TILE_2s || tile == TILE_4s || tile == TILE_5s || tile == TILE_6s || tile == TILE_8s || tile == TILE_9s ||
-	//    tile == TILE_1p || tile == TILE_2p || tile == TILE_3p || tile == TILE_4p || tile == TILE_5p || tile == TILE_8p || tile == TILE_9p ||
-	//    tile == TILE_P);
-
-	// 算法原理同绿一色构成牌判断函数
-	return !!(0x0040019F01BA0000ULL & (1ULL << (tile - TILE_1m)));
-}
-
-/**
- * @brief 判断是否为数牌幺九（老头牌）
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_terminal(tile_t tile) {
-	// 最基本的逐个判断
-	//return (tile == TILE_1m || tile == TILE_9m || tile == TILE_1s || tile == TILE_9s || tile == TILE_1p || tile == TILE_9p);
-
-	// 算法原理：观察数牌幺九的二进制位：
-	// 0x11：0001 0001
-	// 0x19：0001 1001
-	// 0x21：0010 0001
-	// 0x29：0010 1001
-	// 0x31：0011 0001
-	// 0x39：0011 1001
-	// 所有牌的低4bit只会出现在0001到1001之间，跟0111位与，只有0001和1001的结果为1
-	// 所有数牌的高4bit只会出现在0001到0011之间，跟1100位与，必然为0
-	// 于是构造魔数0xC7（1100 0111）跟牌位与，结果为1的，就为数牌幺九
-	// 缺陷：低4bit的操作会对0xB、0xD、0xF产生误判，高4bit的操作会对0x01和0x09产生误判
-	return ((tile & 0xC7) == 1);
-}
-
-/**
- * @brief 判断是否为风牌
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_winds(tile_t tile) {
-	return (tile > 0x40 && tile < 0x45);
-}
-
-/**
- * @brief 判断是否为箭牌（三元牌）
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_dragons(tile_t tile) {
-	return (tile > 0x44 && tile < 0x48);
-}
-
-/**
- * @brief 判断是否为字牌
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_honor(tile_t tile) {
-	return (tile > 0x40 && tile < 0x48);
-}
-
-/**
- * @brief 判断是否为数牌
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_numbered_suit(tile_t tile) {
-	if (tile < 0x1A) return (tile > 0x10);
-	if (tile < 0x2A) return (tile > 0x20);
-	if (tile < 0x3A) return (tile > 0x30);
-	return false;
-}
-
-/**
- * @brief 判断是否为数牌（更快）
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @see is_numbered_suit
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_numbered_suit_quick(tile_t tile) {
-	// 算法原理：数牌为0x11-0x19，0x21-0x29，0x31-0x39，跟0xC0位与，结果为0
-	return !(tile & 0xC0);
-}
-
-/**
- * @brief 判断是否为幺九牌（包括数牌幺九和字牌）
- * @param [in] tile 牌
- * @return bool
- */
-static FORCE_INLINE bool is_terminal_or_honor(tile_t tile) {
-	return is_terminal(tile) || is_honor(tile);
-}
-
-/**
- * @brief 判断两张牌花色是否相同（更快）
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile0 牌0
- * @param [in] tile1 牌1
- * @return bool
- */
-static FORCE_INLINE bool is_suit_equal_quick(tile_t tile0, tile_t tile1) {
-	// 算法原理：高4bit表示花色
-	return ((tile0 & 0xF0) == (tile1 & 0xF0));
-}
-
-/**
- * @brief 判断两张牌点数是否相同（更快）
- *  函数不检查输入的合法性。如果输入不合法的值，将无法保证合法返回值的合法性
- * @param [in] tile0 牌0
- * @param [in] tile1 牌1
- * @return bool
- */
-static FORCE_INLINE bool is_rank_equal_quick(tile_t tile0, tile_t tile1) {
-	// 算法原理：低4bit表示花色。高4bit设置为C是为了过滤掉字牌
-	return ((tile0 & 0xCF) == (tile1 & 0xCF));
-}
-
-/**
- * end group
- * @}
- */
-
-}
-
-#endif
-
-/*** End of inlined file: tile.h ***/
-
-namespace mahjong {
-
-/**
- * @brief 牌组转换成牌
- *
- * @param [in] packs 牌组
- * @param [in] pack_cnt 牌组的数量
- * @param [out] tiles 牌
- * @param [in] tile_cnt 牌的最大数量
- * @return intptr_t 牌的实际数量
- */
-intptr_t packs_to_tiles(const pack_t *packs, intptr_t pack_cnt, tile_t *tiles, intptr_t tile_cnt);
-
-/**
- * @brief 将牌打表
- *
- * @param [in] tiles 牌
- * @param [in] cnt 牌的数量
- * @param [out] cnt_table 牌的数量表
- */
-void map_tiles(const tile_t *tiles, intptr_t cnt, tile_table_t *cnt_table);
-
-/**
- * @brief 将手牌打表
- *
- * @param [in] hand_tiles 手牌
- * @param [out] cnt_table 牌的数量表
- * @return bool 手牌结构是否正确。即是否符合：副露组数*3+立牌数=13
- */
-bool map_hand_tiles(const hand_tiles_t *hand_tiles, tile_table_t *cnt_table);
-
-/**
- * @brief 将表转换成牌
- *
- * @param [in] cnt_table 牌的数量表
- * @param [out] tiles 牌
- * @param [in] max_cnt 牌的最大数量
- * @return intptr_t 牌的实际数量
- */
-intptr_t table_to_tiles(const tile_table_t &cnt_table, tile_t *tiles, intptr_t max_cnt);
-
-/**
- * @brief 有效牌标记表类型
- */
-typedef bool useful_table_t[TILE_TABLE_SIZE];
-
-/**
- * @addtogroup shanten
- * @{
- */
-
-/**
- * @addtogroup basic_form
- * @{
- */
-
-/**
- * @brief 基本和型上听数
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] useful_table 有效牌标记表（可为null）
- * @return int 上听数
- */
-int basic_form_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
-
-/**
- * @brief 基本和型是否听牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] waiting_table 听牌标记表（可为null）
- * @return bool 是否听牌
- */
-bool is_basic_form_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
-
-/**
- * @brief 基本和型是否和牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [in] test_tile 测试的牌
- * @return bool 是否和牌
- */
-bool is_basic_form_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
-
-/**
- * end group
- * @}
- */
-
-/**
- * @addtogroup seven_pairs
- * @{
- */
-
-/**
- * @brief 七对上听数
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] useful_table 有效牌标记表（可为null）
- * @return int 上听数
- */
-int seven_pairs_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
-
-/**
- * @brief 七对是否听牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] waiting_table 听牌标记表（可为null）
- * @return bool 是否听牌
- */
-bool is_seven_pairs_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
-
-/**
- * @brief 七对是否和牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [in] test_tile 测试的牌
- * @return bool 是否和牌
- */
-bool is_seven_pairs_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
-
-/**
- * end group
- * @}
- */
-
-/**
- * @addtogroup thirteen_orphans
- * @{
- */
-
-/**
- * @brief 十三幺上听数
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] useful_table 有效牌标记表（可为null）
- * @return int 上听数
- */
-int thirteen_orphans_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
-
-/**
- * @brief 十三幺是否听牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] waiting_table 听牌标记表（可为null）
- * @return bool 是否听牌
- */
-bool is_thirteen_orphans_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
-
-/**
- * @brief 十三幺是否和牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [in] test_tile 测试的牌
- * @return bool 是否和牌
- */
-bool is_thirteen_orphans_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
-
-/**
- * end group
- * @}
- */
-
-/**
- * @addtogroup knitted_straight
- * @{
- */
-
-/**
- * @brief 组合龙上听数
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] useful_table 有效牌标记表（可为null）
- * @return int 上听数
- */
-int knitted_straight_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
-
-/**
- * @brief 组合龙是否听牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] waiting_table 听牌标记表（可为null）
- * @return bool 是否听牌
- */
-bool is_knitted_straight_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
-
-/**
- * @brief 组合龙是否和牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [in] test_tile 测试的牌
- * @return bool 是否和牌
- */
-bool is_knitted_straight_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
-
-/**
- * end group
- * @}
- */
-
-/**
- * @addtogroup honors_and_knitted_tiles
- * @{
- */
-
-/**
- * @brief 全不靠上听数
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] useful_table 有效牌标记表（可为null）
- * @return int 上听数
- */
-int honors_and_knitted_tiles_shanten(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *useful_table);
-
-/**
- * @brief 全不靠是否听牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [out] waiting_table 听牌标记表（可为null）
- * @return bool 是否听牌
- */
-bool is_honors_and_knitted_tiles_wait(const tile_t *standing_tiles, intptr_t standing_cnt, useful_table_t *waiting_table);
-
-/**
- * @brief 全不靠是否和牌
- *
- * @param [in] standing_tiles 立牌
- * @param [in] standing_cnt 立牌数
- * @param [in] test_tile 测试的牌
- * @return bool 是否和牌
- */
-bool is_honors_and_knitted_tiles_win(const tile_t *standing_tiles, intptr_t standing_cnt, tile_t test_tile);
-
-/**
- * end group
- * @}
- */
-
-/**
- * @brief 是否听牌
- *
- * @param [in] hand_tiles 手牌结构
- * @param [out] useful_table 有效牌标记表（可为null）
- * @return bool 是否听牌
- */
-bool is_waiting(const hand_tiles_t &hand_tiles, useful_table_t *useful_table);
-
-/**
- * end group
- * @}
- */
-
-/**
- * @name form flags
- * @{
- *  和型
- */
-#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
-#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
-#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
-#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
-#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
-#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
-/**
- * @}
- */
-
-/**
- * @brief 枚举打哪张牌的计算结果信息
- */
-struct enum_result_t {
-	tile_t discard_tile;                    ///< 打这张牌
-	uint8_t form_flag;                      ///< 和牌形式
-	int shanten;                            ///< 上听数
-	useful_table_t useful_table;            ///< 有效牌标记表
-};
-
-/**
- * @brief 枚举打哪张牌的计算回调函数
- *
- * @param [in] context 从enum_discard_tile传过来的context原样传回
- * @param [in] result 计算结果
- * @retval true 继续枚举
- * @retval false 结束枚举
- */
-typedef bool (*enum_callback_t)(void *context, const enum_result_t *result);
-
-/**
- * @brief 枚举打哪张牌
- *
- * @param [in] hand_tiles 手牌结构
- * @param [in] serving_tile 上牌（可为0，此时仅计算手牌的信息）
- * @param [in] form_flag 计算哪些和型
- * @param [in] context 用户自定义参数，将原样从回调函数传回
- * @param [in] enum_callback 回调函数
- */
-void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint8_t form_flag,
-	void *context, enum_callback_t enum_callback);
-
-}
-
-/**
- * end group
- * @}
- */
-
-#endif
-
-/*** End of inlined file: shanten.h ***/
-
-
-
-/*** Start of inlined file: stringify.h ***/
-#ifndef __MAHJONG_ALGORITHM__STRINGIFY_H__
-#define __MAHJONG_ALGORITHM__STRINGIFY_H__
-
-namespace mahjong {
-
-/**
- * @brief 字符串格式：
- * - 数牌：万=m 条=s 饼=p。后缀使用小写字母，一连串同花色的数牌可合并使用用一个后缀，如123m、678s等等。
- * - 字牌：东南西北=ESWN，中发白=CFP。使用大写字母。亦兼容天凤风格的后缀z，但按中国习惯顺序567z为中发白。
- * - 吃、碰、杠用英文[]，可选用逗号+数字表示供牌来源。数字的具体规则如下：
- *    - 吃：表示第几张牌是由上家打出，如[567m,2]表示57万吃6万（第2张）。对于不指定数字的，默认为吃第1张。
- *    - 碰：表示由哪家打出，1为上家，2为对家，3为下家，如[999s,3]表示碰下家的9条。对于不指定数字的，默认为碰上家。
- *    - 杠：与碰类似，但对于不指定数字的，则认为是暗杠。例如：[SSSS]表示暗杠南；[8888p,1]表示大明杠上家的8饼。当数字为5、6、7时，表示加杠。例如：[1111s,6]表示碰对家的1条后，又摸到1条加杠。
- * - 范例
- *    - [EEEE][CCCC][FFFF][PPPP]NN
- *    - 1112345678999s9s
- *    - [WWWW,1][444s]45m678pFF6m
- *    - [EEEE]288s349pSCFF2p
- *    - [123p,1][345s,2][999s,3]6m6pEW1m
- *    - 356m18s1579pWNFF9p
- */
-
-/**
- * @addtogroup stringify
- * @{
- */
-
-/**
- * @name error codes
- * @{
- *  解析牌的错误码
- */
-#define PARSE_NO_ERROR 0                                ///< 无错误
-#define PARSE_ERROR_ILLEGAL_CHARACTER -1                ///< 非法字符
-#define PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT -2            ///< 数字后面缺少后缀
-#define PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK -3 ///< 副露包含错误的牌数目
-#define PARSE_ERROR_CANNOT_MAKE_FIXED_PACK -4           ///< 无法正确解析副露
-#define PARSE_ERROR_TOO_MANY_FIXED_PACKS -5             ///< 过多组副露（一副合法手牌最多4副露）
-#define PARSE_ERROR_TOO_MANY_TILES -6                   ///< 过多牌
-#define PARSE_ERROR_TILE_COUNT_GREATER_THAN_4 -7        ///< 某张牌出现超过4枚
-
- /**
-  * @}
-  */
-
-/**
- * @brief 解析牌
- * @param [in] str 字符串
- * @param [out] tiles 牌
- * @param [in] max_cnt 牌的最大数量
- * @retval > 0 实际牌的数量
- * @retval == 0 失败
- */
-intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt);
-
-/**
- * @brief 字符串转换为手牌结构和上牌
- * @param [in] str 字符串
- * @param [out] hand_tiles 手牌结构
- * @param [out] serving_tile 上的牌
- * @retval PARSE_NO_ERROR 无错误
- * @retval PARSE_ERROR_ILLEGAL_CHARACTER 非法字符
- * @retval PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT 数字后面缺少后缀
- * @retval PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK 副露包含错误的牌数目
- * @retval PARSE_ERROR_CANNOT_MAKE_FIXED_PACK 无法正确解析副露
- * @retval PARSE_ERROR_TOO_MANY_FIXED_PACKS 过多组副露（一副合法手牌最多4副露）
- * @retval PARSE_ERROR_TOO_MANY_TILES 过多牌
- * @retval PARSE_ERROR_TILE_COUNT_GREATER_THAN_4 某张牌出现超过4枚
- */
-intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile);
-
-/**
- * @brief 牌转换为字符串
- * @param [in] tiles 牌
- * @param [in] tile_cnt 牌的数量
- * @param [out] str 字符串
- * @param [in] max_size 字符串最大长度
- * @return intptr_t 写入的字符串数
- */
-intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size);
-
-/**
- * @brief 牌组转换为字符串
- * @param [in] packs 牌组
- * @param [in] pack_cnt 牌组的数量
- * @param [out] str 字符串
- * @param [in] max_size 字符串最大长度
- * @return intptr_t 写入的字符串数
- */
-intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size);
-
-/**
- * @brief 手牌结构转换为字符串
- * @param [in] hand_tiles 手牌结构
- * @param [out] str 字符串
- * @param [in] max_size 字符串最大长度
- * @return intptr_t 写入的字符串数
- */
-intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size);
-
-/**
- * end group
- * @}
- */
-
-}
-
-#endif
-
-/*** End of inlined file: stringify.h ***/
-
-
-/*** Start of inlined file: stringify.cpp ***/
-#include <string.h>
-#include <algorithm>
-#include <iterator>
-
-namespace mahjong {
-
-// 解析牌实现函数
-static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
-	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
-	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
-	//}
-
-	intptr_t tile_cnt = 0;
-
-#define SET_SUIT_FOR_NUMBERED(value_)       \
-	for (intptr_t i = tile_cnt; i > 0;) {   \
-		if (tiles[--i] & 0xF0) break;       \
-		tiles[i] |= value_;                 \
-		} (void)0
-
-#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
-#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
-#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
-
-#define SET_SUIT_FOR_HONOR() \
-	for (intptr_t i = tile_cnt; i > 0;) {   \
-		if (tiles[--i] & 0xF0) break;       \
-		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
-		tiles[i] |= 0x40;                   \
-		} (void)0
-
-#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
-#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
-
-	const char *p = str;
-	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
-		char c = *p;
-		switch (c) {
-		case '0': tiles[tile_cnt++] = 5; break;
-		case '1': tiles[tile_cnt++] = 1; break;
-		case '2': tiles[tile_cnt++] = 2; break;
-		case '3': tiles[tile_cnt++] = 3; break;
-		case '4': tiles[tile_cnt++] = 4; break;
-		case '5': tiles[tile_cnt++] = 5; break;
-		case '6': tiles[tile_cnt++] = 6; break;
-		case '7': tiles[tile_cnt++] = 7; break;
-		case '8': tiles[tile_cnt++] = 8; break;
-		case '9': tiles[tile_cnt++] = 9; break;
-		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
-		case 's': SET_SUIT_FOR_BAMBOO(); break;
-		case 'p': SET_SUIT_FOR_DOTS(); break;
-		case 'z': SET_SUIT_FOR_HONOR(); break;
-		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
-		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
-		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
-		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
-		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
-		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
-		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
-		default: goto finish_parse;
-		}
-	}
-
-finish_parse:
-	// 一连串数字+后缀，但已经超过容量，说明牌过多
-	if (NO_SUFFIX_AFTER_DIGIT()) {
-		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
-		const char *p1 = strpbrk(p, "mspz");
-		if (p1 == nullptr) {
-			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
-		}
-
-		switch (*p1) {
-		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
-		case 's': SET_SUIT_FOR_BAMBOO(); break;
-		case 'p': SET_SUIT_FOR_DOTS(); break;
-		case 'z': SET_SUIT_FOR_HONOR(); break;
-		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
-		}
-
-		if (p1 != p) {  // 放弃过中间的数字
-			return PARSE_ERROR_TOO_MANY_TILES;
-		}
-
-		p = p1 + 1;
-	}
-
-#undef SET_SUIT_FOR_NUMBERED
-#undef SET_SUIT_FOR_CHARACTERS
-#undef SET_SUIT_FOR_BAMBOO
-#undef SET_SUIT_FOR_DOTS
-#undef SET_SUIT_FOR_HONOR
-#undef NO_SUFFIX_AFTER_DIGIT
-#undef CHECK_SUFFIX
-
-	*out_tile_cnt = tile_cnt;
-	return static_cast<intptr_t>(p - str);
-}
-
-// 解析牌
-intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
-	intptr_t tile_cnt;
-	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
-		return tile_cnt;
-	}
-	return 0;
-}
-
-// 生成副露
-static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
-	if (tile_cnt > 0) {
-		if (tile_cnt != 3 && tile_cnt != 4) {
-			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
-		}
-		if (tile_cnt == 3) {
-			if (offer == 0) {
-				offer = 1;
-			}
-			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
-				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
-			}
-			else {
-				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
-					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
-				}
-				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
-					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
-				}
-				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
-					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
-				}
-				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
-					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
-				}
-				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
-					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
-				}
-				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
-					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
-				}
-				else {
-					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
-				}
-			}
-		}
-		else {
-			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
-				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
-			}
-			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
-		}
-		return 1;
-	}
-	return 0;
-}
-
-// 字符串转换为手牌结构和上牌
-intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
-	size_t len = strlen(str);
-	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
-		return PARSE_ERROR_ILLEGAL_CHARACTER;
-	}
-
-	pack_t packs[4];
-	intptr_t pack_cnt = 0;
-	tile_t standing_tiles[14];
-	intptr_t standing_cnt = 0;
-
-	bool in_brackets = false;
-	tile_t temp_tiles[14];
-	intptr_t temp_cnt = 0;
-	intptr_t max_cnt = 14;
-	uint8_t offer = 0;
-
-	tile_table_t cnt_table = { 0 };
-
-	const char *p = str;
-	while (char c = *p) {
-		const char *q;
-		switch (c) {
-		case ',': {  // 副露来源
-			if (!in_brackets) {
-				return PARSE_ERROR_ILLEGAL_CHARACTER;
-			}
-			offer = static_cast<uint8_t>(*++p - '0');
-			q = ++p;
-			if (*p != ']') {
-				return PARSE_ERROR_ILLEGAL_CHARACTER;
-			}
-			break;
-		}
-		case '[': {  // 开始一组副露
-			if (in_brackets) {
-				return PARSE_ERROR_ILLEGAL_CHARACTER;
-			}
-			if (pack_cnt > 4) {
-				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
-			}
-			if (temp_cnt > 0) {  // 处理[]符号外面的牌
-				if (standing_cnt + temp_cnt >= max_cnt) {
-					return PARSE_ERROR_TOO_MANY_TILES;
-				}
-				// 放到立牌中
-				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
-				standing_cnt += temp_cnt;
-				temp_cnt = 0;
-			}
-
-			q = ++p;
-			in_brackets = true;
-			offer = 0;
-			max_cnt = 4;  // 副露的牌组最多包含4张牌
-			break;
-		}
-		case ']': {  // 结束一副副露
-			if (!in_brackets) {
-				return PARSE_ERROR_ILLEGAL_CHARACTER;
-			}
-			// 生成副露
-			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
-			if (ret < 0) {
-				return ret;
-			}
-
-			q = ++p;
-			temp_cnt = 0;
-			in_brackets = false;
-			++pack_cnt;
-			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
-			break;
-		}
-		default: {  // 牌
-			if (temp_cnt != 0) {  // 重复进入
-				return PARSE_ERROR_TOO_MANY_TILES;
-			}
-			// 解析max_cnt张牌
-			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
-			if (ret < 0) {  // 出错
-				return ret;
-			}
-			if (ret == 0) {
-				return PARSE_ERROR_ILLEGAL_CHARACTER;
-			}
-			// 对牌打表
-			for (intptr_t i = 0; i < temp_cnt; ++i) {
-				++cnt_table[temp_tiles[i]];
-			}
-			q = p + ret;
-			break;
-		}
-		}
-		p = q;
-	}
-
-	max_cnt = 14 - pack_cnt * 3;
-	if (temp_cnt > 0) {  // 处理[]符号外面的牌
-		if (standing_cnt + temp_cnt > max_cnt) {
-			return PARSE_ERROR_TOO_MANY_TILES;
-		}
-		// 放到立牌中
-		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
-		standing_cnt += temp_cnt;
-	}
-
-	if (standing_cnt > max_cnt) {
-		return PARSE_ERROR_TOO_MANY_TILES;
-	}
-
-	// 如果某张牌超过4
-	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
-		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
-	}
-
-	// 无错误时再写回数据
-	tile_t last_tile = 0;
-	if (standing_cnt == max_cnt) {
-		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
-		hand_tiles->tile_count = max_cnt - 1;
-		last_tile = standing_tiles[max_cnt - 1];
-	}
-	else {
-		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
-		hand_tiles->tile_count = standing_cnt;
-	}
-
-	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
-	hand_tiles->pack_count = pack_cnt;
-	*serving_tile = last_tile;
-
-	return PARSE_NO_ERROR;
-}
-
-// 牌转换为字符串
-intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
-	bool tenhon = false;
-	char *p = str, *end = str + max_size;
-
-	static const char suffix[] = "mspz";
-	static const char honor_text[] = "ESWNCFP";
-	suit_t last_suit = 0;
-	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
-		tile_t t = tiles[i];
-		suit_t s = tile_get_suit(t);
-		rank_t r = tile_get_rank(t);
-		if (s == 1 || s == 2 || s == 3) {  // 数牌
-			if (r >= 1 && r <= 9) {  // 有效范围1-9
-				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
-					if (last_suit != 4 || tenhon) {
-						*p++ = suffix[last_suit - 1];
-					}
-				}
-				if (p < end) {
-					*p++ = '0' + r;  // 写入一个数字字符
-				}
-				last_suit = s;  // 记录花色
-			}
-		}
-		else if (s == 4) {  // 字牌
-			if (r >= 1 && r <= 7) {  // 有效范围1-7
-				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
-					if (last_suit != 4) {
-						*p++ = suffix[last_suit - 1];
-					}
-				}
-				if (p < end) {
-					if (tenhon) {  // 天凤式后缀
-						*p++ = '0' + r;  // 写入一个数字字符
-					}
-					else {
-						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
-					}
-					last_suit = s;
-				}
-			}
-		}
-	}
-
-	// 写入过且还有空间，补充后缀
-	if (p != str && p < end && (last_suit != 4 || tenhon)) {
-		*p++ = suffix[last_suit - 1];
-	}
-
-	if (p < end) {
-		*p = '\0';
-	}
-	return static_cast<intptr_t>(p - str);
-}
-
-// 牌组转换为字符串
-intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
-	char *p = str, *end = str + max_size;
-	tile_t temp[4];
-	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
-		pack_t pack = packs[i];
-		uint8_t o = pack_get_offer(pack);
-		tile_t t = pack_get_tile(pack);
-		uint8_t pt = pack_get_type(pack);
-		switch (pt) {
-		case PACK_TYPE_CHOW:
-			if (p >= end) break;
-			*p++ = '[';
-			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
-			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
-			if (p >= end) break;
-			*p++ = ',';
-			if (p >= end) break;
-			*p++ = '0' + o;
-			if (p >= end) break;
-			*p++ = ']';
-			break;
-		case PACK_TYPE_PUNG:
-			if (p >= end) break;
-			*p++ = '[';
-			temp[0] = t; temp[1] = t; temp[2] = t;
-			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
-			if (p >= end) break;
-			*p++ = ',';
-			if (p >= end) break;
-			*p++ = '0' + o;
-			if (p >= end) break;
-			*p++ = ']';
-			break;
-		case PACK_TYPE_KONG:
-			if (p >= end) break;
-			*p++ = '[';
-			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
-			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
-			if (p >= end) break;
-			*p++ = ',';
-			if (p >= end) break;
-			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
-			if (p >= end) break;
-			*p++ = ']';
-			break;
-		case PACK_TYPE_PAIR:
-			temp[0] = t; temp[1] = t;
-			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
-			break;
-		default: break;
-		}
-	}
-
-	if (p < end) {
-		*p = '\0';
-	}
-	return static_cast<intptr_t>(p - str);
-}
-
-// 手牌结构转换为字符串
-intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
-	char *p = str, *end = str + max_size;
-	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
-	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
-	return static_cast<intptr_t>(p - str);
-}
-
-}
-
-/*** End of inlined file: stringify.cpp ***/
-
-#include "MahjongGB/MahjongGB.h"
-#endif
-#else
-
 
 /*** Start of inlined file: stringify.cpp ***/
 
@@ -10824,10 +8636,81 @@ int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
 	return shanten;
 }
 
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
 mahjong::tile_t MajangToMahjong(const Majang& h){
 	using namespace mahjong;
 	auto tileType = TILE_T(h.getTileInt() / 10);
-	tile_t ret;
+	tile_t ret = 0;
 	switch (tileType) {
 	case WANN:
 	case BING:
@@ -10849,6 +8732,8 @@ mahjong::tile_t MajangToMahjong(const Majang& h){
 			ret = TILE_W; break;
 		case 4:
 			ret = TILE_N; break;
+		default:
+			assert(false);
 		}
 		break;
 	case JIAN:
@@ -10859,17 +8744,34 @@ mahjong::tile_t MajangToMahjong(const Majang& h){
 			ret = TILE_F; break;
 		case 3:
 			ret = TILE_P; break;
+		default:
+			assert(false);
 		}
 		break;
 	}
 	return ret;
-};
+}
 
-int ShantenCalc(const vector<pair<string, Majang> >& pack,
-	const vector<Majang>& hand
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr
 ) {
-	int shanten = std::numeric_limits<int>::max();
-
 	using namespace mahjong;
 
 	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
@@ -10879,10 +8781,6 @@ int ShantenCalc(const vector<pair<string, Majang> >& pack,
 	intptr_t pack_cnt = 0;
 	tile_t standing_tiles[14];
 	intptr_t standing_cnt = 0;
-
-	tile_t temp_tiles[14];
-	intptr_t temp_cnt = 0;
-	intptr_t max_cnt = 14; // 指立牌数最大值
 
 	// tile_table_t cnt_table = { 0 };
 
@@ -10965,7 +8863,1521 @@ int ShantenCalc(const vector<pair<string, Majang> >& pack,
 	hand_tiles.pack_count = pack_cnt;
 	// serving_tile = last_tile;
 
-	useful_table_t useful_table = { false };
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
+#endif // !Shanten_Calculator_H
+
+/*** End of inlined file: ShantenCalculator.h ***/
+
+// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+#endif
+#else
+
+#endif
+
+using namespace std;
+
+//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
+//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
+
+//如何使用(仅供参考)：
+//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
+//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
+
+class Calculator{
+public:
+	//返回一副牌的得分(番数得分和手牌得分的加权和)
+	static double MajangScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
+		vector<Majang> hand,
+		//hand:玩家的暗牌
+		int flowerCount,
+		//flowerCount:补花数
+		StateContainer state
+		//StateContainer:牌库状态
+	);
+
+	// 可能性计算器（被相似度计算器调用）
+	static double ProbabilityCalc(const StateContainer& state,
+		const Majang& aim
+	);
+
+	// 相似度计算器
+	static double SimilarityCalc(const StateContainer& state,
+		const UsefulTableT& aim
+	);
+
+	//利用算番器计算番数得分
+	static double FanScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		Majang winTile,
+		StateContainer state
+	);
+
+	//一副牌的番数得分
+	static double MajangFanScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		StateContainer state,
+		int depth //迭代深度
+	);
+
+	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
+	static double MajangHandScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand
+	);
+
+	static double HandScoreCalculator(
+		int TileAmount[70]
+	);
+};
+
+#endif
+/*** End of inlined file: ScoreCalculator.h ***/
+
+
+/*** Start of inlined file: ScoreCalculator.cpp ***/
+
+/*** Start of inlined file: ScoreCalculator.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef SCORECALCULATOR_H
+#define SCORECALCULATOR_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+#include <cstring>
+#include <vector>
+#include <utility>
+#endif
+
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+/*** Start of inlined file: StateContainer.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef STATECONTAINER_H
+#define STATECONTAINER_H
+
+#ifndef _PREPROCESS_ONLY
+#include <valarray>
+#include <vector>
+#include <algorithm>
+#endif
+
+// 使用Majang类
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+using namespace std;
+
+//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
+
+// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
+// 0. 我们的位置、当前的风圈
+// 1. 我们的起始手牌、四名玩家各人的花牌
+// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
+// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
+// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
+
+// 用于存放当前的局面
+// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
+class StateContainer {
+private:
+	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
+	int curTurnPlayer;                  // 当前是哪个玩家的回合
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> discards;       // 用于存放弃牌堆
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
+	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
+	int totalLeft;                      // 没出现过的牌的总数（初始144）
+	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
+
+public:
+	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
+
+	explicit StateContainer(int curP=0, int curT=0);
+	StateContainer(const StateContainer& other);
+
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
+
+	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
+	void decTileLeft(Majang mj);                                               // 同上
+	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
+	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
+
+	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
+	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
+
+	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
+	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
+	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
+	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
+	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
+	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
+	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
+	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
+	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
+
+	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
+
+	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
+	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
+};
+
+#endif
+/*** End of inlined file: StateContainer.h ***/
+
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+#endif
+#else
+
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+#endif
+
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+	int cnt = 0;
+	for (int i = 0; i < 34; ++i) {
+		TileT t = mahjong::all_tiles[i];
+		if (useful_table[t]) {
+			cnt += 4 - used_table[t];
+		}
+	}
+	return cnt;
+}
+
+void ShantenTest()
+{
+	auto str = "[111m]5m12p1569sSWP";
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+	long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+	if (ret != 0) {
+		printf("error at line %d error = %ld\n", __LINE__, ret);
+		return;
+	}
+
+	char buf[20];
+	ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+	for (size_t i = 0; i < ret; i++) {
+		cout << buf[i];
+	}
+	cout << endl;
+
+	auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+		char buf[64];
+		for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+			if (useful_table[t]) {
+				tiles_to_string(&t, 1, buf, sizeof(buf));
+				printf("%s ", buf);
+			}
+		}
+
+		tile_table_t cnt_table;
+		map_hand_tiles(hand_tiles, &cnt_table);
+
+		printf("%d", CountUsefulTiles(cnt_table, useful_table));
+	};
+
+	puts(str);
+	useful_table_t useful_table/* = {false}*/;
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("13 orphans ===> %d shanten\n", ret0); // 十三幺
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("7 pairs ===> %d shanten\n", ret0); // 七对
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("honors and knitted tiles ===> %d shanten\n", ret0); // 全不靠
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("knitted straight in basic form ===> %d shanten\n", ret0); // 组合龙
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("basic form ===> %d shanten\n", ret0); // 普通情形
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+	auto& h = t;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	string s;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		s.push_back('0' + h.getTileNum());
+	}
+	switch (tileType) {
+	case WANN: s += 'm'; break;
+	case BING: s += 'p'; break;
+	case TIAO: s += 's'; break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			return "E";
+		case 2:
+			return "S";
+		case 3:
+			return "W";
+		case 4:
+			return "N";
+		}
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			return "C";
+		case 2:
+			return "F";
+		case 3:
+			return "P";
+		}
+	}
+	return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand
+){
+	int shanten = std::numeric_limits<int>::max();
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+
+#pragma region 转换成字符串
+	string s;
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		s += '[';
+		if (t == "CHI") {
+			s += tileToStr(m.getPrvMajang());
+			s += tileToStr(m);
+			s += tileToStr(m.getNxtMajang());
+		}
+		else if (t == "PENG" || t == "GANG") {
+			s += tileToStr(m);
+			s += tileToStr(m);
+			s += tileToStr(m);
+			if (t == "GANG") {
+				s += tileToStr(m);
+			}
+		}
+		s += ']';
+	}
+	for (size_t i = 0; i < hand.size(); i++) {
+		s += tileToStr(hand[i]);
+	}
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+	size_t len = s.size();
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char* p = s.c_str();
+	while (char c = *p) {
+		const char* q;
+		switch (c) {
+		case ',': {
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles.tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles.tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	serving_tile = last_tile;
+#pragma endregion
+
+	useful_table_t useful_table = {false};
 	int ret0;
 	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
 	shanten = min(shanten, ret0);
@@ -10984,6 +10396,6551 @@ int ShantenCalc(const vector<pair<string, Majang> >& pack,
 
 	return shanten;
 }
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+	using namespace mahjong;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	tile_t ret = 0;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		ret = h.getTileNum();
+	}
+	switch (tileType) {
+	case WANN: ret |= 0x10; break;
+	case BING: ret |= 0x30; break;
+	case TIAO: ret |= 0x20; break;
+		// SetSuitForNumbered(tileType << 2); break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_E; break;
+		case 2:
+			ret = TILE_S; break;
+		case 3:
+			ret = TILE_W; break;
+		case 4:
+			ret = TILE_N; break;
+		default:
+			assert(false);
+		}
+		break;
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_C; break;
+		case 2:
+			ret = TILE_F; break;
+		case 3:
+			ret = TILE_P; break;
+		default:
+			assert(false);
+		}
+		break;
+	}
+	return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr
+) {
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+
+		/*
+		auto& h = hand[i];
+		auto tileType = TILE_T(h.getTileInt() / 10);
+		switch (tileType) {
+		case WANN:
+		case BING:
+		case TIAO:
+			temp_tiles[tile_cnt++] = h.getTileNum();
+		}
+		switch (tileType) {
+		case WANN: SetSuitForNumbered(0x10); break;
+		case BING: SetSuitForNumbered(0x30); break;
+		case TIAO: SetSuitForNumbered(0x20); break;
+			// SetSuitForNumbered(tileType << 2); break;
+		case FENG:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_E; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_S; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_W; break;
+			case 4:
+				temp_tiles[tile_cnt++] = TILE_N; break;
+			}
+		case JIAN:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_C; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_F; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_P; break;
+			}
+		}
+		*/
+
+		// 对牌打表
+		// for (intptr_t i = 0; i < temp_cnt; ++i) {
+		   // ++cnt_table[temp_tiles[i]];
+		//}
+
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	// 写入数据
+	// tile_t last_tile = 0;
+	// assert(standing_cnt == max_cnt);
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+	// last_tile = standing_tiles[max_cnt - 1];
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	// serving_tile = last_tile;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
+#endif // !Shanten_Calculator_H
+
+/*** End of inlined file: ShantenCalculator.h ***/
+
+// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+#endif
+#else
+
+#endif
+
+using namespace std;
+
+//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
+//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
+
+//如何使用(仅供参考)：
+//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
+//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
+
+class Calculator{
+public:
+	//返回一副牌的得分(番数得分和手牌得分的加权和)
+	static double MajangScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
+		vector<Majang> hand,
+		//hand:玩家的暗牌
+		int flowerCount,
+		//flowerCount:补花数
+		StateContainer state
+		//StateContainer:牌库状态
+	);
+
+	// 可能性计算器（被相似度计算器调用）
+	static double ProbabilityCalc(const StateContainer& state,
+		const Majang& aim
+	);
+
+	// 相似度计算器
+	static double SimilarityCalc(const StateContainer& state,
+		const UsefulTableT& aim
+	);
+
+	//利用算番器计算番数得分
+	static double FanScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		Majang winTile,
+		StateContainer state
+	);
+
+	//一副牌的番数得分
+	static double MajangFanScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		StateContainer state,
+		int depth //迭代深度
+	);
+
+	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
+	static double MajangHandScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand
+	);
+
+	static double HandScoreCalculator(
+		int TileAmount[70]
+	);
+};
+
+#endif
+/*** End of inlined file: ScoreCalculator.h ***/
+
+#ifndef _PREPROCESS_ONLY
+#include <iostream>
+#endif
+using namespace std;
+
+//最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
+double Calculator::MajangScoreCalculator(
+	vector<pair<string, Majang> > pack,
+	vector<Majang> hand,
+	int flowerCount,
+	StateContainer state
+) {
+	//参数实际应按游戏回合分段，这里先随便写了一个
+	const double k1 = 0.4;    // 手牌得分所占权重
+	const double k2 = 0.3;    // 自摸番数得分所占权重
+	const double k3 = 0.3;    // 点炮番数得分所占权重
+	const double k4 = 0.0;    // 复合上听数所占权重
+	//freopen("D://out.txt","a",stdout);
+	double r1 = MajangHandScore(pack, hand);
+	double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
+
+	double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
+
+	int param1, param2, param3;
+	mahjong::useful_table_t useful_table;
+	auto p = ShantenCalc(pack, hand, useful_table);
+	param1 = p.first;                               // shanten数
+	param2 = p.second;                              // effective tiles
+	param3 = SimilarityCalc(state, useful_table);   // similarity
+
+	// 其实讲道理这里仅应该使用similarity一个参量
+	// shanten数是离听牌的距离
+	// 同样shanten数下，effective tiles越多，能减少shanten数的几率就越大
+	// 但是，不是所有effective tiles被抽中的概率都相同，于是加权就得到similarity参量
+	// 这是一层。可是，这一次减少shanten数的几率大，不代表最终达到听牌的几率也大呀，
+	// 万一采取这种方式时再减少很困难怎么办呢，所以可能要应用搜索
+	// 应用搜索还有一个好处，就是可以把番数评估直接加进结果中去，总共节省了两个参量有木有（
+	// 感觉这样就突然和亚马逊棋像了起来，怕是可以用MinMax搜索或者MCTS
+	// 工作量暴增.jpg
+
+	// 在未应用多层搜索时，可以看出，shanten数应当有着相当大的（负）权重
+	// 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
+	// 另外，此时概率大概要取对数（？）
+	// 所以暂时令
+	double k5 = 1 / 2;
+	resultShanten = -(param1 - 1 - log(param3) * k5);
+	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
+
+	//cout<<r1<<" "<<r2<<endl;
+	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
+	return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
+}
+
+//参数c是用来使番数得分与手牌得分的数值相当
+double Calculator::FanScoreCalculator(
+	vector<pair<string, Majang> > pack,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
+	vector<Majang> hand,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
+	int flowerCount,
+	Majang winTile,
+	StateContainer state
+){
+	double k4=120.0;    //将Majang类调整为适用于算番器的接口
+	vector <pair<string,pair<string,int> > > p;
+	for(unsigned int i=0;i<pack.size();++i){
+		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
+	}
+	vector <string> h;
+	for(unsigned int i=0;i<hand.size();++i){
+		h.push_back(hand[i].getTileString());
+	}
+	//算番器啥时候初始化呢？
+	MahjongInit();
+	try{
+		bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
+		bool isGANG=(StateContainer::lastRequest==36);
+		bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
+		int r=0;
+		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
+		return r*k4;
+	}
+	catch(const string &error){
+		return 0;
+	}
+}
+
+double Calculator::MajangFanScore(
+	vector<pair<string, Majang> > pack,
+	vector<Majang> hand,
+	int flowerCount,
+	StateContainer state,
+	int depth
+){
+	double r=0;
+	for(int i=11;i<=19;i++){
+		if(state.getTileLeft(i)){
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
+		}
+	}
+	for(int i=21;i<=29;i++){
+		if(state.getTileLeft(i)){
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
+		}
+	}
+	for(int i=31;i<=39;i++){
+		if(state.getTileLeft(i)){
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
+		}
+	}
+	for(int i=41;i<=44;i++){
+		if(state.getTileLeft(i)){
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
+		}
+	}
+	for(int i=51;i<=53;i++){
+		if(state.getTileLeft(i)){
+			StateContainer newstate(state);
+			newstate.decTileLeft(i);
+			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
+		}
+	}
+	if(depth>=1) return r;
+	for(int i=61;i<=68;i++){
+	  if(state.getTileLeft(i)){
+		   StateContainer newstate(state);
+		   newstate.decTileLeft(i);
+		   r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
+	   }
+	}
+	return r;
+}
+
+//这里采用了将手牌hand和明牌pack合并起来计算的方式,若有必要,可以分开计算并赋上权值
+//参数c是用来使番数得分与手牌得分的数值相当
+double Calculator::MajangHandScore(
+	vector<pair<string, Majang> > pack,
+	vector<Majang> hand
+) {
+	double c = 1;
+	double result = 0;
+	int tileAmount[70];
+	memset(tileAmount, 0, sizeof(tileAmount));
+	for (unsigned int i = 0; i < hand.size(); i++) {
+		tileAmount[hand[i].getTileInt()]++;
+	}
+	for (unsigned int i = 0; i < pack.size(); i++) {
+		if (pack[i].first == "GANG") result += 16;
+		else if (pack[i].first == "PENG") result += 9;
+		else {
+			result += 10;
+		}
+	}
+	result += HandScoreCalculator(tileAmount);
+
+	return result * c;
+}
+
+// 这是单层的，改进空间是升级成多层
+double Calculator::SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+double Calculator::ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / allSecretCnt;
+	return pRet;
+}
+
+double SimilarityCalc(const StateContainer& state,
+	mahjong::useful_table_t useful_table
+){
+	// TO DO
+	return 1.0;
+}
+
+//得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
+//未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
+double Calculator::HandScoreCalculator(
+	int tileAmount[70]
+) {
+	double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
+	int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
+	double r = 0;
+	for (int i = 11; i <= 19; i++) {
+		if (tileAmount[i]) {
+			double singleValue = 0;
+			if (i >= 13) singleValue += tileAmount[i - 2] * 1;
+			if (i >= 12) singleValue += tileAmount[i - 1] * 2;
+			if (i <= 17) singleValue += tileAmount[i + 2] * 1;
+			if (i <= 18) singleValue += tileAmount[i + 1] * 2;
+			if (tileAmount[i] == 2) singleValue += 2;
+			else if (tileAmount[i] == 3) singleValue += 3;
+			else if (tileAmount[i] == 4) singleValue += 4;
+			valueW += tileAmount[i] * singleValue;
+			sumW += tileAmount[i];
+		}
+	}
+	for (int i = 21; i <= 29; i++) {
+		if (tileAmount[i]) {
+			double singleValue = 0;
+			if (i >= 23) singleValue += tileAmount[i - 2] * 1;
+			if (i >= 22) singleValue += tileAmount[i - 1] * 2;
+			if (i <= 27) singleValue += tileAmount[i + 2] * 1;
+			if (i <= 28) singleValue += tileAmount[i + 1] * 2;
+			if (tileAmount[i] == 2) singleValue += 2;
+			else if (tileAmount[i] == 3) singleValue += 3;
+			else if (tileAmount[i] == 4) singleValue += 4;
+			valueB += tileAmount[i] * singleValue;
+			sumB += tileAmount[i];
+		}
+	}
+	for (int i = 31; i <= 39; i++) {
+		if (tileAmount[i]) {
+			double singleValue = 0;
+			if (i >= 33) singleValue += tileAmount[i - 2] * 1;
+			if (i >= 32) singleValue += tileAmount[i - 1] * 2;
+			if (i <= 37) singleValue += tileAmount[i + 2] * 1;
+			if (i <= 38) singleValue += tileAmount[i + 1] * 2;
+			if (tileAmount[i] == 2) singleValue += 2;
+			else if (tileAmount[i] == 3) singleValue += 3;
+			else if (tileAmount[i] == 4) singleValue += 4;
+			valueT += tileAmount[i] * singleValue;
+			sumT += tileAmount[i];
+		}
+	}
+	//箭牌和风牌可能要有特殊的地位*
+	for (int i = 41; i <= 44; i++) {
+		if (tileAmount[i]) {
+			double singleValue = 0;
+			// if(i>=43) singleValue+=tileAmount[i-2]*1;
+			// if(i>=42) singleValue+=tileAmount[i-1]*2;
+			// if(i<=42) singleValue+=tileAmount[i+2]*1;
+			// if(i<=43) singleValue+=tileAmount[i+1]*2;
+			if (tileAmount[i] == 2) singleValue += 2;
+			else if (tileAmount[i] == 3) singleValue += 3;
+			else if (tileAmount[i] == 4) singleValue += 4;
+			valueF += tileAmount[i] * singleValue;
+			sumF += tileAmount[i];
+		}
+	}
+	for (int i = 51; i <= 53; i++) {
+		if (tileAmount[i]) {
+			double singleValue = 0;
+			// if(i>=53) singleValue+=tileAmount[i-2]*1;
+			// if(i>=52) singleValue+=tileAmount[i-1]*2;
+			// if(i<=51) singleValue+=tileAmount[i+2]*1;
+			// if(i<=52) singleValue+=tileAmount[i+1]*2;
+			if (tileAmount[i] == 2) singleValue += 2;
+			else if (tileAmount[i] == 3) singleValue += 3;
+			else if (tileAmount[i] == 4) singleValue += 4;
+			valueJ += tileAmount[i] * singleValue;
+			sumJ += tileAmount[i];
+		}
+	}
+	//手牌张数加成
+	int sum = sumW + sumB + sumT + sumF + sumJ;
+	valueW *= (1 + (double)sumW / sum);
+	valueB *= (1 + (double)sumB / sum);
+	valueT *= (1 + (double)sumT / sum);
+	valueF *= (1 + (double)sumF / sum);
+	valueJ *= (1 + (double)sumJ / sum);
+	r = valueW + valueB + valueT + valueF + valueJ;
+	return r;
+}
+
+/*** End of inlined file: ScoreCalculator.cpp ***/
+
+
+/*** Start of inlined file: ResponseOutput.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef RESPONSEOUTPUT_H
+#define RESPONSEOUTPUT_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+#include <cstring>
+#include <vector>
+#endif
+
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+/*** Start of inlined file: StateContainer.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef STATECONTAINER_H
+#define STATECONTAINER_H
+
+#ifndef _PREPROCESS_ONLY
+#include <valarray>
+#include <vector>
+#include <algorithm>
+#endif
+
+// 使用Majang类
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+using namespace std;
+
+//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
+
+// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
+// 0. 我们的位置、当前的风圈
+// 1. 我们的起始手牌、四名玩家各人的花牌
+// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
+// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
+// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
+
+// 用于存放当前的局面
+// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
+class StateContainer {
+private:
+	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
+	int curTurnPlayer;                  // 当前是哪个玩家的回合
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> discards;       // 用于存放弃牌堆
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
+	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
+	int totalLeft;                      // 没出现过的牌的总数（初始144）
+	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
+
+public:
+	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
+
+	explicit StateContainer(int curP=0, int curT=0);
+	StateContainer(const StateContainer& other);
+
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
+
+	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
+	void decTileLeft(Majang mj);                                               // 同上
+	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
+	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
+
+	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
+	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
+
+	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
+	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
+	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
+	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
+	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
+	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
+	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
+	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
+	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
+
+	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
+
+	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
+	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
+};
+
+#endif
+/*** End of inlined file: StateContainer.h ***/
+
+
+/*** Start of inlined file: ScoreCalculator.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef SCORECALCULATOR_H
+#define SCORECALCULATOR_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+#include <cstring>
+#include <vector>
+#include <utility>
+#endif
+
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+/*** Start of inlined file: StateContainer.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef STATECONTAINER_H
+#define STATECONTAINER_H
+
+#ifndef _PREPROCESS_ONLY
+#include <valarray>
+#include <vector>
+#include <algorithm>
+#endif
+
+// 使用Majang类
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+using namespace std;
+
+//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
+
+// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
+// 0. 我们的位置、当前的风圈
+// 1. 我们的起始手牌、四名玩家各人的花牌
+// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
+// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
+// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
+
+// 用于存放当前的局面
+// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
+class StateContainer {
+private:
+	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
+	int curTurnPlayer;                  // 当前是哪个玩家的回合
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> discards;       // 用于存放弃牌堆
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
+	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
+	int totalLeft;                      // 没出现过的牌的总数（初始144）
+	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
+
+public:
+	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
+
+	explicit StateContainer(int curP=0, int curT=0);
+	StateContainer(const StateContainer& other);
+
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
+
+	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
+	void decTileLeft(Majang mj);                                               // 同上
+	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
+	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
+
+	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
+	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
+
+	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
+	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
+	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
+	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
+	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
+	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
+	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
+	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
+	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
+
+	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
+
+	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
+	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
+};
+
+#endif
+/*** End of inlined file: StateContainer.h ***/
+
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+#endif
+#else
+
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+#endif
+
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+	int cnt = 0;
+	for (int i = 0; i < 34; ++i) {
+		TileT t = mahjong::all_tiles[i];
+		if (useful_table[t]) {
+			cnt += 4 - used_table[t];
+		}
+	}
+	return cnt;
+}
+
+void ShantenTest()
+{
+	auto str = "[111m]5m12p1569sSWP";
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+	long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+	if (ret != 0) {
+		printf("error at line %d error = %ld\n", __LINE__, ret);
+		return;
+	}
+
+	char buf[20];
+	ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+	for (size_t i = 0; i < ret; i++) {
+		cout << buf[i];
+	}
+	cout << endl;
+
+	auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+		char buf[64];
+		for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+			if (useful_table[t]) {
+				tiles_to_string(&t, 1, buf, sizeof(buf));
+				printf("%s ", buf);
+			}
+		}
+
+		tile_table_t cnt_table;
+		map_hand_tiles(hand_tiles, &cnt_table);
+
+		printf("%d", CountUsefulTiles(cnt_table, useful_table));
+	};
+
+	puts(str);
+	useful_table_t useful_table/* = {false}*/;
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("13 orphans ===> %d shanten\n", ret0); // 十三幺
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("7 pairs ===> %d shanten\n", ret0); // 七对
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("honors and knitted tiles ===> %d shanten\n", ret0); // 全不靠
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("knitted straight in basic form ===> %d shanten\n", ret0); // 组合龙
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("basic form ===> %d shanten\n", ret0); // 普通情形
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+	auto& h = t;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	string s;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		s.push_back('0' + h.getTileNum());
+	}
+	switch (tileType) {
+	case WANN: s += 'm'; break;
+	case BING: s += 'p'; break;
+	case TIAO: s += 's'; break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			return "E";
+		case 2:
+			return "S";
+		case 3:
+			return "W";
+		case 4:
+			return "N";
+		}
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			return "C";
+		case 2:
+			return "F";
+		case 3:
+			return "P";
+		}
+	}
+	return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand
+){
+	int shanten = std::numeric_limits<int>::max();
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+
+#pragma region 转换成字符串
+	string s;
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		s += '[';
+		if (t == "CHI") {
+			s += tileToStr(m.getPrvMajang());
+			s += tileToStr(m);
+			s += tileToStr(m.getNxtMajang());
+		}
+		else if (t == "PENG" || t == "GANG") {
+			s += tileToStr(m);
+			s += tileToStr(m);
+			s += tileToStr(m);
+			if (t == "GANG") {
+				s += tileToStr(m);
+			}
+		}
+		s += ']';
+	}
+	for (size_t i = 0; i < hand.size(); i++) {
+		s += tileToStr(hand[i]);
+	}
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+	size_t len = s.size();
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char* p = s.c_str();
+	while (char c = *p) {
+		const char* q;
+		switch (c) {
+		case ',': {
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles.tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles.tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	serving_tile = last_tile;
+#pragma endregion
+
+	useful_table_t useful_table = {false};
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	return shanten;
+}
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+	using namespace mahjong;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	tile_t ret = 0;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		ret = h.getTileNum();
+	}
+	switch (tileType) {
+	case WANN: ret |= 0x10; break;
+	case BING: ret |= 0x30; break;
+	case TIAO: ret |= 0x20; break;
+		// SetSuitForNumbered(tileType << 2); break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_E; break;
+		case 2:
+			ret = TILE_S; break;
+		case 3:
+			ret = TILE_W; break;
+		case 4:
+			ret = TILE_N; break;
+		default:
+			assert(false);
+		}
+		break;
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_C; break;
+		case 2:
+			ret = TILE_F; break;
+		case 3:
+			ret = TILE_P; break;
+		default:
+			assert(false);
+		}
+		break;
+	}
+	return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr
+) {
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+
+		/*
+		auto& h = hand[i];
+		auto tileType = TILE_T(h.getTileInt() / 10);
+		switch (tileType) {
+		case WANN:
+		case BING:
+		case TIAO:
+			temp_tiles[tile_cnt++] = h.getTileNum();
+		}
+		switch (tileType) {
+		case WANN: SetSuitForNumbered(0x10); break;
+		case BING: SetSuitForNumbered(0x30); break;
+		case TIAO: SetSuitForNumbered(0x20); break;
+			// SetSuitForNumbered(tileType << 2); break;
+		case FENG:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_E; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_S; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_W; break;
+			case 4:
+				temp_tiles[tile_cnt++] = TILE_N; break;
+			}
+		case JIAN:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_C; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_F; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_P; break;
+			}
+		}
+		*/
+
+		// 对牌打表
+		// for (intptr_t i = 0; i < temp_cnt; ++i) {
+		   // ++cnt_table[temp_tiles[i]];
+		//}
+
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	// 写入数据
+	// tile_t last_tile = 0;
+	// assert(standing_cnt == max_cnt);
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+	// last_tile = standing_tiles[max_cnt - 1];
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	// serving_tile = last_tile;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
+#endif // !Shanten_Calculator_H
+
+/*** End of inlined file: ShantenCalculator.h ***/
+
+// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+#endif
+#else
+
+#endif
+
+using namespace std;
+
+//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
+//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
+
+//如何使用(仅供参考)：
+//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
+//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
+
+class Calculator{
+public:
+	//返回一副牌的得分(番数得分和手牌得分的加权和)
+	static double MajangScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
+		vector<Majang> hand,
+		//hand:玩家的暗牌
+		int flowerCount,
+		//flowerCount:补花数
+		StateContainer state
+		//StateContainer:牌库状态
+	);
+
+	// 可能性计算器（被相似度计算器调用）
+	static double ProbabilityCalc(const StateContainer& state,
+		const Majang& aim
+	);
+
+	// 相似度计算器
+	static double SimilarityCalc(const StateContainer& state,
+		const UsefulTableT& aim
+	);
+
+	//利用算番器计算番数得分
+	static double FanScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		Majang winTile,
+		StateContainer state
+	);
+
+	//一副牌的番数得分
+	static double MajangFanScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		StateContainer state,
+		int depth //迭代深度
+	);
+
+	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
+	static double MajangHandScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand
+	);
+
+	static double HandScoreCalculator(
+		int TileAmount[70]
+	);
+};
+
+#endif
+/*** End of inlined file: ScoreCalculator.h ***/
+
+using namespace std;
+
+class Output{
+public:
+	static void Response(int request,StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,StateContainer state,bool isZIMO);   //判断是否胡了
+	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
+	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
+	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
+	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
+	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+};
+
+#endif
+/*** End of inlined file: ResponseOutput.h ***/
+
+
+/*** Start of inlined file: ResponseOutput.cpp ***/
+
+/*** Start of inlined file: ResponseOutput.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef RESPONSEOUTPUT_H
+#define RESPONSEOUTPUT_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+#include <cstring>
+#include <vector>
+#endif
+
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+/*** Start of inlined file: StateContainer.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef STATECONTAINER_H
+#define STATECONTAINER_H
+
+#ifndef _PREPROCESS_ONLY
+#include <valarray>
+#include <vector>
+#include <algorithm>
+#endif
+
+// 使用Majang类
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+using namespace std;
+
+//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
+
+// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
+// 0. 我们的位置、当前的风圈
+// 1. 我们的起始手牌、四名玩家各人的花牌
+// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
+// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
+// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
+
+// 用于存放当前的局面
+// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
+class StateContainer {
+private:
+	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
+	int curTurnPlayer;                  // 当前是哪个玩家的回合
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> discards;       // 用于存放弃牌堆
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
+	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
+	int totalLeft;                      // 没出现过的牌的总数（初始144）
+	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
+
+public:
+	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
+
+	explicit StateContainer(int curP=0, int curT=0);
+	StateContainer(const StateContainer& other);
+
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
+
+	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
+	void decTileLeft(Majang mj);                                               // 同上
+	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
+	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
+
+	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
+	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
+
+	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
+	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
+	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
+	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
+	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
+	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
+	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
+	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
+	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
+
+	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
+
+	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
+	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
+};
+
+#endif
+/*** End of inlined file: StateContainer.h ***/
+
+
+/*** Start of inlined file: ScoreCalculator.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef SCORECALCULATOR_H
+#define SCORECALCULATOR_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+#include <cstring>
+#include <vector>
+#include <utility>
+#endif
+
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+/*** Start of inlined file: StateContainer.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef STATECONTAINER_H
+#define STATECONTAINER_H
+
+#ifndef _PREPROCESS_ONLY
+#include <valarray>
+#include <vector>
+#include <algorithm>
+#endif
+
+// 使用Majang类
+
+/*** Start of inlined file: Majang.h ***/
+#ifndef _BOTZONE_ONLINE
+#pragma once
+#endif
+
+#ifndef MAJANG_H
+#define MAJANG_H
+
+#ifndef _PREPROCESS_ONLY
+#include <string>
+//#include <string_view>
+#endif
+
+using namespace std;
+
+// 为了节省内存，用一个int来存麻将的信息
+// 由botzone所给的表示法：
+// > “W4”表示“四万”，“B6”表示“六筒”，“T8”表示“8条”
+// > “F1”～“F4”表示“东南西北”，“J1”～“J3”表示“中发白”，“H1”～“H8”表示“春夏秋冬梅兰竹菊”
+// 注意到数字位最多只会出现1~9，所以可以用个位来存数字位
+// 而以十位来存牌的种类，其中:（可直接看下面的enum
+// 1 => W, 2 => B, 3 => T
+// 4 => F, 5 => J, 6 => H
+typedef int TILE;
+typedef enum TILETYPE {
+	NILL = 0,    // 无，一般出现这个就是没初始化过
+	WANN,        // 万 1
+	BING,        // 筒 2
+	TIAO,        // 条 3
+	FENG,        // 风 4
+	JIAN,        // 箭 5
+	HANA,        // 花 6
+	DRAW,        // 抽牌，虚牌
+} TILE_T;
+
+class Majang {
+private:
+	TILE innerType;                                                         // 储存麻将对应的类型
+public:
+	Majang(): innerType(0) {}                                              // 未初始化
+	Majang(const Majang& other);                                          // 复制构造函数
+	Majang(const char* cstrExpr);                                          // 通过字符串常量创建Majang，！允许隐式转换
+	explicit Majang(const int& intExpr): innerType(intExpr) {}             // 通过int直接创建Majang
+	explicit Majang(const string& strExpr);                                  // 通过string直接创建Majang
+
+	Majang& operator = (const Majang& other);
+	bool operator == (const Majang& other) const;
+
+	void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
+
+	static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型
+	static int parseTileType(const string& strExpr);                          // 从string得到麻将牌的类型
+	static int parseTileNum(const string& strExpr);                           // 从string得到麻将牌的数字
+	static TILE parseTile(const string& strExpr);                             // 从string得到麻将牌（用TILE表示）
+	[[nodiscard]] char getTileType() const;                                 // 获得麻将牌的类型
+	[[nodiscard]] int getTileNum() const;                                   // 获得麻将牌的数字
+	[[nodiscard]] TILE getTileInt() const;                                  // 获得麻将牌的innerType
+	[[nodiscard]] bool isFlowerTile() const;                                // 判断当前这张牌是否是花牌
+	[[nodiscard]] string getTileString() const;                             // 获取麻将牌的代码(botzone表示法),用于算番器——wym
+
+	[[nodiscard]] Majang getNxtMajang() const;                                  // 获得下一个麻将，比如W2的下一个麻将就是W3
+	[[nodiscard]] Majang getPrvMajang() const;                                  // 获得上一个麻将，比如W2的上一个麻将就是W1
+};
+
+#endif
+/*** End of inlined file: Majang.h ***/
+
+
+using namespace std;
+
+//typedef pair<char, int> Majang; // 所有麻将牌均以“大写字母+数字”组合表示
+
+// 从题目的输入request的0~9可知，在输入环节我们可以得到的信息有：
+// 0. 我们的位置、当前的风圈
+// 1. 我们的起始手牌、四名玩家各人的花牌
+// 2. 当前是哪个玩家的回合（可以通过各个摸牌操作来判断）
+// 3. 各个玩家的鸣牌（可以通过吃碰杠来获得）
+// 4. "弃牌堆"中的牌（被打出之后没有被吃碰杠、点炮的牌）
+
+// 用于存放当前的局面
+// 由于该部分很多函数很简单，就不费笔墨写注释了，也没有将实现分离到cpp中
+class StateContainer {
+private:
+	int curPosition;                    // “我们”所处的位置，0是庄家。同样也可以在博弈树节点使用以判断敌我
+	int curTurnPlayer;                  // 当前是哪个玩家的回合
+//    valarray<Majang> inHand;           // 用于存储手牌
+//    valarray<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+//    valarray<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+//    valarray<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+//    valarray<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+////    valarray<Majang> discards;       // 用于存放弃牌堆
+//    valarray<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	vector<Majang> inHand;           // 用于存储手牌
+	vector<Majang> flowerTilesOf[4]; // 用于存储花牌，分别对应4个玩家
+	vector<Majang> chiOf[4];         // 某个玩家鸣牌中的所有“吃”,存放中间那张牌即可
+	vector<Majang> pengOf[4];        // 某个玩家鸣牌中的所有“碰”，存放其中一张即可（因为三张一模一样
+	vector<Majang> gangOf[4];        // 某个玩家鸣牌中的所有“杠”，存放其中一张即可
+//    valarray<Majang> discards;       // 用于存放弃牌堆
+	vector<Majang> tilePlayedOf[4];  // 用于记录某个玩家曾经都打出过哪些卡牌，无论是否被吃、碰还是杠
+	int secretGangCntOf[4];           // 用于记录"暗杠"的数量，通过输入数据我们可以判断出某名玩家有几个暗杠，但我们不知道暗杠的是什么
+	// 下面这个lastPlayed还没确定好到底怎么用，想好的时候再改吧
+	Majang lastPlayed;                 // 用于记录上个回合被打出的麻将牌，如果不是麻将牌类型的话则为其他操作（具体见RequestReader::readRequest
+	int tileLeft[70];                   // 用于记录各种类型牌所剩余的没出现的数量
+	int totalLeft;                      // 没出现过的牌的总数（初始144）
+	int inHandCnt[4];                   // 用于记录四名玩家的手牌数量(虽然不知道有没有用)
+	int tileWallLeft[4];// 用于记录四名玩家的牌墙剩余牌量
+
+public:
+	static int quan;                    // 圈风。因为在一把botzone游戏中，只考虑国标麻将的一局游戏，所以圈风应该是不变的
+	static int lastRequest;             // 上回合的操作,用于算番器的isGANG,采取博弈算法时应换一种存储方式
+
+	explicit StateContainer(int curP=0, int curT=0);
+	StateContainer(const StateContainer& other);
+
+//    [[nodiscard]] valarray<Majang>& getInHand();                               // 获取手牌
+//    [[nodiscard]] valarray<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+//    [[nodiscard]] valarray<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+//    [[nodiscard]] valarray<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+//    [[nodiscard]] valarray<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+////    [[nodiscard]] valarray<Majang>& getDiscards();                             // 获取弃牌堆
+//    [[nodiscard]] valarray<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+//
+//    [[nodiscard]] const valarray<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+//    [[nodiscard]] const valarray<Majang>& getFlowerTilesOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getChiOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getPengOf(int idx) const;
+//    [[nodiscard]] const valarray<Majang>& getGangOf(int idx) const;
+////    [[nodiscard]] const valarray<Majang>& getDiscards() const;
+//    [[nodiscard]] const valarray<Majang>& getTilePlayedOf(int idx) const;
+
+	[[nodiscard]] vector<Majang>& getInHand();                               // 获取手牌
+	[[nodiscard]] vector<Majang>& getFlowerTilesOf(int idx);                 // 获取花牌
+	[[nodiscard]] vector<Majang>& getChiOf(int idx);                         // 获取鸣牌中的“吃"
+	[[nodiscard]] vector<Majang>& getPengOf(int idx);                        // 获取鸣牌中的“碰"
+	[[nodiscard]] vector<Majang>& getGangOf(int idx);                        // 获取鸣牌中的“杠”
+	[[nodiscard]] vector<Majang>& getTilePlayedOf(int idx);                  // 获取某名玩家打过的所有牌
+
+	[[nodiscard]] const vector<Majang>& getInHand() const;                   //  获取手牌的常引用，下同上
+	[[nodiscard]] const vector<Majang>& getFlowerTilesOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getChiOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getPengOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getGangOf(int idx) const;
+	[[nodiscard]] const vector<Majang>& getTilePlayedOf(int idx) const;
+
+	void decTileLeft(int idx);                                                  // 在减少idx对应的牌的数量的同时，减少总数的数量
+	void decTileLeft(Majang mj);                                               // 同上
+	[[nodiscard]] const int & getTileLeft(int idx) const;                       // 获得idx对应的牌的剩余数量
+	[[nodiscard]] const int & getTotalLeft() const;                             // 获得所有牌的剩余数量
+
+	void incSecretGangCntOf(int idx);                                           // 给某名玩家的暗杠数量+1
+	[[nodiscard]] int getSecretGangCntOf(int idx) const;                        // 获取某名玩家的暗杠数量
+
+	void setCurPosition(int curP);                                              // 设置“我们"当前的编号（座位
+	[[nodiscard]] int getCurPosition() const;                                   // 获得我们当前的编号
+	void setCurTurnPlayer(int curTP);                                           // 设置当前回合行动的玩家
+	[[nodiscard]] int getCurTurnPlayer() const;                                 // 获得当前回合行动的玩家的编号
+	void setLastPlayed(const Majang& lastTile);                                // 设置上一个被打出来的麻将
+	[[nodiscard]] const Majang& getLastPlayed() const;                         // 获得上一个被打出来的麻将的常引用
+	void setInHandCntOf(int idx, int cnt);                                      // 将idx号玩家的手牌数量设置为cnt
+	[[nodiscard]] int getInHandCntOf(int idx) const;                            // 获取idx号玩家的手牌数量
+	void incInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量+1
+	void decInHandCntOf(int idx);                                               // 给idx号玩家的手牌数量-1
+
+	void deleteFromInHand(const Majang& toDelete);                             // 从手牌中去除toDelete   //? 可能是一个优化点
+
+	void nxtPosition();                                                         // 将当前的编号（座位）移动到下一个，！应该不常用
+	void nxtTurn();                                                             // 进入下一回合
+
+	int getTileWallLeftOf(int idx) const;                                       // 得到牌墙剩余的数量
+	bool isTileWallEmpty(int idx) const;                                        // 判断牌墙是否为空
+	void decTileWallLeftOf(int idx, int amount=1);                              // 从牌墙中减去几张牌
+};
+
+#endif
+/*** End of inlined file: StateContainer.h ***/
+
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+#endif
+#else
+
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+#endif
+
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+	int cnt = 0;
+	for (int i = 0; i < 34; ++i) {
+		TileT t = mahjong::all_tiles[i];
+		if (useful_table[t]) {
+			cnt += 4 - used_table[t];
+		}
+	}
+	return cnt;
+}
+
+void ShantenTest()
+{
+	auto str = "[111m]5m12p1569sSWP";
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+	long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+	if (ret != 0) {
+		printf("error at line %d error = %ld\n", __LINE__, ret);
+		return;
+	}
+
+	char buf[20];
+	ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+	for (size_t i = 0; i < ret; i++) {
+		cout << buf[i];
+	}
+	cout << endl;
+
+	auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+		char buf[64];
+		for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+			if (useful_table[t]) {
+				tiles_to_string(&t, 1, buf, sizeof(buf));
+				printf("%s ", buf);
+			}
+		}
+
+		tile_table_t cnt_table;
+		map_hand_tiles(hand_tiles, &cnt_table);
+
+		printf("%d", CountUsefulTiles(cnt_table, useful_table));
+	};
+
+	puts(str);
+	useful_table_t useful_table/* = {false}*/;
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("13 orphans ===> %d shanten\n", ret0); // 十三幺
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("7 pairs ===> %d shanten\n", ret0); // 七对
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("honors and knitted tiles ===> %d shanten\n", ret0); // 全不靠
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("knitted straight in basic form ===> %d shanten\n", ret0); // 组合龙
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("basic form ===> %d shanten\n", ret0); // 普通情形
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+	auto& h = t;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	string s;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		s.push_back('0' + h.getTileNum());
+	}
+	switch (tileType) {
+	case WANN: s += 'm'; break;
+	case BING: s += 'p'; break;
+	case TIAO: s += 's'; break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			return "E";
+		case 2:
+			return "S";
+		case 3:
+			return "W";
+		case 4:
+			return "N";
+		}
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			return "C";
+		case 2:
+			return "F";
+		case 3:
+			return "P";
+		}
+	}
+	return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand
+){
+	int shanten = std::numeric_limits<int>::max();
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+
+#pragma region 转换成字符串
+	string s;
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		s += '[';
+		if (t == "CHI") {
+			s += tileToStr(m.getPrvMajang());
+			s += tileToStr(m);
+			s += tileToStr(m.getNxtMajang());
+		}
+		else if (t == "PENG" || t == "GANG") {
+			s += tileToStr(m);
+			s += tileToStr(m);
+			s += tileToStr(m);
+			if (t == "GANG") {
+				s += tileToStr(m);
+			}
+		}
+		s += ']';
+	}
+	for (size_t i = 0; i < hand.size(); i++) {
+		s += tileToStr(hand[i]);
+	}
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+	size_t len = s.size();
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char* p = s.c_str();
+	while (char c = *p) {
+		const char* q;
+		switch (c) {
+		case ',': {
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles.tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles.tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	serving_tile = last_tile;
+#pragma endregion
+
+	useful_table_t useful_table = {false};
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	return shanten;
+}
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+	using namespace mahjong;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	tile_t ret = 0;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		ret = h.getTileNum();
+	}
+	switch (tileType) {
+	case WANN: ret |= 0x10; break;
+	case BING: ret |= 0x30; break;
+	case TIAO: ret |= 0x20; break;
+		// SetSuitForNumbered(tileType << 2); break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_E; break;
+		case 2:
+			ret = TILE_S; break;
+		case 3:
+			ret = TILE_W; break;
+		case 4:
+			ret = TILE_N; break;
+		default:
+			assert(false);
+		}
+		break;
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_C; break;
+		case 2:
+			ret = TILE_F; break;
+		case 3:
+			ret = TILE_P; break;
+		default:
+			assert(false);
+		}
+		break;
+	}
+	return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr
+) {
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+
+		/*
+		auto& h = hand[i];
+		auto tileType = TILE_T(h.getTileInt() / 10);
+		switch (tileType) {
+		case WANN:
+		case BING:
+		case TIAO:
+			temp_tiles[tile_cnt++] = h.getTileNum();
+		}
+		switch (tileType) {
+		case WANN: SetSuitForNumbered(0x10); break;
+		case BING: SetSuitForNumbered(0x30); break;
+		case TIAO: SetSuitForNumbered(0x20); break;
+			// SetSuitForNumbered(tileType << 2); break;
+		case FENG:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_E; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_S; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_W; break;
+			case 4:
+				temp_tiles[tile_cnt++] = TILE_N; break;
+			}
+		case JIAN:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_C; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_F; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_P; break;
+			}
+		}
+		*/
+
+		// 对牌打表
+		// for (intptr_t i = 0; i < temp_cnt; ++i) {
+		   // ++cnt_table[temp_tiles[i]];
+		//}
+
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	// 写入数据
+	// tile_t last_tile = 0;
+	// assert(standing_cnt == max_cnt);
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+	// last_tile = standing_tiles[max_cnt - 1];
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	// serving_tile = last_tile;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
+#endif // !Shanten_Calculator_H
+
+/*** End of inlined file: ShantenCalculator.h ***/
+
+// 直接使用botzone上的内置算番器（因为我实在不知道怎么配置了
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+#endif
+#else
+
+#endif
+
+using namespace std;
+
+//手牌得分用于出牌时的决策，通过比较出掉某一张牌后剩余13张牌的得分，可得到最优的出牌
+//只考虑了自己怎么能赢，而没考虑与对手的博弈，这是一版极其自闭的评估函数。
+
+//如何使用(仅供参考)：
+//1.出牌时通过比较出掉某一张牌后剩余13张牌的得分与风险系数的乘积(用于评估对手对该牌的需要程度),得到最优出牌
+//2.决策杠、吃、碰时通过比较操作前后得分的变化决定是否进行该操作.
+
+class Calculator{
+public:
+	//返回一副牌的得分(番数得分和手牌得分的加权和)
+	static double MajangScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		//pack:玩家的明牌，每组第一个string为"PENG" "GANG" "CHI" 三者之一，第二个为牌（吃牌表示中间牌）
+		vector<Majang> hand,
+		//hand:玩家的暗牌
+		int flowerCount,
+		//flowerCount:补花数
+		StateContainer state
+		//StateContainer:牌库状态
+	);
+
+	// 可能性计算器（被相似度计算器调用）
+	static double ProbabilityCalc(const StateContainer& state,
+		const Majang& aim
+	);
+
+	// 相似度计算器
+	static double SimilarityCalc(const StateContainer& state,
+		const UsefulTableT& aim
+	);
+
+	//利用算番器计算番数得分
+	static double FanScoreCalculator(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		Majang winTile,
+		StateContainer state
+	);
+
+	//一副牌的番数得分
+	static double MajangFanScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand,
+		int flowerCount,
+		StateContainer state,
+		int depth //迭代深度
+	);
+
+	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
+	static double MajangHandScore(
+		vector<pair<string, Majang> > pack,
+		vector<Majang> hand
+	);
+
+	static double HandScoreCalculator(
+		int TileAmount[70]
+	);
+};
+
+#endif
+/*** End of inlined file: ScoreCalculator.h ***/
+
+using namespace std;
+
+class Output{
+public:
+	static void Response(int request,StateContainer state);     //由局面状态(state)和上一步操作(request)得到输出
+	static bool judgeHu(vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& winTile,StateContainer state,bool isZIMO);   //判断是否胡了
+	static bool judgeGang(int tileAmout[70],vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,StateContainer state,int status);    //判断能否杠,status=2表示为摸牌后，status=3表示对手出牌后;如果能,再判断是否要杠
+	static bool judgeBuGang(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile);   //摸牌后判断能否补杠,如果能,再判断是否要杠
+	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
+	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
+	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+};
+
+#endif
+/*** End of inlined file: ResponseOutput.h ***/
+
+#ifndef _PREPROCESS_ONLY
+#include <iostream>
+#endif
+
+using namespace std;
+
+void Output::Response(int request, StateContainer state){
+
+	//接口不同,把valarray转化vector(优化后去掉此步骤)
+	vector<Majang> hand;
+	for(size_t i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
+	vector<pair<string,Majang> > pack;
+	for(size_t i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
+	for(size_t i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
+	for(size_t i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
+
+	//注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
+	int tileAmount[70];
+	memset(tileAmount,0,sizeof(tileAmount));
+	//! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
+//    for(size_t i=0;i<hand.size();i++){
+	for(const auto& item: hand)
+		tileAmount[item.getTileInt()]++;
+
+	bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+	bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
+	//如果是抽牌
+	if(request==2){
+		//此时手牌中最后一个元素即为抽到的牌
+		if(judgeHu(pack,hand,hand.back(),state,true)){
+			printf("HU");
+		}
+		else if(!myEmpty&&!isLast&&judgeBuGang(state,pack,hand,hand.back())){
+			printf("BUGANG %s",hand.back().getTileString().c_str());
+		}
+		else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
+			printf("GANG %s",hand.back().getTileString().c_str());
+		}
+		else{
+			Majang Tileplay=getBestPlay(state,pack,hand).second;
+			printf("PLAY %s",Tileplay.getTileString().c_str());
+		}
+	}
+
+	//如果有别人打出的牌
+	else if((request==32||request==33||request==34)&&state.getCurTurnPlayer() != state.getCurPosition()){
+		Majang lastTile=state.getLastPlayed();//被打出的牌
+		int chi=judgeChi(tileAmount,lastTile);
+		//HU
+		if(judgeHu(pack,hand,lastTile,state,false)){
+			printf("HU");
+		}
+		//GANG
+		else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
+			printf("GANG");
+		}
+		//PENG
+		else if(!isLast&&judgePeng(tileAmount,lastTile)){
+			Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
+			if(MajangPlay.getTileInt()==1){
+				printf("PASS");
+			}
+			else{
+				printf("PENG %s",MajangPlay.getTileString().c_str());
+			}
+		}
+		//chi
+		else if((!isLast&&state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
+			Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi);
+			if(MajangPlay.getTileInt()==1){
+				printf("PASS");
+			}
+			else{
+				if(chi==1) printf("CHI %s %s",lastTile.getNxtMajang().getTileString().c_str(),MajangPlay.getTileString().c_str());
+				else if(chi==2) printf("CHI %s %s",lastTile.getTileString().c_str(),MajangPlay.getTileString().c_str());
+				else printf("CHI %s %s",lastTile.getPrvMajang().getTileString().c_str(),MajangPlay.getTileString().c_str());
+			}
+		}
+		else{
+			printf("PASS");
+		}
+	}
+
+	//抢杠和
+	else if(request==36&&judgeHu(pack,hand,state.getLastPlayed(),state,false)){
+		printf("HU");
+	}
+
+	//其余情况直接输出"pass"即可
+	else{
+		printf("PASS");
+	}
+}
+
+bool Output::judgeHu(
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	const Majang& winTile,
+	StateContainer state,
+	bool isZIMO
+){
+	//cout << "[DEBUG] judgingHu\n";
+	//再次转换接口(可优化)
+	vector <pair<string,pair<string,int> > > p;
+	for(unsigned int i=0;i<pack.size();++i){
+		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
+	}
+	//cout << "[DEBUG] p Generate Successed.\n";
+	vector <string> h;
+	//如果是摸牌,要把手牌中已经加入的摸牌去掉
+	if(isZIMO){
+		for(unsigned int i=0;i<hand.size()-1;++i){
+			h.push_back(hand[i].getTileString());
+		}
+	}
+	else{
+		for(unsigned int i=0;i<hand.size();++i){
+			h.push_back(hand[i].getTileString());
+		}
+	}
+	//cout << "[DEBUG] h Generate Successed.\n";
+	//算番器啥时候初始化呢？
+	MahjongInit();
+	//cout << "[DEBUG] Mahjong Init Successed.\n";
+	try{
+		bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
+		bool isGANG=(StateContainer::lastRequest==36);
+		bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+
+		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),0,isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
+		int r=0;
+		//cout << "[DEBUG] judgeHu Successed!\n";
+		for(unsigned int i=0;i<re.size();i++) {
+			r+=re[i].first;
+			// cout << "[DEBUG] " << re[i].second << " | " << re[i].first << endl;
+		}
+		return r >= 8;  // 这里简化了一下
+	}catch(const string &error){
+		return false;
+	}
+}
+
+int Output::judgeChi(
+	int TileAmount[70],
+	const Majang& newTile
+){
+	if(newTile.getTileInt()/10<=3){
+		if(newTile.getTileNum()<=7&&TileAmount[newTile.getTileInt()+1]&&TileAmount[newTile.getTileInt()+2]) return 1;
+		else if(newTile.getTileNum()>=2&&newTile.getTileNum()<=8&&TileAmount[newTile.getTileInt()-1]&&TileAmount[newTile.getTileInt()+1]) return 2;
+		else if(newTile.getTileNum()>=3&&TileAmount[newTile.getTileInt()-1]&&TileAmount[newTile.getTileInt()-2]) return 3;
+		else return 0;
+	}
+	//风牌、箭牌不能吃，吗？
+	else
+		return 0;
+}
+
+bool Output::judgePeng(
+	int tileAmout[70],
+	const Majang& newTile
+){
+	if(tileAmout[newTile.getTileInt()]==2) return true;
+	else return false;
+}
+
+bool Output::judgeGang(
+	int tileAmout[70],
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	const Majang& newTile,
+	StateContainer state,
+	int status
+){
+	//cout << "[DEBUG] judgingGang\n";    // 没位置加判断是否成功
+	if(status==3){
+		if(tileAmout[newTile.getTileInt()]==3){
+			//先得到不杠时的评估值
+			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			//杠后修改pack,hand;
+			for(unsigned int i=0;i<hand.size();i++){
+				if(hand[i].getTileInt()==newTile.getTileInt()){
+					hand.erase(hand.begin()+i);
+					i--;
+			}
+		}
+			pack.push_back(make_pair("GANG",newTile));
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			if(maxResult2-maxResult1>=1e-5) return true;
+			else return false;
+		}
+		else return false;
+	}
+	else if(status==2){
+		if(tileAmout[newTile.getTileInt()]==4){
+			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
+			double maxResult1=getBestPlay(state,pack,hand).first;
+			//杠后修改pack,hand;
+			for(unsigned int i=0;i<hand.size();i++){
+				if(hand[i].getTileInt()==newTile.getTileInt()){
+					hand.erase(hand.begin()+i);
+					i--;
+			}
+			pack.push_back(make_pair("GANG",newTile));
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			if(maxResult2-maxResult1>=1e-5) return true;
+			else return false;
+			}
+		}
+		else return false;
+	}
+	return false;
+}
+
+bool Output::judgeBuGang(
+	StateContainer state,
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	const Majang& newTile
+){
+	//cout << " judgingBuGang\n";
+	for(unsigned int i=0;i<pack.size();i++){
+		if(pack[i].first=="PENG"&&pack[i].second.getTileInt()==newTile.getTileInt()){
+			//如果不杠,则要打出一张牌,找到所有出牌中的评估最大值
+			double maxResult1=getBestPlay(state,pack,hand).first;
+			//如果杠,先把手牌中的这张牌去掉,再在pack中去掉peng,增加gang
+			for(unsigned int k=0;k<hand.size();k++){
+				if(hand[k].getTileInt()==newTile.getTileInt()){
+					hand.erase(hand.begin()+k);
+					break;
+				}
+			}
+			pack.erase(pack.begin()+i);
+			pack.push_back(make_pair("GANG",newTile));
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			//cout << "[DEBUG] judgeBuGang Successed!\n";
+			if(maxResult2-maxResult1>=1e-5) return true;
+			else return false;
+		}
+	}
+	return false;
+}
+
+const pair<double,Majang> Output::getBestPlay(
+	StateContainer state,
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand
+){
+	int bestChoice=0;
+	double maxResult=-1e5;
+	for(unsigned int i=0;i<hand.size();i++){
+		vector<Majang> newHand(hand);
+		newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
+		double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+		if(ans>maxResult){
+			maxResult=ans;
+			bestChoice=i;
+		}
+	}
+	return make_pair(maxResult,hand[bestChoice]);
+}
+
+const Majang Output::getBestCP(
+	StateContainer state,
+	vector<pair<string,Majang> > pack,
+	vector<Majang> hand,
+	const Majang& newTile,
+	int pos
+){
+	//先得到不进行操作时最优得分
+	double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+	//进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
+	if(pos==0){
+		for(unsigned int i=0;i<hand.size();i++){
+			if(hand[i].getTileInt()==newTile.getTileInt()){
+				hand.erase(hand.begin()+i);
+				i--;
+			}
+		}
+			pack.push_back(make_pair("PENG",newTile));
+	}
+	else{
+		//把吃掉的牌从手牌hand中去掉,再把顺子加到pack中
+		if(pos==1){
+			int k1=1,k2=1;
+			unsigned int i=0;
+			while((k1||k2)&&i<hand.size()){
+				if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
+					k1--;
+					hand.erase(hand.begin()+i);
+				}
+				else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+2){
+					k2--;
+					hand.erase(hand.begin()+i);
+				}
+				else{
+					i++;
+				}
+			}
+			pack.push_back(make_pair("CHI",newTile.getNxtMajang()));
+		}
+		else if(pos==2){
+			int k1=1,k2=1;
+			unsigned int i=0;
+			while((k1||k2)&&i<hand.size()){
+				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
+					k1--;
+					hand.erase(hand.begin()+i);
+				}
+				else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+1){
+					k2--;
+					hand.erase(hand.begin()+i);
+				}
+				else{
+					i++;
+				}
+			}
+			pack.push_back(make_pair("CHI",newTile));
+		}
+		else{
+			int k1=1,k2=1;
+			unsigned int i=0;
+			while((k1||k2)&&i<hand.size()){
+				if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
+					k1--;
+					hand.erase(hand.begin()+i);
+				}
+				else if(k2&&hand[i].getTileInt()==newTile.getTileInt()-2){
+					k2--;
+					hand.erase(hand.begin()+i);
+				}
+				else{
+					i++;
+				}
+			}
+			pack.push_back(make_pair("CHI",newTile.getPrvMajang()));
+		}
+	}
+	//得到操作过后的最优解
+	pair<double,Majang> r=getBestPlay(state,pack,hand);
+	double maxResult2=r.first;
+	if(maxResult2-maxResult1>=1e-5){
+		return r.second;
+	}
+	else return Majang(1);
+}
+/*** End of inlined file: ResponseOutput.cpp ***/
+
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+#endif
+#else
+
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+#endif
+
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+	int cnt = 0;
+	for (int i = 0; i < 34; ++i) {
+		TileT t = mahjong::all_tiles[i];
+		if (useful_table[t]) {
+			cnt += 4 - used_table[t];
+		}
+	}
+	return cnt;
+}
+
+void ShantenTest()
+{
+	auto str = "[111m]5m12p1569sSWP";
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+	long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+	if (ret != 0) {
+		printf("error at line %d error = %ld\n", __LINE__, ret);
+		return;
+	}
+
+	char buf[20];
+	ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+	for (size_t i = 0; i < ret; i++) {
+		cout << buf[i];
+	}
+	cout << endl;
+
+	auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+		char buf[64];
+		for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+			if (useful_table[t]) {
+				tiles_to_string(&t, 1, buf, sizeof(buf));
+				printf("%s ", buf);
+			}
+		}
+
+		tile_table_t cnt_table;
+		map_hand_tiles(hand_tiles, &cnt_table);
+
+		printf("%d", CountUsefulTiles(cnt_table, useful_table));
+	};
+
+	puts(str);
+	useful_table_t useful_table/* = {false}*/;
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("13 orphans ===> %d shanten\n", ret0); // 十三幺
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("7 pairs ===> %d shanten\n", ret0); // 七对
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("honors and knitted tiles ===> %d shanten\n", ret0); // 全不靠
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("knitted straight in basic form ===> %d shanten\n", ret0); // 组合龙
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("basic form ===> %d shanten\n", ret0); // 普通情形
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+	auto& h = t;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	string s;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		s.push_back('0' + h.getTileNum());
+	}
+	switch (tileType) {
+	case WANN: s += 'm'; break;
+	case BING: s += 'p'; break;
+	case TIAO: s += 's'; break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			return "E";
+		case 2:
+			return "S";
+		case 3:
+			return "W";
+		case 4:
+			return "N";
+		}
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			return "C";
+		case 2:
+			return "F";
+		case 3:
+			return "P";
+		}
+	}
+	return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand
+){
+	int shanten = std::numeric_limits<int>::max();
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+
+#pragma region 转换成字符串
+	string s;
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		s += '[';
+		if (t == "CHI") {
+			s += tileToStr(m.getPrvMajang());
+			s += tileToStr(m);
+			s += tileToStr(m.getNxtMajang());
+		}
+		else if (t == "PENG" || t == "GANG") {
+			s += tileToStr(m);
+			s += tileToStr(m);
+			s += tileToStr(m);
+			if (t == "GANG") {
+				s += tileToStr(m);
+			}
+		}
+		s += ']';
+	}
+	for (size_t i = 0; i < hand.size(); i++) {
+		s += tileToStr(hand[i]);
+	}
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+	size_t len = s.size();
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char* p = s.c_str();
+	while (char c = *p) {
+		const char* q;
+		switch (c) {
+		case ',': {
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles.tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles.tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	serving_tile = last_tile;
+#pragma endregion
+
+	useful_table_t useful_table = {false};
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	return shanten;
+}
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+	using namespace mahjong;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	tile_t ret = 0;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		ret = h.getTileNum();
+	}
+	switch (tileType) {
+	case WANN: ret |= 0x10; break;
+	case BING: ret |= 0x30; break;
+	case TIAO: ret |= 0x20; break;
+		// SetSuitForNumbered(tileType << 2); break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_E; break;
+		case 2:
+			ret = TILE_S; break;
+		case 3:
+			ret = TILE_W; break;
+		case 4:
+			ret = TILE_N; break;
+		default:
+			assert(false);
+		}
+		break;
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_C; break;
+		case 2:
+			ret = TILE_F; break;
+		case 3:
+			ret = TILE_P; break;
+		default:
+			assert(false);
+		}
+		break;
+	}
+	return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr
+) {
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+
+		/*
+		auto& h = hand[i];
+		auto tileType = TILE_T(h.getTileInt() / 10);
+		switch (tileType) {
+		case WANN:
+		case BING:
+		case TIAO:
+			temp_tiles[tile_cnt++] = h.getTileNum();
+		}
+		switch (tileType) {
+		case WANN: SetSuitForNumbered(0x10); break;
+		case BING: SetSuitForNumbered(0x30); break;
+		case TIAO: SetSuitForNumbered(0x20); break;
+			// SetSuitForNumbered(tileType << 2); break;
+		case FENG:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_E; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_S; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_W; break;
+			case 4:
+				temp_tiles[tile_cnt++] = TILE_N; break;
+			}
+		case JIAN:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_C; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_F; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_P; break;
+			}
+		}
+		*/
+
+		// 对牌打表
+		// for (intptr_t i = 0; i < temp_cnt; ++i) {
+		   // ++cnt_table[temp_tiles[i]];
+		//}
+
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	// 写入数据
+	// tile_t last_tile = 0;
+	// assert(standing_cnt == max_cnt);
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+	// last_tile = standing_tiles[max_cnt - 1];
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	// serving_tile = last_tile;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
 #endif // !Shanten_Calculator_H
 
 /*** End of inlined file: ShantenCalculator.h ***/
@@ -11014,7 +16971,11 @@ int main() {
 	hand.push_back(Majang(JIAN * 10 + 3));
 	cout << ComplicatedShantenCalc(pack, hand) << endl;
 	cout << "=== complicated shanten test end ===" << endl;
-	cout << ShantenCalc(pack, hand) << endl;
+	int param1, param2; // shanten, effective tiles
+	auto p = ShantenCalc(pack, hand);
+	param1 = p.first; param2 = p.second;
+	cout << "shanten: " << param1 << endl
+		<< "effective tiles: " << param2 << endl;
 	cout << "=== simplified shanten test end ===" << endl;
 	cout << "=== shanten test end ===" << endl;
 #endif // !_BOTZONE_ONLINE
@@ -11022,7 +16983,7 @@ int main() {
 	string tmp;
 	int lastRequest;
 	StateContainer basicState;
-	for(int i=1; i<turnID; i++) {
+	for (int i = 1; i < turnID; i++) {
 		lastRequest = Reader::readRequest(basicState);
 		getline(cin, tmp);   // 过滤掉我们发出的无用的信息
 //        vector<Majang> & tmpM=basicState.getInHand();
@@ -11031,13 +16992,13 @@ int main() {
 //        }
 //        cout<<endl;
 	}
-	StateContainer::lastRequest=lastRequest;
-	int t=Reader::readRequest(basicState);
-//        vector<Majang> & tmpM=basicState.getInHand();
-//        for(auto & mahjong:tmpM){
-//            cout<<mahjong.getTileString()<<" ";
-//        }
-//        cout<<endl;
+	StateContainer::lastRequest = lastRequest;
+	int t = Reader::readRequest(basicState);
+	//        vector<Majang> & tmpM=basicState.getInHand();
+	//        for(auto & mahjong:tmpM){
+	//            cout<<mahjong.getTileString()<<" ";
+	//        }
+	//        cout<<endl;
 	Output::Response(t, basicState);
 	return 0;
 }

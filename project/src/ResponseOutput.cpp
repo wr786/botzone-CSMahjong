@@ -26,16 +26,17 @@ void Output::Response(int request, StateContainer state){
         tileAmount[item.getTileInt()]++;
 
     bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+    bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
     //如果是抽牌
     if(request==2){
         //此时手牌中最后一个元素即为抽到的牌
         if(judgeHu(pack,hand,hand.back(),state,true)){
             printf("HU");
         } 
-        else if(isLast&&judgeBuGang(state,pack,hand,hand.back())){
+        else if(!myEmpty&&!isLast&&judgeBuGang(state,pack,hand,hand.back())){
             printf("BUGANG %s",hand.back().getTileString().c_str());
         }
-        else if(isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
+        else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
             printf("GANG %s",hand.back().getTileString().c_str());
         }
         else{
@@ -53,7 +54,7 @@ void Output::Response(int request, StateContainer state){
             printf("HU");
         }
         //GANG      
-        else if(!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
+        else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
             printf("GANG");
         }
         //PENG
