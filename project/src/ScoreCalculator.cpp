@@ -24,10 +24,10 @@ double Calculator::MajangScoreCalculator(
 
     int param1, param2, param3;
     mahjong::useful_table_t useful_table;
-    auto p = ShantenCalc(pack, hand, useful_table);
-    param1 = p.first;                               // shanten数
-    param2 = p.second;                              // effective tiles
-    param3 = SimilarityCalc(state, useful_table);   // similarity
+    //auto p = ShantenCalc(pack, hand, useful_table);
+    //param1 = p.first;                               // shanten数
+    //param2 = p.second;                              // effective tiles
+    //param3 = SimilarityCalc(state, useful_table);   // similarity
 
     // 其实讲道理这里仅应该使用similarity一个参量
     // shanten数是离听牌的距离
@@ -43,8 +43,8 @@ double Calculator::MajangScoreCalculator(
     // 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
     // 另外，此时概率大概要取对数（？）
     // 所以暂时令
-    double k5=0.5;
-    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
+    //double k5=0.5;
+    //if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
     //cout<<r1<<" "<<r2<<endl;
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
