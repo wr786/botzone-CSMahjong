@@ -25,16 +25,18 @@ void Output::Response(int request, StateContainer state){
     for(const auto& item: hand)
         tileAmount[item.getTileInt()]++;
 
+    bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+    bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
     //如果是抽牌
     if(request==2){
         //此时手牌中最后一个元素即为抽到的牌
         if(judgeHu(pack,hand,hand.back(),state,true)){
             printf("HU");
         } 
-        else if(judgeBuGang(state,pack,hand,hand.back())){
+        else if(!myEmpty&&!isLast&&judgeBuGang(state,pack,hand,hand.back())){
             printf("BUGANG %s",hand.back().getTileString().c_str());
         }
-        else if(judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
+        else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
             printf("GANG %s",hand.back().getTileString().c_str());
         }
         else{
@@ -52,11 +54,11 @@ void Output::Response(int request, StateContainer state){
             printf("HU");
         }
         //GANG      
-        else if(judgeGang(tileAmount,pack,hand,lastTile,state,3)){
+        else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
             printf("GANG");
         }
         //PENG
-        else if(judgePeng(tileAmount,lastTile)){
+        else if(!isLast&&judgePeng(tileAmount,lastTile)){
             Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
             if(MajangPlay.getTileInt()==1){
                 printf("PASS");
@@ -66,7 +68,7 @@ void Output::Response(int request, StateContainer state){
             }
         }
         //chi
-        else if((state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
+        else if(!isLast&&(state.getCurTurnPlayer()+1)%4==state.getCurPosition()&&chi){
             Majang MajangPlay=getBestCP(state,pack,hand,lastTile,chi); 
             if(MajangPlay.getTileInt()==1){
                 printf("PASS");
@@ -126,7 +128,8 @@ bool Output::judgeHu(
     try{
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
         bool isGANG=(StateContainer::lastRequest==36);
-        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
+
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),0,isZIMO,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);
         int r=0; 
         //cout << "[DEBUG] judgeHu Successed!\n";

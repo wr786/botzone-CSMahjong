@@ -12,10 +12,10 @@ double Calculator::MajangScoreCalculator(
     StateContainer state
 ) {
     //参数实际应按游戏回合分段，这里先随便写了一个
-    const double k1 = 0.2;    // 手牌得分所占权重
-    const double k2 = 0.15;    // 自摸番数得分所占权重
-    const double k3 = 0.15;    // 点炮番数得分所占权重
-    const double k4 = 0.5;    // 复合上听数所占权重
+    double k1=0.4;    // 手牌得分所占权重
+    double k2=0.3;    // 自摸番数得分所占权重
+    double k3=0.3;    // 点炮番数得分所占权重
+    double k4=0.0;    // 复合上听数所占权重
     //freopen("D://out.txt","a",stdout);
     double r1 = MajangHandScore(pack, hand);
     double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
@@ -43,10 +43,9 @@ double Calculator::MajangScoreCalculator(
     // 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
     // 另外，此时概率大概要取对数（？）
     // 所以暂时令
-    const double k5 = 1 / 2;
-    resultShanten = -(param1 - 1 - log(param3) * k5);
+    double k5=0.5;
+    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-
     //cout<<r1<<" "<<r2<<endl;
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
     return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
@@ -60,7 +59,7 @@ double Calculator::FanScoreCalculator(
     Majang winTile,
     StateContainer state
 ){  
-    double k4=120.0;    //将Majang类调整为适用于算番器的接口    
+    double k6=120.0;    //将Majang类调整为适用于算番器的接口    
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
         p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
@@ -74,11 +73,11 @@ double Calculator::FanScoreCalculator(
     try{
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
         bool isGANG=(StateContainer::lastRequest==36);
-        bool isLast=(state.getTotalLeft()-state.getTileLeft(0)-state.getTileLeft(1)-state.getTileLeft(2)-state.getTileLeft(3)-state.getSecretGangCntOf(0)-state.getSecretGangCntOf(1)-state.getSecretGangCntOf(2)-state.getSecretGangCntOf(3))==0;
+        bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-        return r*k4;
+        return r*k6;
     }
     catch(const string &error){
         return 0;
@@ -230,7 +229,7 @@ double Calculator::ProbabilityCalc(const StateContainer& state,
         }
     }
 
-    double pRet = (4 - thisMjCnt) / allSecretCnt;
+    double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
     return pRet;
 }
 
@@ -259,6 +258,9 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+            if(i==11||i==19) singleValue+=0.4;
+            else if(i==12||i==18) singleValue+=0.8;
+            else singleValue+=1.2;
             valueW += tileAmount[i] * singleValue;
             sumW += tileAmount[i];
         }
@@ -273,6 +275,9 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+            if(i==21||i==29) singleValue+=0.4;
+            else if(i==22||i==28) singleValue+=0.8;
+            else singleValue+=1.2;
             valueB += tileAmount[i] * singleValue;
             sumB += tileAmount[i];
         }
@@ -287,6 +292,9 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+            if(i==31||i==39) singleValue+=0.4;
+            else if(i==32||i==38) singleValue+=0.8;
+            else singleValue+=1.2;
             valueT += tileAmount[i] * singleValue;
             sumT += tileAmount[i];
         }

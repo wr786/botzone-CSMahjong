@@ -20,17 +20,17 @@ for line in lines:
 			file.write(line[:startPos] + str(aug) + line[endPos:] + '\n')
 		except ValueError:
 			file.write(line + '\n')
-	elif line.find("return result") != -1:
-		startPos = line.find('return result')
-		endPos = line.find('* c;')
-		print(f'[INFO] Using {line[startPos+7:endPos]}')
-		inputStr = input('>>> ')
-		if inputStr.strip() == 'r':
-			file.write(line[:startPos+13] + " * c;\n")
-		elif inputStr.strip() == 's':
-			file.write(line[:startPos+13] + "Shanten * c;\n")
-		else:
-			file.write(line + '\n')
+	# elif line.find("return result") != -1:
+	# 	startPos = line.find('return result')
+	# 	endPos = line.find('* c;')
+	# 	print(f'[INFO] Using {line[startPos+7:endPos]}')
+	# 	inputStr = input('>>> ')
+	# 	if inputStr.strip() == 'r':
+	# 		file.write(line[:startPos+13] + " * c;\n")
+	# 	elif inputStr.strip() == 's':
+	# 		file.write(line[:startPos+13] + "Shanten * c;\n")
+	# 	else:
+	# 		file.write(line + '\n')
 	else:
 		file.write(line + '\n')
 
