@@ -68,7 +68,7 @@ double Calculator::FanScoreCalculator(
     for(unsigned int i=0;i<hand.size();++i){
         h.push_back(hand[i].getTileString());
     }
-    //算番器啥时候初始化呢？
+    //算番器啥时候初始化呢？ 
     MahjongInit();
     try{
         bool isJUEZHANG=state.getTileLeft(winTile.getTileInt())==0;
@@ -80,7 +80,42 @@ double Calculator::FanScoreCalculator(
         return r*k6;
     }
     catch(const string &error){
-        return 0;
+        int tileAmount[70];
+        memset(tileAmount,0,sizeof(tileAmount));
+        vector<int> handAndPack;
+        int quanfeng=StateContainer::quan;
+        int menfeng=state.getCurPosition();
+        for(auto i:pack){
+            if(i.first=="CHI"){
+                tileAmount[i.second.getTileInt()]++;
+                handAndPack.push_back(i.second.getTileInt());
+                tileAmount[i.second.getTileInt()+1]++;
+                handAndPack.push_back(i.second.getTileInt()+1);
+                tileAmount[i.second.getTileInt()-1]++;
+                handAndPack.push_back(i.second.getTileInt()-1);
+            }
+            else if(i.first=="PENG"){
+                tileAmount[i.second.getTileInt()]+=3;
+                handAndPack.push_back(i.second.getTileInt());
+                handAndPack.push_back(i.second.getTileInt());
+                handAndPack.push_back(i.second.getTileInt());
+            }
+            else {
+                tileAmount[i.second.getTileInt()]+=4;
+                handAndPack.push_back(i.second.getTileInt());
+                handAndPack.push_back(i.second.getTileInt());
+                handAndPack.push_back(i.second.getTileInt());
+                handAndPack.push_back(i.second.getTileInt());
+            }
+        }
+        for(auto i:hand){
+            handAndPack.push_back(i.getTileInt());
+            tileAmount[i.getTileInt()]++;
+        }
+        tileAmount[winTile.getTileInt()]++;
+        handAndPack.push_back(winTile.getTileInt());
+        int r=fanCalculator(tileAmount,handAndPack,quanfeng,menfeng);
+        return r;
     }
 }
 
@@ -337,5 +372,109 @@ double Calculator::HandScoreCalculator(
     valueJ *= (1 + (double)sumJ / sum);
     r = valueW + valueB + valueT + valueF + valueJ;
     return r;
+}
+int Calculator::fanCalculator(
+    int tileAmount[70],
+    vector<int> handAndPack,
+    int quanfeng,
+    int menfeng
+){  
+    int fan=0;
+    //考虑的番型
+    bool yaojiuke=true;
+    bool laoshaofu=true;
+    bool lianliu=true;
+    bool xixiangfeng=true;
+    bool yibangao=true;
+    bool shuangtongke=true;
+    bool jianke=true;
+    bool quanfengke=true;
+    bool menfengke=true;
+    //记录以multiset中元素为中间元素的顺子和刻字
+    sort(handAndPack.begin(),handAndPack.end());   
+    multiset<int> shunzi[4];
+    multiset<int> totalshunzi;
+    set<int> kezi;
+    //在这里shunzi和kezi的计算是有重复的
+    for(auto item:handAndPack){
+        if(item/10<=3){
+            if(item%10>=2&&item%10<=8){
+                if(tileAmount[item-1]&&tileAmount[item+1]){
+                    totalshunzi.insert(item);
+                    if(yibangao&&totalshunzi.count(item)==2){
+                        fan++;
+                        yibangao=false;
+                    }
+                    shunzi[item/10].insert(item);
+                }
+            }
+        }
+        if(tileAmount[item]==3){
+            if(kezi.count(item)==0){
+                kezi.insert(item);
+                if(yaojiuke&&item%10==1||item%10==9){
+                    fan++;
+                    yaojiuke=false;
+                }
+                if(jianke&&item/10>=5&&item/10<=6){
+                    fan++;
+                    jianke=false;
+                }
+                if(quanfengke&&item==40+quanfeng+1){
+                    fan++;
+                    quanfengke=false;
+                }
+                if(menfengke&&item==40+menfeng+1){
+                    fan++;
+                    menfengke=false;
+                }
+            }
+        }
+    }
+    
+    for(int i=1;i<=3;i++){
+        if(laoshaofu&&shunzi[i].count(2)&&shunzi[i].count(8)){
+            laoshaofu=false;
+            fan++;
+        }
+        if(lianliu){
+            for(int item:shunzi[i]){
+                if(shunzi[i].count(item+3)){
+                    fan++;
+                    lianliu=false;
+                    break;
+                }
+            }
+        }
+    }
+
+    for(int item:totalshunzi){
+        if(xixiangfeng){
+            int i1,i2;
+            if(item<=20){i1=item+10;i2=item+20;}
+            else if(item<=30){i1=item+10;i2=item-10;}
+            else {i1=item-10;i2=item-20;}
+            if(totalshunzi.count(i1)||totalshunzi.count(i2)){
+                fan++;
+                xixiangfeng=false;
+                break;
+            }
+        }
+    }
+
+    for(int item:kezi){
+        if(shuangtongke){
+            int i1,i2;
+            if(item<=20){i1=item+10;i2=item+20;}
+            else if(item<=30){i1=item+10;i2=item-10;}
+            else {i1=item-10;i2=item-20;}
+            if(kezi.count(i1)||kezi.count(i2)){
+                fan++;
+                shuangtongke=false;
+                break;
+            }
+        }
+    }
+    return fan;
 }
 

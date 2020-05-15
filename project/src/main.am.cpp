@@ -1656,6 +1656,7 @@ int Reader::readRequest(StateContainer &state) {
 #include <cstring>
 #include <vector>
 #include <utility>
+#include <set>
 #endif
 
 
@@ -8984,6 +8985,13 @@ public:
 	static double HandScoreCalculator(
 		int TileAmount[70]
 	);
+
+	static int fanCalculator(
+		int tileAmount[70],
+		vector<int> handAndPack,
+		int quanfeng,
+		int menfeng
+	);
 };
 
 #endif
@@ -9005,6 +9013,7 @@ public:
 #include <cstring>
 #include <vector>
 #include <utility>
+#include <set>
 #endif
 
 
@@ -10745,6 +10754,13 @@ public:
 	static double HandScoreCalculator(
 		int TileAmount[70]
 	);
+
+	static int fanCalculator(
+		int tileAmount[70],
+		vector<int> handAndPack,
+		int quanfeng,
+		int menfeng
+	);
 };
 
 #endif
@@ -10775,10 +10791,10 @@ double Calculator::MajangScoreCalculator(
 
 	int param1, param2, param3;
 	mahjong::useful_table_t useful_table;
-	auto p = ShantenCalc(pack, hand, useful_table);
-	param1 = p.first;                               // shanten数
-	param2 = p.second;                              // effective tiles
-	param3 = SimilarityCalc(state, useful_table);   // similarity
+	//auto p = ShantenCalc(pack, hand, useful_table);
+	//param1 = p.first;                               // shanten数
+	//param2 = p.second;                              // effective tiles
+	//param3 = SimilarityCalc(state, useful_table);   // similarity
 
 	// 其实讲道理这里仅应该使用similarity一个参量
 	// shanten数是离听牌的距离
@@ -10794,8 +10810,8 @@ double Calculator::MajangScoreCalculator(
 	// 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
 	// 另外，此时概率大概要取对数（？）
 	// 所以暂时令
-	double k5=0.5;
-	if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
+	//double k5=0.5;
+	//if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
 	//cout<<r1<<" "<<r2<<endl;
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
@@ -10831,7 +10847,42 @@ double Calculator::FanScoreCalculator(
 		return r*k6;
 	}
 	catch(const string &error){
-		return 0;
+		int tileAmount[70];
+		memset(tileAmount,0,sizeof(tileAmount));
+		vector<int> handAndPack;
+		int quanfeng=StateContainer::quan;
+		int menfeng=state.getCurPosition();
+		for(auto i:pack){
+			if(i.first=="CHI"){
+				tileAmount[i.second.getTileInt()]++;
+				handAndPack.push_back(i.second.getTileInt());
+				tileAmount[i.second.getTileInt()+1]++;
+				handAndPack.push_back(i.second.getTileInt()+1);
+				tileAmount[i.second.getTileInt()-1]++;
+				handAndPack.push_back(i.second.getTileInt()-1);
+			}
+			else if(i.first=="PENG"){
+				tileAmount[i.second.getTileInt()]+=3;
+				handAndPack.push_back(i.second.getTileInt());
+				handAndPack.push_back(i.second.getTileInt());
+				handAndPack.push_back(i.second.getTileInt());
+			}
+			else {
+				tileAmount[i.second.getTileInt()]+=4;
+				handAndPack.push_back(i.second.getTileInt());
+				handAndPack.push_back(i.second.getTileInt());
+				handAndPack.push_back(i.second.getTileInt());
+				handAndPack.push_back(i.second.getTileInt());
+			}
+		}
+		for(auto i:hand){
+			handAndPack.push_back(i.getTileInt());
+			tileAmount[i.getTileInt()]++;
+		}
+		tileAmount[winTile.getTileInt()]++;
+		handAndPack.push_back(winTile.getTileInt());
+		int r=fanCalculator(tileAmount,handAndPack,quanfeng,menfeng);
+		return r;
 	}
 }
 
@@ -11088,6 +11139,110 @@ double Calculator::HandScoreCalculator(
 	valueJ *= (1 + (double)sumJ / sum);
 	r = valueW + valueB + valueT + valueF + valueJ;
 	return r;
+}
+int Calculator::fanCalculator(
+	int tileAmount[70],
+	vector<int> handAndPack,
+	int quanfeng,
+	int menfeng
+){
+	int fan=0;
+	//考虑的番型
+	bool yaojiuke=true;
+	bool laoshaofu=true;
+	bool lianliu=true;
+	bool xixiangfeng=true;
+	bool yibangao=true;
+	bool shuangtongke=true;
+	bool jianke=true;
+	bool quanfengke=true;
+	bool menfengke=true;
+	//记录以multiset中元素为中间元素的顺子和刻字
+	sort(handAndPack.begin(),handAndPack.end());
+	multiset<int> shunzi[4];
+	multiset<int> totalshunzi;
+	set<int> kezi;
+	//在这里shunzi和kezi的计算是有重复的
+	for(auto item:handAndPack){
+		if(item/10<=3){
+			if(item%10>=2&&item%10<=8){
+				if(tileAmount[item-1]&&tileAmount[item+1]){
+					totalshunzi.insert(item);
+					if(yibangao&&totalshunzi.count(item)==2){
+						fan++;
+						yibangao=false;
+					}
+					shunzi[item/10].insert(item);
+				}
+			}
+		}
+		if(tileAmount[item]==3){
+			if(kezi.count(item)==0){
+				kezi.insert(item);
+				if(yaojiuke&&item%10==1||item%10==9){
+					fan++;
+					yaojiuke=false;
+				}
+				if(jianke&&item/10>=5&&item/10<=6){
+					fan++;
+					jianke=false;
+				}
+				if(quanfengke&&item==40+quanfeng+1){
+					fan++;
+					quanfengke=false;
+				}
+				if(menfengke&&item==40+menfeng+1){
+					fan++;
+					menfengke=false;
+				}
+			}
+		}
+	}
+
+	for(int i=1;i<=3;i++){
+		if(laoshaofu&&shunzi[i].count(2)&&shunzi[i].count(8)){
+			laoshaofu=false;
+			fan++;
+		}
+		if(lianliu){
+			for(int item:shunzi[i]){
+				if(shunzi[i].count(item+3)){
+					fan++;
+					lianliu=false;
+					break;
+				}
+			}
+		}
+	}
+
+	for(int item:totalshunzi){
+		if(xixiangfeng){
+			int i1,i2;
+			if(item<=20){i1=item+10;i2=item+20;}
+			else if(item<=30){i1=item+10;i2=item-10;}
+			else {i1=item-10;i2=item-20;}
+			if(totalshunzi.count(i1)||totalshunzi.count(i2)){
+				fan++;
+				xixiangfeng=false;
+				break;
+			}
+		}
+	}
+
+	for(int item:kezi){
+		if(shuangtongke){
+			int i1,i2;
+			if(item<=20){i1=item+10;i2=item+20;}
+			else if(item<=30){i1=item+10;i2=item-10;}
+			else {i1=item-10;i2=item-20;}
+			if(kezi.count(i1)||kezi.count(i2)){
+				fan++;
+				shuangtongke=false;
+				break;
+			}
+		}
+	}
+	return fan;
 }
 
 /*** End of inlined file: ScoreCalculator.cpp ***/
@@ -11382,6 +11537,7 @@ public:
 #include <cstring>
 #include <vector>
 #include <utility>
+#include <set>
 #endif
 
 
@@ -13121,6 +13277,13 @@ public:
 
 	static double HandScoreCalculator(
 		int TileAmount[70]
+	);
+
+	static int fanCalculator(
+		int tileAmount[70],
+		vector<int> handAndPack,
+		int quanfeng,
+		int menfeng
 	);
 };
 
@@ -13436,6 +13599,7 @@ public:
 #include <cstring>
 #include <vector>
 #include <utility>
+#include <set>
 #endif
 
 
@@ -15176,6 +15340,13 @@ public:
 	static double HandScoreCalculator(
 		int TileAmount[70]
 	);
+
+	static int fanCalculator(
+		int tileAmount[70],
+		vector<int> handAndPack,
+		int quanfeng,
+		int menfeng
+	);
 };
 
 #endif
@@ -15216,11 +15387,17 @@ void Output::Response(int request, StateContainer state){
 
 	//注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
 	int tileAmount[70];
+	int tileAmountGang[70];
 	memset(tileAmount,0,sizeof(tileAmount));
+	memset(tileAmountGang,0,sizeof(tileAmountGang));
 	//! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
 //    for(size_t i=0;i<hand.size();i++){
-	for(const auto& item: hand)
-		tileAmount[item.getTileInt()]++;
+	for(const auto item: hand)
+		{tileAmount[item.getTileInt()]++;
+			tileAmountGang[item.getTileInt()]++;}
+	for(const auto item: pack)
+		if(item.first=="PENG")
+			tileAmountGang[item.second.getTileInt()]+=3;
 
 	bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
 	bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
@@ -15233,7 +15410,7 @@ void Output::Response(int request, StateContainer state){
 		else if(!myEmpty&&!isLast&&judgeBuGang(state,pack,hand,hand.back())){
 			printf("BUGANG %s",hand.back().getTileString().c_str());
 		}
-		else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
+		else if(!myEmpty&&!isLast&&judgeGang(tileAmountGang,pack,hand,hand.back(),state,2)){
 			printf("GANG %s",hand.back().getTileString().c_str());
 		}
 		else{
@@ -15251,7 +15428,7 @@ void Output::Response(int request, StateContainer state){
 			printf("HU");
 		}
 		//GANG
-		else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
+		else if(!myEmpty&&!isLast&&judgeGang(tileAmountGang,pack,hand,lastTile,state,3)){
 			printf("GANG");
 		}
 		//PENG

@@ -10,6 +10,7 @@
 #include <cstring>
 #include <vector>
 #include <utility>
+#include <set>
 #endif
 
 #include "Majang.h"
@@ -84,6 +85,13 @@ public:
 
     static double HandScoreCalculator(
         int TileAmount[70]
+    );
+
+    static int fanCalculator(
+        int tileAmount[70],
+        vector<int> handAndPack,
+        int quanfeng,
+        int menfeng
     );
 };
 

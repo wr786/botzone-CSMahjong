@@ -24,12 +24,12 @@ void Output::Response(int request, StateContainer state){
     memset(tileAmountGang,0,sizeof(tileAmountGang));
     //! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
 //    for(size_t i=0;i<hand.size();i++){
-    for(const auto& item: hand)
+    for(const auto item: hand)
         {tileAmount[item.getTileInt()]++;
             tileAmountGang[item.getTileInt()]++;}
-    for(const auto& item: pack)
+    for(const auto item: pack)
         if(item.first=="PENG")
-                tileAmountGang[item.second.getTileInt()]+=3;   
+            tileAmountGang[item.second.getTileInt()]+=3;   
 
     bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
     bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
