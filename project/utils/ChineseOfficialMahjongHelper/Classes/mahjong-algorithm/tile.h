@@ -23,8 +23,10 @@
 #ifndef __MAHJONG_ALGORITHM__TILE_H__
 #define __MAHJONG_ALGORITHM__TILE_H__
 
+#ifndef _PREPROCESS_ONLY
 #include <stddef.h>
 #include <stdint.h>
+#endif
 
  // force inline
 #ifndef FORCE_INLINE

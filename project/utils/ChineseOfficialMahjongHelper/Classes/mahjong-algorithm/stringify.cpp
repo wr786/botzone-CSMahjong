@@ -21,9 +21,11 @@
  ****************************************************************************/
 
 #include "stringify.h"
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 

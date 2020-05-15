@@ -21,11 +21,13 @@
  ****************************************************************************/
 
 #include "shanten.h"
+#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <string.h>
 #include <limits>
 #include <algorithm>
 #include <iterator>
+#endif
 #include "standard_tiles.h"
 
 namespace mahjong {

@@ -21,11 +21,13 @@
  ****************************************************************************/
 
 #include "fan_calculator.h"
+#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 #include "standard_tiles.h"
 #include "shanten.h"
 
