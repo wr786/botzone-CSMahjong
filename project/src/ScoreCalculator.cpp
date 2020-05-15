@@ -258,6 +258,9 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+            if(i==11||i==19) singleValue+=0.4;
+            else if(i==12||i==18) singleValue+=0.8;
+            else singleValue+=1.2;
             valueW += tileAmount[i] * singleValue;
             sumW += tileAmount[i];
         }
@@ -272,6 +275,9 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+            if(i==21||i==29) singleValue+=0.4;
+            else if(i==22||i==28) singleValue+=0.8;
+            else singleValue+=1.2;
             valueB += tileAmount[i] * singleValue;
             sumB += tileAmount[i];
         }
@@ -286,6 +292,9 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+            if(i==31||i==39) singleValue+=0.4;
+            else if(i==32||i==38) singleValue+=0.8;
+            else singleValue+=1.2;
             valueT += tileAmount[i] * singleValue;
             sumT += tileAmount[i];
         }

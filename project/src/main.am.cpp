@@ -3230,25 +3230,18 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
-#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
-#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <cstring>
-#include <iostream>
-#endif
-
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -4005,6 +3998,10 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 #endif
 
 /*** End of inlined file: fan_calculator.h ***/
+
+
+#include <cstring>
+#include <iostream>
 
 using namespace std;
 
@@ -11012,6 +11009,9 @@ double Calculator::HandScoreCalculator(
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
+			if(i==11||i==19) singleValue+=0.4;
+			else if(i==12||i==18) singleValue+=0.8;
+			else singleValue+=1.2;
 			valueW += tileAmount[i] * singleValue;
 			sumW += tileAmount[i];
 		}
@@ -11026,6 +11026,9 @@ double Calculator::HandScoreCalculator(
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
+			if(i==21||i==29) singleValue+=0.4;
+			else if(i==22||i==28) singleValue+=0.8;
+			else singleValue+=1.2;
 			valueB += tileAmount[i] * singleValue;
 			sumB += tileAmount[i];
 		}
@@ -11040,6 +11043,9 @@ double Calculator::HandScoreCalculator(
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
+			if(i==31||i==39) singleValue+=0.4;
+			else if(i==32||i==38) singleValue+=0.8;
+			else singleValue+=1.2;
 			valueT += tileAmount[i] * singleValue;
 			sumT += tileAmount[i];
 		}
