@@ -15387,17 +15387,13 @@ void Output::Response(int request, StateContainer state){
 
 	//注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
 	int tileAmount[70];
-	int tileAmountGang[70];
+
 	memset(tileAmount,0,sizeof(tileAmount));
-	memset(tileAmountGang,0,sizeof(tileAmountGang));
+
 	//! 这里显然可以优化，可能还有很多相似的地方，我就先不找了
 //    for(size_t i=0;i<hand.size();i++){
 	for(const auto item: hand)
-		{tileAmount[item.getTileInt()]++;
-			tileAmountGang[item.getTileInt()]++;}
-	for(const auto item: pack)
-		if(item.first=="PENG")
-			tileAmountGang[item.second.getTileInt()]+=3;
+		tileAmount[item.getTileInt()]++;
 
 	bool isLast=state.isTileWallEmpty((state.getCurTurnPlayer()+1)%4);
 	bool myEmpty=state.isTileWallEmpty((state.getCurPosition()));
@@ -15410,7 +15406,7 @@ void Output::Response(int request, StateContainer state){
 		else if(!myEmpty&&!isLast&&judgeBuGang(state,pack,hand,hand.back())){
 			printf("BUGANG %s",hand.back().getTileString().c_str());
 		}
-		else if(!myEmpty&&!isLast&&judgeGang(tileAmountGang,pack,hand,hand.back(),state,2)){
+		else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,hand.back(),state,2)){
 			printf("GANG %s",hand.back().getTileString().c_str());
 		}
 		else{
@@ -15428,7 +15424,7 @@ void Output::Response(int request, StateContainer state){
 			printf("HU");
 		}
 		//GANG
-		else if(!myEmpty&&!isLast&&judgeGang(tileAmountGang,pack,hand,lastTile,state,3)){
+		else if(!myEmpty&&!isLast&&judgeGang(tileAmount,pack,hand,lastTile,state,3)){
 			printf("GANG");
 		}
 		//PENG
