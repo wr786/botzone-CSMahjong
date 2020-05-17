@@ -247,7 +247,9 @@ bool Output::judgeBuGang(
     }
     return false;
 }
-
+int cmp(Majang a,Majang b){
+    return a.getTileInt()<b.getTileInt();
+}
 
 const pair<double,Majang> Output::getBestPlay(
     StateContainer state,
@@ -256,6 +258,7 @@ const pair<double,Majang> Output::getBestPlay(
 ){
     int bestChoice=0;
     double maxResult=-1e5;
+    sort(hand.begin(),hand.end(),cmp);
     for(unsigned int i=0;i<hand.size();i++){
         vector<Majang> newHand(hand);
         newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌

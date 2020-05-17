@@ -15,19 +15,20 @@ double Calculator::MajangScoreCalculator(
     double k1=0.4;    // 手牌得分所占权重
     double k2=0.3;    // 自摸番数得分所占权重
     double k3=0.3;    // 点炮番数得分所占权重
-    double k4=0.0;    // 复合上听数所占权重
+    double k4=0.4;    // 复合上听数所占权重
     //freopen("D://out.txt","a",stdout);
     double r1 = MajangHandScore(pack, hand);
     double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
 
     double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
 
-    int param1, param2, param3;
+    int param1, param2;
+    double param3;
     mahjong::useful_table_t useful_table;
-    //auto p = ShantenCalc(pack, hand, useful_table);
-    //param1 = p.first;                               // shanten数
-    //param2 = p.second;                              // effective tiles
-    //param3 = SimilarityCalc(state, useful_table);   // similarity
+    auto p = ShantenCalc(pack, hand, useful_table);
+    param1 = p.first;                               // shanten数
+    param2 = p.second;                              // effective tiles
+    param3 = SimilarityCalc(state, useful_table);   // similarity
 
     // 其实讲道理这里仅应该使用similarity一个参量
     // shanten数是离听牌的距离
@@ -43,12 +44,15 @@ double Calculator::MajangScoreCalculator(
     // 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
     // 另外，此时概率大概要取对数（？）
     // 所以暂时令
-    //double k5=0.5;
-    //if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
-    // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-    //cout<<r1<<" "<<r2<<endl;
+    double k5=0.5;
+
+    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
+    // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
+    double k7=25;
+    double r3=k7*resultShanten;
+    //printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
-    return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
+    return r1 * k1 + r2 * (k2 + k3) + r3 * k4;
 }
 
 //参数c是用来使番数得分与手牌得分的数值相当
@@ -57,7 +61,7 @@ double Calculator::FanScoreCalculator(
     vector<Majang> hand,//似乎可以直接用两位整数直接作为代表Majang的参数，从而节省时间与空间
     int flowerCount,
     Majang winTile,
-    StateContainer state
+    StateContainer state    
 ){  
     double k6=120.0;    //将Majang类调整为适用于算番器的接口    
     vector <pair<string,pair<string,int> > > p;
@@ -115,7 +119,7 @@ double Calculator::FanScoreCalculator(
         tileAmount[winTile.getTileInt()]++;
         handAndPack.push_back(winTile.getTileInt());
         int r=fanCalculator(tileAmount,handAndPack,quanfeng,menfeng);
-        return r;
+        return r*k6;
     }
 }
 
