@@ -1,6 +1,7 @@
 #include "ScoreCalculator.h"
 #ifndef _PREPROCESS_ONLY
 #include <iostream>
+#include <ctime>
 #endif
 using namespace std;
 
@@ -10,15 +11,16 @@ double Calculator::MajangScoreCalculator(
     vector<Majang> hand,
     int flowerCount,
     StateContainer state
-) {
+) { 
+
     //参数实际应按游戏回合分段，这里先随便写了一个
     double k1=0.4;    // 手牌得分所占权重
     double k2=0.3;    // 自摸番数得分所占权重
     double k3=0.3;    // 点炮番数得分所占权重
     double k4=0.4;    // 复合上听数所占权重
-    //freopen("D://out.txt","a",stdout);
+    //freopen("D://out.txt","w",stdout);
     double r1 = MajangHandScore(pack, hand);
-    double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
+    double r2 = MajangFanScore(pack, hand, flowerCount, state);
 
     double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
 
@@ -50,7 +52,10 @@ double Calculator::MajangScoreCalculator(
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
     double k7=25;
     double r3=k7*resultShanten;
+
+
     //printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
+
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
     return r1 * k1 + r2 * (k2 + k3) + r3 * k4;
 }
@@ -127,9 +132,9 @@ double Calculator::MajangFanScore(
     vector<pair<string, Majang> > pack,
     vector<Majang> hand,
     int flowerCount,
-    StateContainer state,
-    int depth
+    StateContainer state
 ){  
+
     double r=0;
     for(int i=11;i<=19;i++){
         if(state.getTileLeft(i)){
@@ -166,14 +171,6 @@ double Calculator::MajangFanScore(
             r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
         }        
     }
-    if(depth>=1) return r;
-    for(int i=61;i<=68;i++){
-      if(state.getTileLeft(i)){
-           StateContainer newstate(state);
-           newstate.decTileLeft(i);
-           r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
-       }
-    }
     return r;    
 }
 
@@ -182,7 +179,7 @@ double Calculator::MajangFanScore(
 double Calculator::MajangHandScore(
     vector<pair<string, Majang> > pack,
     vector<Majang> hand
-) {
+) { 
     double c = 1;
     double result = 0;
     int tileAmount[70];
@@ -198,7 +195,6 @@ double Calculator::MajangHandScore(
         }
     }
     result += HandScoreCalculator(tileAmount);
-
     return result * c;
 }
 

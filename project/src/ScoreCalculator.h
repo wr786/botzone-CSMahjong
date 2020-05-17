@@ -73,8 +73,7 @@ public:
         vector<pair<string, Majang> > pack,
         vector<Majang> hand,
         int flowerCount,
-        StateContainer state,
-        int depth //迭代深度
+        StateContainer state
     );
 
     //一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)

@@ -74,7 +74,9 @@ int main() {
     //        for(auto & mahjong:tmpM){
     //            cout<<mahjong.getTileString()<<" ";
     //        }
-    //        cout<<endl;    
+    //        cout<<endl;      
+    
     Output::Response(t, basicState);
+
     return 0;
 }

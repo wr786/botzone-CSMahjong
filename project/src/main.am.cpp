@@ -8972,8 +8972,7 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
+		StateContainer state
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -10741,8 +10740,7 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
+		StateContainer state
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -10768,6 +10766,7 @@ public:
 
 #ifndef _PREPROCESS_ONLY
 #include <iostream>
+#include <ctime>
 #endif
 using namespace std;
 
@@ -10778,23 +10777,25 @@ double Calculator::MajangScoreCalculator(
 	int flowerCount,
 	StateContainer state
 ) {
+
 	//参数实际应按游戏回合分段，这里先随便写了一个
 	double k1=0.4;    // 手牌得分所占权重
 	double k2=0.3;    // 自摸番数得分所占权重
 	double k3=0.3;    // 点炮番数得分所占权重
-	double k4=0.0;    // 复合上听数所占权重
-	//freopen("D://out.txt","a",stdout);
+	double k4=0.4;    // 复合上听数所占权重
+	//freopen("D://out.txt","w",stdout);
 	double r1 = MajangHandScore(pack, hand);
-	double r2 = MajangFanScore(pack, hand, flowerCount, state, 0);
+	double r2 = MajangFanScore(pack, hand, flowerCount, state);
 
 	double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
 
-	int param1, param2, param3;
+	int param1, param2;
+	double param3;
 	mahjong::useful_table_t useful_table;
-	//auto p = ShantenCalc(pack, hand, useful_table);
-	//param1 = p.first;                               // shanten数
-	//param2 = p.second;                              // effective tiles
-	//param3 = SimilarityCalc(state, useful_table);   // similarity
+	auto p = ShantenCalc(pack, hand, useful_table);
+	param1 = p.first;                               // shanten数
+	param2 = p.second;                              // effective tiles
+	param3 = SimilarityCalc(state, useful_table);   // similarity
 
 	// 其实讲道理这里仅应该使用similarity一个参量
 	// shanten数是离听牌的距离
@@ -10810,12 +10811,17 @@ double Calculator::MajangScoreCalculator(
 	// 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
 	// 另外，此时概率大概要取对数（？）
 	// 所以暂时令
-	//double k5=0.5;
-	//if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
+	double k5=0.5;
+
+	if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-	//cout<<r1<<" "<<r2<<endl;
+	double k7=25;
+	double r3=k7*resultShanten;
+
+	//printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
+
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
-	return r1 * k1 + r2 * (k2 + k3) + resultShanten * k4;
+	return r1 * k1 + r2 * (k2 + k3) + r3 * k4;
 }
 
 //参数c是用来使番数得分与手牌得分的数值相当
@@ -10890,9 +10896,9 @@ double Calculator::MajangFanScore(
 	vector<pair<string, Majang> > pack,
 	vector<Majang> hand,
 	int flowerCount,
-	StateContainer state,
-	int depth
+	StateContainer state
 ){
+
 	double r=0;
 	for(int i=11;i<=19;i++){
 		if(state.getTileLeft(i)){
@@ -10929,14 +10935,6 @@ double Calculator::MajangFanScore(
 			r+=(double)state.getTileLeft(i)/state.getTotalLeft()*FanScoreCalculator(pack,hand,flowerCount,Majang(i),newstate);
 		}
 	}
-	if(depth>=1) return r;
-	for(int i=61;i<=68;i++){
-	  if(state.getTileLeft(i)){
-		   StateContainer newstate(state);
-		   newstate.decTileLeft(i);
-		   r+=(double)state.getTileLeft(i)/state.getTotalLeft()*MajangFanScore(pack,hand,flowerCount+1,newstate,depth+1);
-	   }
-	}
 	return r;
 }
 
@@ -10961,7 +10959,6 @@ double Calculator::MajangHandScore(
 		}
 	}
 	result += HandScoreCalculator(tileAmount);
-
 	return result * c;
 }
 
@@ -13265,8 +13262,7 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
+		StateContainer state
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -15327,8 +15323,7 @@ public:
 		vector<pair<string, Majang> > pack,
 		vector<Majang> hand,
 		int flowerCount,
-		StateContainer state,
-		int depth //迭代深度
+		StateContainer state
 	);
 
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
@@ -15376,7 +15371,6 @@ public:
 using namespace std;
 
 void Output::Response(int request, StateContainer state){
-
 	//接口不同,把valarray转化vector(优化后去掉此步骤)
 	vector<Majang> hand;
 	for(size_t i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
@@ -15411,6 +15405,7 @@ void Output::Response(int request, StateContainer state){
 		}
 		else{
 			Majang Tileplay=getBestPlay(state,pack,hand).second;
+
 			printf("PLAY %s",Tileplay.getTileString().c_str());
 		}
 	}
@@ -15612,9 +15607,6 @@ bool Output::judgeBuGang(
 	}
 	return false;
 }
-int cmp(Majang a,Majang b){
-	return a.getTileInt()<b.getTileInt();
-}
 
 const pair<double,Majang> Output::getBestPlay(
 	StateContainer state,
@@ -15623,7 +15615,6 @@ const pair<double,Majang> Output::getBestPlay(
 ){
 	int bestChoice=0;
 	double maxResult=-1e5;
-	sort(hand.begin(),hand.end(),cmp);
 	for(unsigned int i=0;i<hand.size();i++){
 		vector<Majang> newHand(hand);
 		newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -17184,6 +17175,8 @@ int main() {
 	//            cout<<mahjong.getTileString()<<" ";
 	//        }
 	//        cout<<endl;
+
 	Output::Response(t, basicState);
+
 	return 0;
 }

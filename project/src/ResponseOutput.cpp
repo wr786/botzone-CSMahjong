@@ -8,7 +8,6 @@
 using namespace std;
 
 void Output::Response(int request, StateContainer state){
-    
     //接口不同,把valarray转化vector(优化后去掉此步骤)
     vector<Majang> hand;
     for(size_t i=0;i<state.getInHand().size();i++) hand.push_back(state.getInHand()[i]);
@@ -42,7 +41,8 @@ void Output::Response(int request, StateContainer state){
             printf("GANG %s",hand.back().getTileString().c_str());
         }
         else{
-            Majang Tileplay=getBestPlay(state,pack,hand).second;
+            Majang Tileplay=getBestPlay(state,pack,hand).second;            
+
             printf("PLAY %s",Tileplay.getTileString().c_str());
         }
     }
@@ -247,9 +247,6 @@ bool Output::judgeBuGang(
     }
     return false;
 }
-int cmp(Majang a,Majang b){
-    return a.getTileInt()<b.getTileInt();
-}
 
 const pair<double,Majang> Output::getBestPlay(
     StateContainer state,
@@ -258,7 +255,6 @@ const pair<double,Majang> Output::getBestPlay(
 ){
     int bestChoice=0;
     double maxResult=-1e5;
-    sort(hand.begin(),hand.end(),cmp);
     for(unsigned int i=0;i<hand.size();i++){
         vector<Majang> newHand(hand);
         newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
