@@ -80,11 +80,13 @@ public:
     //一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
     static double MajangHandScore(
         vector<pair<string, Majang> > pack, 
-        vector<Majang> hand
+        vector<Majang> hand,
+        bool dianpao
     );
 
     static double HandScoreCalculator(
-        int TileAmount[70]
+        int TileAmount[70],
+        bool dianpao
     );
 
     static int fanCalculator(

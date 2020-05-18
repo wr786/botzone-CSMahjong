@@ -13,15 +13,27 @@ double Calculator::MajangScoreCalculator(
     vector<Majang> hand,
     int flowerCount,
     StateContainer state
-) { 
-
+) {    
+    double k1,k2,k3;
     //参数实际应按游戏回合分段，这里先随便写了一个
-    double k1=0.4;    // 手牌得分所占权重
-    double k2=0.3;    // 自摸番数得分所占权重
-    double k3=0.3;    // 点炮番数得分所占权重
-    double k4=0.4;    // 复合上听数所占权重
+    if(state.getTileWallLeftOf(state.getCurPosition())<=15){
+        k1=0.2;    // 手牌得分所占权重
+        k2=0.4;    // 番数得分所占权重   
+        k3=0.4;    // 复合上听数所占权重
+    }
+    else{
+        k1=0.5;    // 手牌得分所占权重
+        k2=0.3;    // 番数得分所占权重   
+        k3=0.2;    // 复合上听数所占权重        
+    }
+
+    int num=0;
+    for(int i:{0,1,2,3}){
+        if(i!=state.getCurPosition()&&state.getTileWallLeftOf(i)<=8) num++;
+    }
+    bool dianpao=num>=2;
     //freopen("D://out.txt","w",stdout);
-    double r1 = MajangHandScore(pack, hand);
+    double r1 = MajangHandScore(pack, hand,dianpao);
     double r2 = MajangFanScore(pack, hand, flowerCount, state);
 
     double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
@@ -48,18 +60,18 @@ double Calculator::MajangScoreCalculator(
     // 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
     // 另外，此时概率大概要取对数（？）
     // 所以暂时令
-    double k5=0.5;
+    double k4=0.5;
 
-    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
+    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
-    double k7=25.0;
-    double r3=k7*resultShanten;
+    double k5=25.0;
+    double r3=k5*resultShanten;
 
 
     //printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
 
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
-    return r1 * k1 + r2 * (k2 + k3) + r3 * k4;
+    return r1 * k1 + r2 * k2  + r3 * k3;
 }
 
 //参数c是用来使番数得分与手牌得分的数值相当
@@ -180,7 +192,8 @@ double Calculator::MajangFanScore(
 //参数c是用来使番数得分与手牌得分的数值相当
 double Calculator::MajangHandScore(
     vector<pair<string, Majang> > pack,
-    vector<Majang> hand
+    vector<Majang> hand,
+    bool dianpao
 ) { 
     double c = 1;
     double result = 0;
@@ -196,7 +209,7 @@ double Calculator::MajangHandScore(
             result += 10;
         }
     }
-    result += HandScoreCalculator(tileAmount);
+    result += HandScoreCalculator(tileAmount,dianpao);
     return result * c;
 }
 
@@ -280,7 +293,8 @@ double SimilarityCalc(const StateContainer& state,
 //得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
 //未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
 double Calculator::HandScoreCalculator(
-    int tileAmount[70]
+    int tileAmount[70],
+    bool dianpao
 ) {
     double kw=1;
     double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
@@ -300,7 +314,7 @@ double Calculator::HandScoreCalculator(
             else if(i==12||i==18) singleValue+=0.8;
             else singleValue+=1.2;
 
-            if(cntPlayedRecently[i]) {
+            if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
@@ -324,7 +338,7 @@ double Calculator::HandScoreCalculator(
             else if(i==22||i==28) singleValue+=0.8;
             else singleValue+=1.2;
 
-            if(cntPlayedRecently[i]) {
+            if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
@@ -348,7 +362,7 @@ double Calculator::HandScoreCalculator(
             else if(i==32||i==38) singleValue+=0.8;
             else singleValue+=1.2;
 
-            if(cntPlayedRecently[i]) {
+            if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
@@ -370,7 +384,7 @@ double Calculator::HandScoreCalculator(
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
 
-            if(cntPlayedRecently[i]) {
+            if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
@@ -391,7 +405,7 @@ double Calculator::HandScoreCalculator(
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
 
-            if(cntPlayedRecently[i]) {
+            if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
