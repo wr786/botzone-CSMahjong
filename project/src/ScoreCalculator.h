@@ -11,6 +11,7 @@
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 #endif
 
 #include "Majang.h"
@@ -92,6 +93,9 @@ public:
         int quanfeng,
         int menfeng
     );
+
+    static unordered_map<int, int> cntPlayedRecently;
+    static void calcPlayedRecently(const StateContainer& state);
 };
 
 #endif

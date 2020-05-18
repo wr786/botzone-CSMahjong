@@ -5,6 +5,8 @@
 #endif
 using namespace std;
 
+unordered_map<int, int> Calculator::cntPlayedRecently;
+
 //最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
 double Calculator::MajangScoreCalculator(
     vector<pair<string, Majang> > pack,
@@ -50,7 +52,7 @@ double Calculator::MajangScoreCalculator(
 
     if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
-    double k7=25;
+    double k7=25.0;
     double r3=k7*resultShanten;
 
 
@@ -280,6 +282,7 @@ double SimilarityCalc(const StateContainer& state,
 double Calculator::HandScoreCalculator(
     int tileAmount[70]
 ) {
+    double kw=1;
     double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
     int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
     double r = 0;
@@ -296,6 +299,13 @@ double Calculator::HandScoreCalculator(
             if(i==11||i==19) singleValue+=0.4;
             else if(i==12||i==18) singleValue+=0.8;
             else singleValue+=1.2;
+
+            if(cntPlayedRecently[i]) {
+                // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+                // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+                singleValue -= kw*cntPlayedRecently[i];
+            }
+
             valueW += tileAmount[i] * singleValue;
             sumW += tileAmount[i];
         }
@@ -313,6 +323,13 @@ double Calculator::HandScoreCalculator(
             if(i==21||i==29) singleValue+=0.4;
             else if(i==22||i==28) singleValue+=0.8;
             else singleValue+=1.2;
+
+            if(cntPlayedRecently[i]) {
+                // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+                // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+                singleValue -= kw*cntPlayedRecently[i];
+            }
+
             valueB += tileAmount[i] * singleValue;
             sumB += tileAmount[i];
         }
@@ -330,6 +347,13 @@ double Calculator::HandScoreCalculator(
             if(i==31||i==39) singleValue+=0.4;
             else if(i==32||i==38) singleValue+=0.8;
             else singleValue+=1.2;
+
+            if(cntPlayedRecently[i]) {
+                // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+                // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+                singleValue -= kw*cntPlayedRecently[i];
+            }
+
             valueT += tileAmount[i] * singleValue;
             sumT += tileAmount[i];
         }
@@ -345,6 +369,13 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+
+            if(cntPlayedRecently[i]) {
+                // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+                // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+                singleValue -= kw*cntPlayedRecently[i];
+            }
+
             valueF += tileAmount[i] * singleValue;
             sumF += tileAmount[i];
         }
@@ -359,6 +390,13 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
+
+            if(cntPlayedRecently[i]) {
+                // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+                // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+                singleValue -= kw*cntPlayedRecently[i];
+            }
+
             valueJ += tileAmount[i] * singleValue;
             sumJ += tileAmount[i];
         }
@@ -476,5 +514,16 @@ int Calculator::fanCalculator(
         }
     }
     return fan;
+}
+
+void Calculator::calcPlayedRecently(const StateContainer &state) {
+    for(int i=0; i<4; i++) {
+        const vector<Majang>& tilePlayed = state.getTilePlayedOf(i);
+        int len = tilePlayed.size();
+        int depth = min(5, len);
+        for(int idx=len-depth; idx<len; idx++) {
+            cntPlayedRecently[tilePlayed[idx].getTileInt()] += 1;
+        }
+    }
 }
 

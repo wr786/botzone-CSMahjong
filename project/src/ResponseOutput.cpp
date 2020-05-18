@@ -15,7 +15,9 @@ void Output::Response(int request, StateContainer state){
     for(size_t i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
     for(size_t i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
     for(size_t i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
-    
+
+    Calculator::calcPlayedRecently(state); // 应该是在这个时候就可以进行计算了
+
     //注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
     int tileAmount[70];
 

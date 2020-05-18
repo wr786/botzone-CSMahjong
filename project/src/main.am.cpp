@@ -707,7 +707,7 @@ StateContainer::StateContainer(const StateContainer &other) {
 //valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
 //valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
 ////valarray<Majang> &StateContainer::getDiscards() { return discards; }
-//valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+// valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
 //
 //const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
 //const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
@@ -1657,6 +1657,7 @@ int Reader::readRequest(StateContainer &state) {
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 #endif
 
 
@@ -3231,18 +3232,25 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
+#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
+#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <cstring>
+#include <iostream>
+#endif
+
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -3253,8 +3261,10 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef __MAHJONG_ALGORITHM__TILE_H__
 #define __MAHJONG_ALGORITHM__TILE_H__
 
+#ifndef _PREPROCESS_ONLY
 #include <stddef.h>
 #include <stdint.h>
+#endif
 
  // force inline
 #ifndef FORCE_INLINE
@@ -4000,10 +4010,6 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 
 /*** End of inlined file: fan_calculator.h ***/
 
-
-#include <cstring>
-#include <iostream>
-
 using namespace std;
 
 static unordered_map<string, mahjong::tile_t> str2tile;
@@ -4097,11 +4103,13 @@ void MahjongInit()
 
 
 /*** Start of inlined file: fan_calculator.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 /*** Start of inlined file: standard_tiles.h ***/
 #ifndef __MAHJONG_ALGORITHM__STANDARD_TILES_H__
@@ -6590,11 +6598,13 @@ int calculate_fan(const calculate_param_t *calculate_param, fan_table_t *fan_tab
 
 
 /*** Start of inlined file: shanten.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <string.h>
 #include <limits>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -7953,9 +7963,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 /*** End of inlined file: stringify.h ***/
 
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -8991,6 +9003,9 @@ public:
 		int quanfeng,
 		int menfeng
 	);
+
+	static unordered_map<int, int> cntPlayedRecently;
+	static void calcPlayedRecently(const StateContainer& state);
 };
 
 #endif
@@ -9013,6 +9028,7 @@ public:
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 #endif
 
 
@@ -9721,9 +9737,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -10759,6 +10777,9 @@ public:
 		int quanfeng,
 		int menfeng
 	);
+
+	static unordered_map<int, int> cntPlayedRecently;
+	static void calcPlayedRecently(const StateContainer& state);
 };
 
 #endif
@@ -10769,6 +10790,8 @@ public:
 #include <ctime>
 #endif
 using namespace std;
+
+unordered_map<int, int> Calculator::cntPlayedRecently;
 
 //最终在决策时还应乘上出相应牌的风险系数(用于评估对手对该牌的需要程度)
 double Calculator::MajangScoreCalculator(
@@ -10815,7 +10838,7 @@ double Calculator::MajangScoreCalculator(
 
 	if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-	double k7=25;
+	double k7=25.0;
 	double r3=k7*resultShanten;
 
 	//printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
@@ -11044,6 +11067,7 @@ double SimilarityCalc(const StateContainer& state,
 double Calculator::HandScoreCalculator(
 	int tileAmount[70]
 ) {
+	double kw=1;
 	double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
 	int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
 	double r = 0;
@@ -11060,6 +11084,13 @@ double Calculator::HandScoreCalculator(
 			if(i==11||i==19) singleValue+=0.4;
 			else if(i==12||i==18) singleValue+=0.8;
 			else singleValue+=1.2;
+
+			if(cntPlayedRecently[i]) {
+				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+				singleValue -= kw*cntPlayedRecently[i];
+			}
+
 			valueW += tileAmount[i] * singleValue;
 			sumW += tileAmount[i];
 		}
@@ -11077,6 +11108,13 @@ double Calculator::HandScoreCalculator(
 			if(i==21||i==29) singleValue+=0.4;
 			else if(i==22||i==28) singleValue+=0.8;
 			else singleValue+=1.2;
+
+			if(cntPlayedRecently[i]) {
+				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+				singleValue -= kw*cntPlayedRecently[i];
+			}
+
 			valueB += tileAmount[i] * singleValue;
 			sumB += tileAmount[i];
 		}
@@ -11094,6 +11132,13 @@ double Calculator::HandScoreCalculator(
 			if(i==31||i==39) singleValue+=0.4;
 			else if(i==32||i==38) singleValue+=0.8;
 			else singleValue+=1.2;
+
+			if(cntPlayedRecently[i]) {
+				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+				singleValue -= kw*cntPlayedRecently[i];
+			}
+
 			valueT += tileAmount[i] * singleValue;
 			sumT += tileAmount[i];
 		}
@@ -11109,6 +11154,13 @@ double Calculator::HandScoreCalculator(
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
+
+			if(cntPlayedRecently[i]) {
+				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+				singleValue -= kw*cntPlayedRecently[i];
+			}
+
 			valueF += tileAmount[i] * singleValue;
 			sumF += tileAmount[i];
 		}
@@ -11123,6 +11175,13 @@ double Calculator::HandScoreCalculator(
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
+
+			if(cntPlayedRecently[i]) {
+				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
+				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
+				singleValue -= kw*cntPlayedRecently[i];
+			}
+
 			valueJ += tileAmount[i] * singleValue;
 			sumJ += tileAmount[i];
 		}
@@ -11240,6 +11299,17 @@ int Calculator::fanCalculator(
 		}
 	}
 	return fan;
+}
+
+void Calculator::calcPlayedRecently(const StateContainer &state) {
+	for(int i=0; i<4; i++) {
+		const vector<Majang>& tilePlayed = state.getTilePlayedOf(i);
+		int len = tilePlayed.size();
+		int depth = min(5, len);
+		for(int idx=len-depth; idx<len; idx++) {
+			cntPlayedRecently[tilePlayed[idx].getTileInt()] += 1;
+		}
+	}
 }
 
 /*** End of inlined file: ScoreCalculator.cpp ***/
@@ -11535,6 +11605,7 @@ public:
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 #endif
 
 
@@ -12243,9 +12314,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -13281,6 +13354,9 @@ public:
 		int quanfeng,
 		int menfeng
 	);
+
+	static unordered_map<int, int> cntPlayedRecently;
+	static void calcPlayedRecently(const StateContainer& state);
 };
 
 #endif
@@ -13596,6 +13672,7 @@ public:
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 #endif
 
 
@@ -14304,9 +14381,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -15342,6 +15421,9 @@ public:
 		int quanfeng,
 		int menfeng
 	);
+
+	static unordered_map<int, int> cntPlayedRecently;
+	static void calcPlayedRecently(const StateContainer& state);
 };
 
 #endif
@@ -15378,6 +15460,8 @@ void Output::Response(int request, StateContainer state){
 	for(size_t i=0;i<state.getChiOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("CHI",state.getChiOf(state.getCurPosition())[i]));
 	for(size_t i=0;i<state.getPengOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("PENG",state.getPengOf(state.getCurPosition())[i]));
 	for(size_t i=0;i<state.getGangOf(state.getCurPosition()).size();i++) pack.push_back(make_pair("GANG",state.getGangOf(state.getCurPosition())[i]));
+
+	Calculator::calcPlayedRecently(state); // 应该是在这个时候就可以进行计算了
 
 	//注意：若此回合为抽牌后,此时应比正常情况多出1张手牌
 	int tileAmount[70];
@@ -16158,9 +16242,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 

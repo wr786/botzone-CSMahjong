@@ -52,7 +52,7 @@ StateContainer::StateContainer(const StateContainer &other) {
 //valarray<Majang> &StateContainer::getPengOf(int idx) { return pengOf[idx]; }
 //valarray<Majang> &StateContainer::getGangOf(int idx) { return gangOf[idx]; }
 ////valarray<Majang> &StateContainer::getDiscards() { return discards; }
-//valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
+// valarray<Majang> &StateContainer::getTilePlayedOf(int idx) { return tilePlayedOf[idx]; }
 //
 //const valarray<Majang> &StateContainer::getInHand() const { return inHand; }
 //const valarray<Majang> &StateContainer::getFlowerTilesOf(int idx) const { return flowerTilesOf[idx]; }
