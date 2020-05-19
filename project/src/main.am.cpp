@@ -3232,25 +3232,18 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
-#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
-#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <cstring>
-#include <iostream>
-#endif
-
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -3261,10 +3254,8 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef __MAHJONG_ALGORITHM__TILE_H__
 #define __MAHJONG_ALGORITHM__TILE_H__
 
-#ifndef _PREPROCESS_ONLY
 #include <stddef.h>
 #include <stdint.h>
-#endif
 
  // force inline
 #ifndef FORCE_INLINE
@@ -4010,6 +4001,10 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 
 /*** End of inlined file: fan_calculator.h ***/
 
+
+#include <cstring>
+#include <iostream>
+
 using namespace std;
 
 static unordered_map<string, mahjong::tile_t> str2tile;
@@ -4103,13 +4098,11 @@ void MahjongInit()
 
 
 /*** Start of inlined file: fan_calculator.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 /*** Start of inlined file: standard_tiles.h ***/
 #ifndef __MAHJONG_ALGORITHM__STANDARD_TILES_H__
@@ -6598,13 +6591,11 @@ int calculate_fan(const calculate_param_t *calculate_param, fan_table_t *fan_tab
 
 
 /*** Start of inlined file: shanten.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <string.h>
 #include <limits>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -7963,11 +7954,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 /*** End of inlined file: stringify.h ***/
 
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -8777,13 +8766,192 @@ int CountTable(mahjong::useful_table_t& ut) {
 	return etc;
 }
 
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
 // 我发现useful_table很重要啊 --DRZ
 pair<int, int> ShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
-	mahjong::useful_table_t useful_table = nullptr
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
 ) {
 	using namespace mahjong;
 
@@ -8902,17 +9070,25 @@ pair<int, int> ShantenCalc(
 
 	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
 
-	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
 	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
 	Check();
@@ -8956,18 +9132,9 @@ public:
 		//hand:玩家的暗牌
 		int flowerCount,
 		//flowerCount:补花数
-		StateContainer state
+		StateContainer state,
 		//StateContainer:牌库状态
-	);
-
-	// 可能性计算器（被相似度计算器调用）
-	static double ProbabilityCalc(const StateContainer& state,
-		const Majang& aim
-	);
-
-	// 相似度计算器
-	static double SimilarityCalc(const StateContainer& state,
-		const UsefulTableT& aim
+		mahjong::tile_t form_flag
 	);
 
 	//利用算番器计算番数得分
@@ -8990,11 +9157,13 @@ public:
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
 	static double MajangHandScore(
 		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
+		vector<Majang> hand,
+		bool dianpao
 	);
 
 	static double HandScoreCalculator(
-		int TileAmount[70]
+		int TileAmount[70],
+		bool dianpao
 	);
 
 	static int fanCalculator(
@@ -9737,11 +9906,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -10551,13 +10718,192 @@ int CountTable(mahjong::useful_table_t& ut) {
 	return etc;
 }
 
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
 // 我发现useful_table很重要啊 --DRZ
 pair<int, int> ShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
-	mahjong::useful_table_t useful_table = nullptr
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
 ) {
 	using namespace mahjong;
 
@@ -10676,17 +11022,25 @@ pair<int, int> ShantenCalc(
 
 	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
 
-	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
 	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
 	Check();
@@ -10730,18 +11084,9 @@ public:
 		//hand:玩家的暗牌
 		int flowerCount,
 		//flowerCount:补花数
-		StateContainer state
+		StateContainer state,
 		//StateContainer:牌库状态
-	);
-
-	// 可能性计算器（被相似度计算器调用）
-	static double ProbabilityCalc(const StateContainer& state,
-		const Majang& aim
-	);
-
-	// 相似度计算器
-	static double SimilarityCalc(const StateContainer& state,
-		const UsefulTableT& aim
+		mahjong::tile_t form_flag
 	);
 
 	//利用算番器计算番数得分
@@ -10764,11 +11109,13 @@ public:
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
 	static double MajangHandScore(
 		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
+		vector<Majang> hand,
+		bool dianpao
 	);
 
 	static double HandScoreCalculator(
-		int TileAmount[70]
+		int TileAmount[70],
+		bool dianpao
 	);
 
 	static int fanCalculator(
@@ -10798,16 +11145,35 @@ double Calculator::MajangScoreCalculator(
 	vector<pair<string, Majang> > pack,
 	vector<Majang> hand,
 	int flowerCount,
-	StateContainer state
+	StateContainer state,
+	mahjong::tile_t form_flag=0x01
 ) {
-
+	double k1,k2,k3;
 	//参数实际应按游戏回合分段，这里先随便写了一个
-	double k1=0.4;    // 手牌得分所占权重
-	double k2=0.3;    // 自摸番数得分所占权重
-	double k3=0.3;    // 点炮番数得分所占权重
-	double k4=0.4;    // 复合上听数所占权重
+	if(state.getTileWallLeftOf(state.getCurPosition())<=15){
+		k1=0.2;    // 手牌得分所占权重
+		k2=0.5;    // 番数得分所占权重
+		k3=0.3;    // 复合上听数所占权重
+	}
+	else if(state.getTileWallLeftOf(state.getCurPosition())<=18){
+		k1=0.3;    // 手牌得分所占权重
+		k2=0.3;    // 番数得分所占权重
+		k3=0.4;    // 复合上听数所占权重
+	}
+	else{
+		//前几手抓牌shanten不太准
+		k1=0.5;    // 手牌得分所占权重
+		k2=0.3;    // 番数得分所占权重
+		k3=0.2;    // 复合上听数所占权重
+	}
+
+	int num=0;
+	for(int i:{0,1,2,3}){
+		if(i!=state.getCurPosition()&&state.getTileWallLeftOf(i)<=8) num++;
+	}
+	bool dianpao=num>=2;
 	//freopen("D://out.txt","w",stdout);
-	double r1 = MajangHandScore(pack, hand);
+	double r1 = MajangHandScore(pack, hand,dianpao);
 	double r2 = MajangFanScore(pack, hand, flowerCount, state);
 
 	double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
@@ -10815,7 +11181,7 @@ double Calculator::MajangScoreCalculator(
 	int param1, param2;
 	double param3;
 	mahjong::useful_table_t useful_table;
-	auto p = ShantenCalc(pack, hand, useful_table);
+	auto p = ShantenCalc(pack, hand, useful_table,form_flag);
 	param1 = p.first;                               // shanten数
 	param2 = p.second;                              // effective tiles
 	param3 = SimilarityCalc(state, useful_table);   // similarity
@@ -10834,17 +11200,18 @@ double Calculator::MajangScoreCalculator(
 	// 毕竟在没有其他信息的情况下，很难认为一个大shanten数反而更容易听牌
 	// 另外，此时概率大概要取对数（？）
 	// 所以暂时令
-	double k5=0.5;
+	double k4=0.5;
 
-	if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k5);	// 因为初始化是0，所以不用写else
+	if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
-	double k7=25.0;
-	double r3=k7*resultShanten;
+	double k5=20;
+	if(form_flag!=0x01) k5=30;  //这时候要加大shanten的占比
+	double r3=k5*resultShanten;
 
 	//printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
 
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
-	return r1 * k1 + r2 * (k2 + k3) + r3 * k4;
+	return r1 * k1 + r2 * k2  + r3 * k3;
 }
 
 //参数c是用来使番数得分与手牌得分的数值相当
@@ -10855,7 +11222,7 @@ double Calculator::FanScoreCalculator(
 	Majang winTile,
 	StateContainer state
 ){
-	double k6=120.0;    //将Majang类调整为适用于算番器的接口
+	double k6=40;    //将Majang类调整为适用于算番器的接口
 	vector <pair<string,pair<string,int> > > p;
 	for(unsigned int i=0;i<pack.size();++i){
 		p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
@@ -10873,7 +11240,7 @@ double Calculator::FanScoreCalculator(
 		auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
 		int r=0;
 		for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-		return r*k6;
+		return r*k6*3;
 	}
 	catch(const string &error){
 		int tileAmount[70];
@@ -10911,7 +11278,12 @@ double Calculator::FanScoreCalculator(
 		tileAmount[winTile.getTileInt()]++;
 		handAndPack.push_back(winTile.getTileInt());
 		int r=fanCalculator(tileAmount,handAndPack,quanfeng,menfeng);
-		return r*k6;
+		if(state.getTileWallLeftOf(state.getCurPosition())<=16){
+			return 0;
+		}
+		else{
+			return r*k6;
+		}
 	}
 }
 
@@ -10965,7 +11337,8 @@ double Calculator::MajangFanScore(
 //参数c是用来使番数得分与手牌得分的数值相当
 double Calculator::MajangHandScore(
 	vector<pair<string, Majang> > pack,
-	vector<Majang> hand
+	vector<Majang> hand,
+	bool dianpao
 ) {
 	double c = 1;
 	double result = 0;
@@ -10974,98 +11347,23 @@ double Calculator::MajangHandScore(
 	for (unsigned int i = 0; i < hand.size(); i++) {
 		tileAmount[hand[i].getTileInt()]++;
 	}
+	//各个数值都翻了倍，原因是吃碰杠后handscore会明显减少，然而这是不科学的
 	for (unsigned int i = 0; i < pack.size(); i++) {
-		if (pack[i].first == "GANG") result += 16;
-		else if (pack[i].first == "PENG") result += 9;
+		if (pack[i].first == "GANG") result += 32;
+		else if (pack[i].first == "PENG") result += 18;
 		else {
-			result += 10;
+			result += 20;
 		}
 	}
-	result += HandScoreCalculator(tileAmount);
+	result += HandScoreCalculator(tileAmount,dianpao);
 	return result * c;
-}
-
-// 这是单层的，改进空间是升级成多层
-double Calculator::SimilarityCalc(const StateContainer& state,
-	const UsefulTableT& aim
-){
-	using namespace mahjong;
-	vector<Majang> vct;
-	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
-	{
-		if (aim[i])
-		{
-			auto mj = MahjongToMajang(i);
-			vct.push_back(mj);
-		}
-	}
-	double sim = 0;
-	for (size_t i = 0; i < vct.size(); i++)
-	{
-		sim += ProbabilityCalc(state, vct[i]);
-	}
-	return sim;
-}
-
-double Calculator::ProbabilityCalc(const StateContainer& state,
-	const Majang& aim
-){
-	const int playerIdx = state.getCurTurnPlayer();
-
-	int OtherMingTilesCnt = 0;
-	for (int i = 0; i < 4; ++i) {
-		if (i != playerIdx) {
-			// 他人鸣牌总数
-			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
-			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
-			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
-		}
-	}
-	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
-
-	int thisMjCnt = 0;
-	auto& MyMj = state.getInHand();
-	for (auto& mj : MyMj) {
-		// 自己手中的该麻将
-		if (mj == aim)
-			thisMjCnt++;
-	}
-	for (int i = 0; i < 4; ++i) {
-		if (i != playerIdx) {
-			// 他人鸣牌中的该麻将
-			for (auto& mj : state.getPengOf(i)) {
-				if (mj == aim)
-					thisMjCnt += 3;
-			}
-			for (auto& mj : state.getChiOf(i)) {
-				if (mj == aim
-					|| mj.getPrvMajang() == aim
-					|| mj.getNxtMajang() == aim) {
-					thisMjCnt++;
-				}
-			}
-			for (auto& mj : state.getGangOf(i)) {
-				if (mj == aim)
-					thisMjCnt += 4;
-			}
-		}
-	}
-
-	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
-	return pRet;
-}
-
-double SimilarityCalc(const StateContainer& state,
-	mahjong::useful_table_t useful_table
-){
-	// TO DO
-	return 1.0;
 }
 
 //得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
 //未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
 double Calculator::HandScoreCalculator(
-	int tileAmount[70]
+	int tileAmount[70],
+	bool dianpao
 ) {
 	double kw=1;
 	double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
@@ -11085,7 +11383,7 @@ double Calculator::HandScoreCalculator(
 			else if(i==12||i==18) singleValue+=0.8;
 			else singleValue+=1.2;
 
-			if(cntPlayedRecently[i]) {
+			if(dianpao&&cntPlayedRecently[i]) {
 				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
@@ -11109,7 +11407,7 @@ double Calculator::HandScoreCalculator(
 			else if(i==22||i==28) singleValue+=0.8;
 			else singleValue+=1.2;
 
-			if(cntPlayedRecently[i]) {
+			if(dianpao&&cntPlayedRecently[i]) {
 				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
@@ -11133,7 +11431,7 @@ double Calculator::HandScoreCalculator(
 			else if(i==32||i==38) singleValue+=0.8;
 			else singleValue+=1.2;
 
-			if(cntPlayedRecently[i]) {
+			if(dianpao&&cntPlayedRecently[i]) {
 				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
@@ -11155,7 +11453,7 @@ double Calculator::HandScoreCalculator(
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
 
-			if(cntPlayedRecently[i]) {
+			if(dianpao&&cntPlayedRecently[i]) {
 				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
@@ -11176,7 +11474,7 @@ double Calculator::HandScoreCalculator(
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
 
-			if(cntPlayedRecently[i]) {
+			if(dianpao&&cntPlayedRecently[i]) {
 				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
@@ -12314,11 +12612,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -13128,13 +13424,192 @@ int CountTable(mahjong::useful_table_t& ut) {
 	return etc;
 }
 
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
 // 我发现useful_table很重要啊 --DRZ
 pair<int, int> ShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
-	mahjong::useful_table_t useful_table = nullptr
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
 ) {
 	using namespace mahjong;
 
@@ -13253,17 +13728,25 @@ pair<int, int> ShantenCalc(
 
 	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
 
-	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
 	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
 	Check();
@@ -13307,18 +13790,9 @@ public:
 		//hand:玩家的暗牌
 		int flowerCount,
 		//flowerCount:补花数
-		StateContainer state
+		StateContainer state,
 		//StateContainer:牌库状态
-	);
-
-	// 可能性计算器（被相似度计算器调用）
-	static double ProbabilityCalc(const StateContainer& state,
-		const Majang& aim
-	);
-
-	// 相似度计算器
-	static double SimilarityCalc(const StateContainer& state,
-		const UsefulTableT& aim
+		mahjong::tile_t form_flag
 	);
 
 	//利用算番器计算番数得分
@@ -13341,11 +13815,13 @@ public:
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
 	static double MajangHandScore(
 		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
+		vector<Majang> hand,
+		bool dianpao
 	);
 
 	static double HandScoreCalculator(
-		int TileAmount[70]
+		int TileAmount[70],
+		bool dianpao
 	);
 
 	static int fanCalculator(
@@ -13361,6 +13837,1601 @@ public:
 
 #endif
 /*** End of inlined file: ScoreCalculator.h ***/
+
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+#endif
+#else
+
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+#endif
+
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+	int cnt = 0;
+	for (int i = 0; i < 34; ++i) {
+		TileT t = mahjong::all_tiles[i];
+		if (useful_table[t]) {
+			cnt += 4 - used_table[t];
+		}
+	}
+	return cnt;
+}
+
+void ShantenTest()
+{
+	auto str = "[111m]5m12p1569sSWP";
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+	long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+	if (ret != 0) {
+		printf("error at line %d error = %ld\n", __LINE__, ret);
+		return;
+	}
+
+	char buf[20];
+	ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+	for (size_t i = 0; i < ret; i++) {
+		cout << buf[i];
+	}
+	cout << endl;
+
+	auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+		char buf[64];
+		for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+			if (useful_table[t]) {
+				tiles_to_string(&t, 1, buf, sizeof(buf));
+				printf("%s ", buf);
+			}
+		}
+
+		tile_table_t cnt_table;
+		map_hand_tiles(hand_tiles, &cnt_table);
+
+		printf("%d", CountUsefulTiles(cnt_table, useful_table));
+	};
+
+	puts(str);
+	useful_table_t useful_table/* = {false}*/;
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("13 orphans ===> %d shanten\n", ret0); // 十三幺
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("7 pairs ===> %d shanten\n", ret0); // 七对
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("honors and knitted tiles ===> %d shanten\n", ret0); // 全不靠
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("knitted straight in basic form ===> %d shanten\n", ret0); // 组合龙
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("basic form ===> %d shanten\n", ret0); // 普通情形
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+	auto& h = t;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	string s;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		s.push_back('0' + h.getTileNum());
+	}
+	switch (tileType) {
+	case WANN: s += 'm'; break;
+	case BING: s += 'p'; break;
+	case TIAO: s += 's'; break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			return "E";
+		case 2:
+			return "S";
+		case 3:
+			return "W";
+		case 4:
+			return "N";
+		}
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			return "C";
+		case 2:
+			return "F";
+		case 3:
+			return "P";
+		}
+	}
+	return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand
+){
+	int shanten = std::numeric_limits<int>::max();
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+
+#pragma region 转换成字符串
+	string s;
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		s += '[';
+		if (t == "CHI") {
+			s += tileToStr(m.getPrvMajang());
+			s += tileToStr(m);
+			s += tileToStr(m.getNxtMajang());
+		}
+		else if (t == "PENG" || t == "GANG") {
+			s += tileToStr(m);
+			s += tileToStr(m);
+			s += tileToStr(m);
+			if (t == "GANG") {
+				s += tileToStr(m);
+			}
+		}
+		s += ']';
+	}
+	for (size_t i = 0; i < hand.size(); i++) {
+		s += tileToStr(hand[i]);
+	}
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+	size_t len = s.size();
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char* p = s.c_str();
+	while (char c = *p) {
+		const char* q;
+		switch (c) {
+		case ',': {
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles.tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles.tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	serving_tile = last_tile;
+#pragma endregion
+
+	useful_table_t useful_table = {false};
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	return shanten;
+}
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+	using namespace mahjong;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	tile_t ret = 0;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		ret = h.getTileNum();
+	}
+	switch (tileType) {
+	case WANN: ret |= 0x10; break;
+	case BING: ret |= 0x30; break;
+	case TIAO: ret |= 0x20; break;
+		// SetSuitForNumbered(tileType << 2); break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_E; break;
+		case 2:
+			ret = TILE_S; break;
+		case 3:
+			ret = TILE_W; break;
+		case 4:
+			ret = TILE_N; break;
+		default:
+			assert(false);
+		}
+		break;
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_C; break;
+		case 2:
+			ret = TILE_F; break;
+		case 3:
+			ret = TILE_P; break;
+		default:
+			assert(false);
+		}
+		break;
+	}
+	return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
+) {
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+
+		/*
+		auto& h = hand[i];
+		auto tileType = TILE_T(h.getTileInt() / 10);
+		switch (tileType) {
+		case WANN:
+		case BING:
+		case TIAO:
+			temp_tiles[tile_cnt++] = h.getTileNum();
+		}
+		switch (tileType) {
+		case WANN: SetSuitForNumbered(0x10); break;
+		case BING: SetSuitForNumbered(0x30); break;
+		case TIAO: SetSuitForNumbered(0x20); break;
+			// SetSuitForNumbered(tileType << 2); break;
+		case FENG:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_E; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_S; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_W; break;
+			case 4:
+				temp_tiles[tile_cnt++] = TILE_N; break;
+			}
+		case JIAN:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_C; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_F; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_P; break;
+			}
+		}
+		*/
+
+		// 对牌打表
+		// for (intptr_t i = 0; i < temp_cnt; ++i) {
+		   // ++cnt_table[temp_tiles[i]];
+		//}
+
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	// 写入数据
+	// tile_t last_tile = 0;
+	// assert(standing_cnt == max_cnt);
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+	// last_tile = standing_tiles[max_cnt - 1];
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	// serving_tile = last_tile;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
+#endif // !Shanten_Calculator_H
+
+/*** End of inlined file: ShantenCalculator.h ***/
 
 using namespace std;
 
@@ -14381,11 +16452,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -15195,13 +17264,192 @@ int CountTable(mahjong::useful_table_t& ut) {
 	return etc;
 }
 
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
 // 我发现useful_table很重要啊 --DRZ
 pair<int, int> ShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
-	mahjong::useful_table_t useful_table = nullptr
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
 ) {
 	using namespace mahjong;
 
@@ -15320,17 +17568,25 @@ pair<int, int> ShantenCalc(
 
 	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
 
-	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
 	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
 	Check();
@@ -15374,18 +17630,9 @@ public:
 		//hand:玩家的暗牌
 		int flowerCount,
 		//flowerCount:补花数
-		StateContainer state
+		StateContainer state,
 		//StateContainer:牌库状态
-	);
-
-	// 可能性计算器（被相似度计算器调用）
-	static double ProbabilityCalc(const StateContainer& state,
-		const Majang& aim
-	);
-
-	// 相似度计算器
-	static double SimilarityCalc(const StateContainer& state,
-		const UsefulTableT& aim
+		mahjong::tile_t form_flag
 	);
 
 	//利用算番器计算番数得分
@@ -15408,11 +17655,13 @@ public:
 	//一副牌的手牌得分(赋予顺子、刻子、杠、碰、吃相应的得分)
 	static double MajangHandScore(
 		vector<pair<string, Majang> > pack,
-		vector<Majang> hand
+		vector<Majang> hand,
+		bool dianpao
 	);
 
 	static double HandScoreCalculator(
-		int TileAmount[70]
+		int TileAmount[70],
+		bool dianpao
 	);
 
 	static int fanCalculator(
@@ -15428,6 +17677,1601 @@ public:
 
 #endif
 /*** End of inlined file: ScoreCalculator.h ***/
+
+
+/*** Start of inlined file: ShantenCalculator.h ***/
+#pragma once
+
+#ifndef Shanten_Calculator_H
+#define Shanten_Calculator_H
+
+#ifndef _PREPROCESS_ONLY
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#endif
+
+#ifdef _BOTZONE_ONLINE
+#ifndef _PREPROCESS_ONLY
+#include "MahjongGB/MahjongGB.h"
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+
+#endif
+#else
+
+
+/*** Start of inlined file: stringify.cpp ***/
+#include <string.h>
+#include <algorithm>
+#include <iterator>
+
+namespace mahjong {
+
+// 解析牌实现函数
+static intptr_t parse_tiles_impl(const char *str, tile_t *tiles, intptr_t max_cnt, intptr_t *out_tile_cnt) {
+	//if (strspn(str, "123456789mpsESWNCFP") != strlen(str)) {
+	//    return PARSE_ERROR_ILLEGAL_CHARACTER;
+	//}
+
+	intptr_t tile_cnt = 0;
+
+#define SET_SUIT_FOR_NUMBERED(value_)       \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		tiles[i] |= value_;                 \
+		} (void)0
+
+#define SET_SUIT_FOR_CHARACTERS()   SET_SUIT_FOR_NUMBERED(0x10)
+#define SET_SUIT_FOR_BAMBOO()       SET_SUIT_FOR_NUMBERED(0x20)
+#define SET_SUIT_FOR_DOTS()         SET_SUIT_FOR_NUMBERED(0x30)
+
+#define SET_SUIT_FOR_HONOR() \
+	for (intptr_t i = tile_cnt; i > 0;) {   \
+		if (tiles[--i] & 0xF0) break;       \
+		if (tiles[i] > 7) return PARSE_ERROR_ILLEGAL_CHARACTER; \
+		tiles[i] |= 0x40;                   \
+		} (void)0
+
+#define NO_SUFFIX_AFTER_DIGIT() (tile_cnt > 0 && !(tiles[tile_cnt - 1] & 0xF0))
+#define CHECK_SUFFIX() if (NO_SUFFIX_AFTER_DIGIT()) return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT
+
+	const char *p = str;
+	for (; tile_cnt < max_cnt && *p != '\0'; ++p) {
+		char c = *p;
+		switch (c) {
+		case '0': tiles[tile_cnt++] = 5; break;
+		case '1': tiles[tile_cnt++] = 1; break;
+		case '2': tiles[tile_cnt++] = 2; break;
+		case '3': tiles[tile_cnt++] = 3; break;
+		case '4': tiles[tile_cnt++] = 4; break;
+		case '5': tiles[tile_cnt++] = 5; break;
+		case '6': tiles[tile_cnt++] = 6; break;
+		case '7': tiles[tile_cnt++] = 7; break;
+		case '8': tiles[tile_cnt++] = 8; break;
+		case '9': tiles[tile_cnt++] = 9; break;
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		case 'E': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_E; break;
+		case 'S': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_S; break;
+		case 'W': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_W; break;
+		case 'N': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_N; break;
+		case 'C': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_C; break;
+		case 'F': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_F; break;
+		case 'P': CHECK_SUFFIX(); tiles[tile_cnt++] = TILE_P; break;
+		default: goto finish_parse;
+		}
+	}
+
+finish_parse:
+	// 一连串数字+后缀，但已经超过容量，说明牌过多
+	if (NO_SUFFIX_AFTER_DIGIT()) {
+		// 这里的逻辑为：放弃中间一部分数字，直接解析最近的后缀
+		const char *p1 = strpbrk(p, "mspz");
+		if (p1 == nullptr) {
+			return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		switch (*p1) {
+		case 'm': SET_SUIT_FOR_CHARACTERS(); break;
+		case 's': SET_SUIT_FOR_BAMBOO(); break;
+		case 'p': SET_SUIT_FOR_DOTS(); break;
+		case 'z': SET_SUIT_FOR_HONOR(); break;
+		default: return PARSE_ERROR_NO_SUFFIX_AFTER_DIGIT;
+		}
+
+		if (p1 != p) {  // 放弃过中间的数字
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+
+		p = p1 + 1;
+	}
+
+#undef SET_SUIT_FOR_NUMBERED
+#undef SET_SUIT_FOR_CHARACTERS
+#undef SET_SUIT_FOR_BAMBOO
+#undef SET_SUIT_FOR_DOTS
+#undef SET_SUIT_FOR_HONOR
+#undef NO_SUFFIX_AFTER_DIGIT
+#undef CHECK_SUFFIX
+
+	*out_tile_cnt = tile_cnt;
+	return static_cast<intptr_t>(p - str);
+}
+
+// 解析牌
+intptr_t parse_tiles(const char *str, tile_t *tiles, intptr_t max_cnt) {
+	intptr_t tile_cnt;
+	if (parse_tiles_impl(str, tiles, max_cnt, &tile_cnt) > 0) {
+		return tile_cnt;
+	}
+	return 0;
+}
+
+// 生成副露
+static intptr_t make_fixed_pack(const tile_t *tiles, intptr_t tile_cnt, pack_t *pack, uint8_t offer) {
+	if (tile_cnt > 0) {
+		if (tile_cnt != 3 && tile_cnt != 4) {
+			return PARSE_ERROR_WRONG_TILES_COUNT_FOR_FIXED_PACK;
+		}
+		if (tile_cnt == 3) {
+			if (offer == 0) {
+				offer = 1;
+			}
+			if (tiles[0] == tiles[1] && tiles[1] == tiles[2]) {
+				*pack = make_pack(offer, PACK_TYPE_PUNG, tiles[0]);
+			}
+			else {
+				if (tiles[0] + 1 == tiles[1] && tiles[1] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else if (tiles[0] + 1 == tiles[2] && tiles[2] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[1] + 1 == tiles[0] && tiles[0] + 1 == tiles[2]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[1] + 1 == tiles[2] && tiles[2] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[2]);
+				}
+				else if (tiles[2] + 1 == tiles[0] && tiles[0] + 1 == tiles[1]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[0]);
+				}
+				else if (tiles[2] + 1 == tiles[1] && tiles[1] + 1 == tiles[0]) {
+					*pack = make_pack(offer, PACK_TYPE_CHOW, tiles[1]);
+				}
+				else {
+					return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+				}
+			}
+		}
+		else {
+			if (tiles[0] != tiles[1] || tiles[1] != tiles[2] || tiles[2] != tiles[3]) {
+				return PARSE_ERROR_CANNOT_MAKE_FIXED_PACK;
+			}
+			*pack = make_pack(offer, PACK_TYPE_KONG, tiles[0]);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+// 字符串转换为手牌结构和上牌
+intptr_t string_to_tiles(const char *str, hand_tiles_t *hand_tiles, tile_t *serving_tile) {
+	size_t len = strlen(str);
+	if (strspn(str, "0123456789mpszESWNCFP,[]") != len) {
+		return PARSE_ERROR_ILLEGAL_CHARACTER;
+	}
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char *p = str;
+	while (char c = *p) {
+		const char *q;
+		switch (c) {
+		case ',': {  // 副露来源
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			if (*p != ']') {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			if (pack_cnt > 4) {
+				return PARSE_ERROR_TOO_MANY_FIXED_PACKS;
+			}
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				if (standing_cnt + temp_cnt >= max_cnt) {
+					return PARSE_ERROR_TOO_MANY_TILES;
+				}
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			if (!in_brackets) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			if (temp_cnt != 0) {  // 重复进入
+				return PARSE_ERROR_TOO_MANY_TILES;
+			}
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			if (ret < 0) {  // 出错
+				return ret;
+			}
+			if (ret == 0) {
+				return PARSE_ERROR_ILLEGAL_CHARACTER;
+			}
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		if (standing_cnt + temp_cnt > max_cnt) {
+			return PARSE_ERROR_TOO_MANY_TILES;
+		}
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	if (standing_cnt > max_cnt) {
+		return PARSE_ERROR_TOO_MANY_TILES;
+	}
+
+	// 如果某张牌超过4
+	if (std::any_of(std::begin(cnt_table), std::end(cnt_table), [](int cnt) { return cnt > 4; })) {
+		return PARSE_ERROR_TILE_COUNT_GREATER_THAN_4;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles->tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles->standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles->tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles->fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles->pack_count = pack_cnt;
+	*serving_tile = last_tile;
+
+	return PARSE_NO_ERROR;
+}
+
+// 牌转换为字符串
+intptr_t tiles_to_string(const tile_t *tiles, intptr_t tile_cnt, char *str, intptr_t max_size) {
+	bool tenhon = false;
+	char *p = str, *end = str + max_size;
+
+	static const char suffix[] = "mspz";
+	static const char honor_text[] = "ESWNCFP";
+	suit_t last_suit = 0;
+	for (intptr_t i = 0; i < tile_cnt && p < end; ++i) {
+		tile_t t = tiles[i];
+		suit_t s = tile_get_suit(t);
+		rank_t r = tile_get_rank(t);
+		if (s == 1 || s == 2 || s == 3) {  // 数牌
+			if (r >= 1 && r <= 9) {  // 有效范围1-9
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4 || tenhon) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					*p++ = '0' + r;  // 写入一个数字字符
+				}
+				last_suit = s;  // 记录花色
+			}
+		}
+		else if (s == 4) {  // 字牌
+			if (r >= 1 && r <= 7) {  // 有效范围1-7
+				if (last_suit != s && last_suit != 0) {  // 花色变了，加后缀
+					if (last_suit != 4) {
+						*p++ = suffix[last_suit - 1];
+					}
+				}
+				if (p < end) {
+					if (tenhon) {  // 天凤式后缀
+						*p++ = '0' + r;  // 写入一个数字字符
+					}
+					else {
+						*p++ = honor_text[r - 1];  // 直接写入字牌相应字母
+					}
+					last_suit = s;
+				}
+			}
+		}
+	}
+
+	// 写入过且还有空间，补充后缀
+	if (p != str && p < end && (last_suit != 4 || tenhon)) {
+		*p++ = suffix[last_suit - 1];
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 牌组转换为字符串
+intptr_t packs_to_string(const pack_t *packs, intptr_t pack_cnt, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	tile_t temp[4];
+	for (intptr_t i = 0; i < pack_cnt && p < end; ++i) {
+		pack_t pack = packs[i];
+		uint8_t o = pack_get_offer(pack);
+		tile_t t = pack_get_tile(pack);
+		uint8_t pt = pack_get_type(pack);
+		switch (pt) {
+		case PACK_TYPE_CHOW:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = static_cast<tile_t>(t - 1); temp[1] = t; temp[2] = static_cast<tile_t>(t + 1);
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PUNG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t;
+			p += tiles_to_string(temp, 3, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + o;
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_KONG:
+			if (p >= end) break;
+			*p++ = '[';
+			temp[0] = t; temp[1] = t; temp[2] = t; temp[3] = t;
+			p += tiles_to_string(temp, 4, p, static_cast<intptr_t>(end - p));
+			if (p >= end) break;
+			*p++ = ',';
+			if (p >= end) break;
+			*p++ = '0' + (is_promoted_kong(pack) ? o | 0x4 : o);
+			if (p >= end) break;
+			*p++ = ']';
+			break;
+		case PACK_TYPE_PAIR:
+			temp[0] = t; temp[1] = t;
+			p += tiles_to_string(temp, 2, p, static_cast<intptr_t>(end - p));
+			break;
+		default: break;
+		}
+	}
+
+	if (p < end) {
+		*p = '\0';
+	}
+	return static_cast<intptr_t>(p - str);
+}
+
+// 手牌结构转换为字符串
+intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_t max_size) {
+	char *p = str, *end = str + max_size;
+	p += packs_to_string(hand_tiles->fixed_packs, hand_tiles->pack_count, str, max_size);
+	if (p < end) p += tiles_to_string(hand_tiles->standing_tiles, hand_tiles->tile_count, p, static_cast<intptr_t>(end - p));
+	return static_cast<intptr_t>(p - str);
+}
+
+}
+
+/*** End of inlined file: stringify.cpp ***/
+
+#endif
+
+using TileTableT = mahjong::tile_table_t;
+using UsefulTableT = mahjong::useful_table_t;
+using TileT = mahjong::tile_t;
+
+int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
+	int cnt = 0;
+	for (int i = 0; i < 34; ++i) {
+		TileT t = mahjong::all_tiles[i];
+		if (useful_table[t]) {
+			cnt += 4 - used_table[t];
+		}
+	}
+	return cnt;
+}
+
+void ShantenTest()
+{
+	auto str = "[111m]5m12p1569sSWP";
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+	long ret = string_to_tiles(str, &hand_tiles, &serving_tile);
+	if (ret != 0) {
+		printf("error at line %d error = %ld\n", __LINE__, ret);
+		return;
+	}
+
+	char buf[20];
+	ret = hand_tiles_to_string(&hand_tiles, buf, sizeof(buf));
+	for (size_t i = 0; i < ret; i++) {
+		cout << buf[i];
+	}
+	cout << endl;
+
+	auto display = [](const hand_tiles_t* hand_tiles, useful_table_t& useful_table) {
+		char buf[64];
+		for (tile_t t = TILE_1m; t < TILE_TABLE_SIZE; ++t) {
+			if (useful_table[t]) {
+				tiles_to_string(&t, 1, buf, sizeof(buf));
+				printf("%s ", buf);
+			}
+		}
+
+		tile_table_t cnt_table;
+		map_hand_tiles(hand_tiles, &cnt_table);
+
+		printf("%d", CountUsefulTiles(cnt_table, useful_table));
+	};
+
+	puts(str);
+	useful_table_t useful_table/* = {false}*/;
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("13 orphans ===> %d shanten\n", ret0); // 十三幺
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("7 pairs ===> %d shanten\n", ret0); // 七对
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("honors and knitted tiles ===> %d shanten\n", ret0); // 全不靠
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("knitted straight in basic form ===> %d shanten\n", ret0); // 组合龙
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	printf("basic form ===> %d shanten\n", ret0); // 普通情形
+	if (ret0 != std::numeric_limits<int>::max()) display(&hand_tiles, useful_table);
+	puts("\n");
+}
+
+string tileToStr(const Majang& t)
+{
+	auto& h = t;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	string s;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		s.push_back('0' + h.getTileNum());
+	}
+	switch (tileType) {
+	case WANN: s += 'm'; break;
+	case BING: s += 'p'; break;
+	case TIAO: s += 's'; break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			return "E";
+		case 2:
+			return "S";
+		case 3:
+			return "W";
+		case 4:
+			return "N";
+		}
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			return "C";
+		case 2:
+			return "F";
+		case 3:
+			return "P";
+		}
+	}
+	return s;
+}
+
+int ComplicatedShantenCalc(const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand
+){
+	int shanten = std::numeric_limits<int>::max();
+
+	using namespace mahjong;
+	hand_tiles_t hand_tiles;
+	tile_t serving_tile;
+
+#pragma region 转换成字符串
+	string s;
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		s += '[';
+		if (t == "CHI") {
+			s += tileToStr(m.getPrvMajang());
+			s += tileToStr(m);
+			s += tileToStr(m.getNxtMajang());
+		}
+		else if (t == "PENG" || t == "GANG") {
+			s += tileToStr(m);
+			s += tileToStr(m);
+			s += tileToStr(m);
+			if (t == "GANG") {
+				s += tileToStr(m);
+			}
+		}
+		s += ']';
+	}
+	for (size_t i = 0; i < hand.size(); i++) {
+		s += tileToStr(hand[i]);
+	}
+#pragma endregion
+
+#pragma region 字符串再转换成库中的表示形式
+	size_t len = s.size();
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	bool in_brackets = false;
+	tile_t temp_tiles[14];
+	intptr_t temp_cnt = 0;
+	intptr_t max_cnt = 14;
+	uint8_t offer = 0;
+
+	tile_table_t cnt_table = { 0 };
+
+	const char* p = s.c_str();
+	while (char c = *p) {
+		const char* q;
+		switch (c) {
+		case ',': {
+			offer = static_cast<uint8_t>(*++p - '0');
+			q = ++p;
+			break;
+		}
+		case '[': {  // 开始一组副露
+			if (temp_cnt > 0) {  // 处理[]符号外面的牌
+				// 放到立牌中
+				memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+				standing_cnt += temp_cnt;
+				temp_cnt = 0;
+			}
+
+			q = ++p;
+			in_brackets = true;
+			offer = 0;
+			max_cnt = 4;  // 副露的牌组最多包含4张牌
+			break;
+		}
+		case ']': {  // 结束一副副露
+			// 生成副露
+			intptr_t ret = make_fixed_pack(temp_tiles, temp_cnt, &packs[pack_cnt], offer);
+			if (ret < 0) {
+				return ret;
+			}
+
+			q = ++p;
+			temp_cnt = 0;
+			in_brackets = false;
+			++pack_cnt;
+			max_cnt = 14 - standing_cnt - pack_cnt * 3;  // 余下立牌数的最大值
+			break;
+		}
+		default: {  // 牌
+			// 解析max_cnt张牌
+			intptr_t ret = parse_tiles_impl(p, temp_tiles, max_cnt, &temp_cnt);
+			// 对牌打表
+			for (intptr_t i = 0; i < temp_cnt; ++i) {
+				++cnt_table[temp_tiles[i]];
+			}
+			q = p + ret;
+			break;
+		}
+		}
+		p = q;
+	}
+
+	max_cnt = 14 - pack_cnt * 3;
+	if (temp_cnt > 0) {  // 处理[]符号外面的牌
+		// 放到立牌中
+		memcpy(&standing_tiles[standing_cnt], temp_tiles, temp_cnt * sizeof(tile_t));
+		standing_cnt += temp_cnt;
+	}
+
+	// 无错误时再写回数据
+	tile_t last_tile = 0;
+	if (standing_cnt == max_cnt) {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, (max_cnt - 1) * sizeof(tile_t));
+		hand_tiles.tile_count = max_cnt - 1;
+		last_tile = standing_tiles[max_cnt - 1];
+	}
+	else {
+		memcpy(hand_tiles.standing_tiles, standing_tiles, standing_cnt * sizeof(tile_t));
+		hand_tiles.tile_count = standing_cnt;
+	}
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	serving_tile = last_tile;
+#pragma endregion
+
+	useful_table_t useful_table = {false};
+	int ret0;
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &useful_table);
+	shanten = min(shanten, ret0);
+
+	return shanten;
+}
+
+/**
+ * @brief 牌\n
+ * 内存结构：
+ * - 0-3 4bit 牌的点数
+ * - 4-7 4bit 牌的花色
+ * 合法的牌为：
+ * - 0x11 - 0x19 万子（CHARACTERS）
+ * - 0x21 - 0x29 条子（BAMBOO）
+ * - 0x31 - 0x39 饼子（DOTS）
+ * - 0x41 - 0x47 字牌（HONORS）
+ * - 0x51 - 0x58 花牌（FLOWER）
+ */
+// h 不会是花牌
+Majang MahjongToMajang(mahjong::tile_t h) {
+	using namespace mahjong;
+	auto tileType = h / 16;
+	auto num = h % 16;
+	int ret = 0;
+	switch (tileType)
+	{
+	case 1:
+	case 2:
+	case 3:
+		ret = num;
+		break;
+	}
+	switch (tileType)
+	{
+	case 1:
+		ret += WANN * 10;
+		break;
+	case 2:
+		ret += TIAO * 10;
+		break;
+	case 3:
+		ret += BING * 10;
+		break;
+	case 4:
+		switch (h)
+		{
+		case TILE_E:
+			ret = FENG * 10 + 1;
+			break;
+		case TILE_S:
+			ret = FENG * 10 + 2;
+			break;
+		case TILE_W:
+			ret = FENG * 10 + 3;
+			break;
+		case TILE_N:
+			ret = FENG * 10 + 4;
+			break;
+		case TILE_C:
+			ret = JIAN * 10 + 1;
+			break;
+		case TILE_F:
+			ret = JIAN * 10 + 2;
+			break;
+		case TILE_P:
+			ret = JIAN * 10 + 3;
+			break;
+		default:
+			assert(false);
+		}
+		break;
+	default:
+		assert(false);
+	}
+	return Majang(ret);
+}
+
+mahjong::tile_t MajangToMahjong(const Majang& h){
+	using namespace mahjong;
+	auto tileType = TILE_T(h.getTileInt() / 10);
+	tile_t ret = 0;
+	switch (tileType) {
+	case WANN:
+	case BING:
+	case TIAO:
+		ret = h.getTileNum();
+	}
+	switch (tileType) {
+	case WANN: ret |= 0x10; break;
+	case BING: ret |= 0x30; break;
+	case TIAO: ret |= 0x20; break;
+		// SetSuitForNumbered(tileType << 2); break;
+	case FENG:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_E; break;
+		case 2:
+			ret = TILE_S; break;
+		case 3:
+			ret = TILE_W; break;
+		case 4:
+			ret = TILE_N; break;
+		default:
+			assert(false);
+		}
+		break;
+	case JIAN:
+		switch (h.getTileNum()) {
+		case 1:
+			ret = TILE_C; break;
+		case 2:
+			ret = TILE_F; break;
+		case 3:
+			ret = TILE_P; break;
+		default:
+			assert(false);
+		}
+		break;
+	}
+	return ret;
+}
+
+void ClearTable(mahjong::useful_table_t& ut) {
+	memset(ut, 0, sizeof(bool) * 72);
+}
+
+int CountTable(mahjong::useful_table_t& ut) {
+	int etc = 0;
+	for (auto tile : ut)
+		if (tile)
+			etc++;
+	return etc;
+}
+
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
+// 返回值的first为shanten，second为effective tiles count
+// useful_table_ret!=nullptr时作为out参数
+// 我发现useful_table很重要啊 --DRZ
+pair<int, int> ShantenCalc(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
+) {
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+
+		/*
+		auto& h = hand[i];
+		auto tileType = TILE_T(h.getTileInt() / 10);
+		switch (tileType) {
+		case WANN:
+		case BING:
+		case TIAO:
+			temp_tiles[tile_cnt++] = h.getTileNum();
+		}
+		switch (tileType) {
+		case WANN: SetSuitForNumbered(0x10); break;
+		case BING: SetSuitForNumbered(0x30); break;
+		case TIAO: SetSuitForNumbered(0x20); break;
+			// SetSuitForNumbered(tileType << 2); break;
+		case FENG:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_E; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_S; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_W; break;
+			case 4:
+				temp_tiles[tile_cnt++] = TILE_N; break;
+			}
+		case JIAN:
+			switch (h.getTileNum()) {
+			case 1:
+				temp_tiles[tile_cnt++] = TILE_C; break;
+			case 2:
+				temp_tiles[tile_cnt++] = TILE_F; break;
+			case 3:
+				temp_tiles[tile_cnt++] = TILE_P; break;
+			}
+		}
+		*/
+
+		// 对牌打表
+		// for (intptr_t i = 0; i < temp_cnt; ++i) {
+		   // ++cnt_table[temp_tiles[i]];
+		//}
+
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	// 写入数据
+	// tile_t last_tile = 0;
+	// assert(standing_cnt == max_cnt);
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+	// last_tile = standing_tiles[max_cnt - 1];
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+	// serving_tile = last_tile;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&]() -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，合并有效牌
+			std::transform(std::begin(useful_table_ret), std::end(useful_table_ret),
+				std::begin(temp_table),
+				std::begin(useful_table_ret),
+				[](bool u, bool t) { return u || t; });
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
+
+	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check();
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return { ret_shanten, effectiveTileCount };
+}
+
+#endif // !Shanten_Calculator_H
+
+/*** End of inlined file: ShantenCalculator.h ***/
 
 using namespace std;
 
@@ -15692,13 +19536,53 @@ bool Output::judgeBuGang(
 	return false;
 }
 
+int cmp(Majang a,Majang b){
+	return a.getTileInt()<b.getTileInt();
+}
+
+//如果有特定的胡法，则往那条路走
 const pair<double,Majang> Output::getBestPlay(
 	StateContainer state,
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand
 ){
+	using namespace mahjong;
+	sort(hand.begin(),hand.end(),cmp);
+
+	useful_table_t useful_table;
+
+	tile_t form_flag;
+	int shanten=14;
+	double similarity=0;
+	for(unsigned int i=0;i<hand.size();i++){
+		vector<Majang> newHand(hand);
+		newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
+		auto p=ShantenJudge(pack, newHand, state, useful_table);
+		if(shanten>p.second.first){
+			shanten=p.second.first;
+			similarity=p.second.second;
+			form_flag=p.first;
+		}
+	}
+
+	//如果存在一个特殊番型，且相似度应大于一定值(minLimit)
 	int bestChoice=0;
 	double maxResult=-1e5;
+
+	double minLimit=0.01;
+	if(form_flag!=0x01&&similarity>=minLimit&&shanten<=2){
+		for(unsigned int i=0;i<hand.size();i++){
+			vector<Majang> newHand(hand);
+			newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
+			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
+			if(ans>maxResult){
+				maxResult=ans;
+				bestChoice=i;
+			}
+		}
+	}
+
+	else{
 	for(unsigned int i=0;i<hand.size();i++){
 		vector<Majang> newHand(hand);
 		newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -15707,6 +19591,7 @@ const pair<double,Majang> Output::getBestPlay(
 			maxResult=ans;
 			bestChoice=i;
 		}
+	}
 	}
 	return make_pair(maxResult,hand[bestChoice]);
 }
@@ -15718,8 +19603,32 @@ const Majang Output::getBestCP(
 	const Majang& newTile,
 	int pos
 ){
+
 	//先得到不进行操作时最优得分
-	double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+	using namespace mahjong;
+	sort(hand.begin(),hand.end(),cmp);
+
+	useful_table_t useful_table;
+
+	tile_t form_flag;
+	int shanten=14;
+	double similarity=0;
+	auto p=ShantenJudge(pack, hand, state, useful_table);
+	shanten=p.second.first;
+	similarity=p.second.second;
+	form_flag=p.first;
+
+	//如果存在一个特殊番型，且相似度应大于一定值(minLimit)
+	double maxResult1=-1e5;
+
+	double minLimit=0.1;
+	//这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
+	if(form_flag!=0x01&&similarity>=minLimit&&shanten<=2){
+		maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
+		return Majang(1);
+		}
+	else
+		maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 	//进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
 	if(pos==0){
 		for(unsigned int i=0;i<hand.size();i++){
@@ -16242,11 +20151,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -17056,13 +20963,192 @@ int CountTable(mahjong::useful_table_t& ut) {
 	return etc;
 }
 
+double ProbabilityCalc(const StateContainer& state,
+	const Majang& aim
+){
+	const int playerIdx = state.getCurTurnPlayer();
+
+	int OtherMingTilesCnt = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌总数
+			OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+			OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+			OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+		}
+	}
+	int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+	int thisMjCnt = 0;
+	auto& MyMj = state.getInHand();
+	for (auto& mj : MyMj) {
+		// 自己手中的该麻将
+		if (mj == aim)
+			thisMjCnt++;
+	}
+	for (int i = 0; i < 4; ++i) {
+		if (i != playerIdx) {
+			// 他人鸣牌中的该麻将
+			for (auto& mj : state.getPengOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 3;
+			}
+			for (auto& mj : state.getChiOf(i)) {
+				if (mj == aim
+					|| mj.getPrvMajang() == aim
+					|| mj.getNxtMajang() == aim) {
+					thisMjCnt++;
+				}
+			}
+			for (auto& mj : state.getGangOf(i)) {
+				if (mj == aim)
+					thisMjCnt += 4;
+			}
+		}
+	}
+
+	double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+	return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+	const UsefulTableT& aim
+){
+	using namespace mahjong;
+	vector<Majang> vct;
+	for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+	{
+		if (aim[i])
+		{
+			auto mj = MahjongToMajang(i);
+			vct.push_back(mj);
+		}
+	}
+	double sim = 0;
+	for (size_t i = 0; i < vct.size(); i++)
+	{
+		sim += ProbabilityCalc(state, vct[i]);
+	}
+	return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state,
+	mahjong::useful_table_t useful_table = nullptr
+){
+	using namespace mahjong;
+
+	hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+	// tile_t serving_tile;
+
+	pack_t packs[4];
+	intptr_t pack_cnt = 0;
+	tile_t standing_tiles[14];
+	intptr_t standing_cnt = 0;
+
+	// tile_table_t cnt_table = { 0 };
+
+	const int offer = 0; // const 0
+
+	for (size_t i = 0; i < pack.size(); i++) {
+		auto& m = pack[i].second;
+		auto& t = pack[i].first;
+		auto tileType = TILE_T(m.getTileInt() / 10);
+		auto tt = MajangToMahjong(m);
+		if (t == "CHI") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+		}
+		else if (t == "PENG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+		}
+		else if (t == "GANG") {
+			packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+		}
+		++pack_cnt;
+	}
+
+	for (size_t i = 0; i < hand.size(); i++) {
+		standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+		++standing_cnt;
+	}
+
+	memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+	hand_tiles.tile_count = standing_cnt;
+
+	memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+	hand_tiles.pack_count = pack_cnt;
+
+	useful_table_t useful_table_ret = { false };
+	useful_table_t temp_table = { false };
+	int ret0;
+	int effectiveTileCount = 0;
+	double similarity= 0;
+	tile_t form_flag=0x01;
+
+	int ret_shanten = std::numeric_limits<int>::max();
+
+	auto Check = [&](tile_t cur_form_flag) -> void {
+		if (ret0 == std::numeric_limits<int>::max())
+			return;
+		if (ret0 < ret_shanten) {
+			// 上听数小的，直接覆盖数据
+			ret_shanten = ret0;
+			memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			form_flag=cur_form_flag;
+			similarity=cur_similarity;
+		}
+		else if (ret_shanten == ret0) {
+			// 上听数相等的，选择Similarity小
+			double cur_similarity=SimilarityCalc(state, useful_table_ret);
+			if(cur_similarity<similarity){
+				similarity=cur_similarity;
+				memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+				form_flag=cur_form_flag;
+			}
+		}
+	};
+
+	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+	/*
+	#define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+	#define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+	#define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+	#define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+	#define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙
+	#define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+	*/
+	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x04);
+
+	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x02);
+
+	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x08);
+
+	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+	Check(0x10);
+
+	effectiveTileCount = CountTable(useful_table_ret);
+	if (useful_table != nullptr)
+		memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+	return {form_flag,{ret_shanten,similarity}};
+}
+
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
 // 我发现useful_table很重要啊 --DRZ
 pair<int, int> ShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
-	mahjong::useful_table_t useful_table = nullptr
+	mahjong::useful_table_t useful_table = nullptr,
+	mahjong::tile_t form_flag=0x01
 ) {
 	using namespace mahjong;
 
@@ -17181,17 +21267,25 @@ pair<int, int> ShantenCalc(
 
 	// 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
 
-	ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x04||form_flag==0x01){
+		ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x02||form_flag==0x01){
+		ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x08||form_flag==0x01){
+		ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
-	ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-	Check();
+	if(form_flag==0x10||form_flag==0x01){
+		ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+		Check();
+	}
 
 	ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
 	Check();

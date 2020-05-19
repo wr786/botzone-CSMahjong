@@ -413,13 +413,195 @@ int CountTable(mahjong::useful_table_t& ut) {
     return etc;
 }
 
+
+double ProbabilityCalc(const StateContainer& state,
+    const Majang& aim
+){
+    const int playerIdx = state.getCurTurnPlayer();
+
+    int OtherMingTilesCnt = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (i != playerIdx) {
+            // 他人鸣牌总数
+            OtherMingTilesCnt += state.getPengOf(i).size() * 3;
+            OtherMingTilesCnt += state.getChiOf(i).size() * 3;
+            OtherMingTilesCnt += state.getGangOf(i).size() * 4;
+        }
+    }
+    int allSecretCnt = 136 - OtherMingTilesCnt - 14;
+
+    int thisMjCnt = 0;
+    auto& MyMj = state.getInHand();
+    for (auto& mj : MyMj) {
+        // 自己手中的该麻将
+        if (mj == aim)
+            thisMjCnt++;
+    }
+    for (int i = 0; i < 4; ++i) {
+        if (i != playerIdx) {
+            // 他人鸣牌中的该麻将
+            for (auto& mj : state.getPengOf(i)) {
+                if (mj == aim)
+                    thisMjCnt += 3;
+            }
+            for (auto& mj : state.getChiOf(i)) {
+                if (mj == aim
+                    || mj.getPrvMajang() == aim
+                    || mj.getNxtMajang() == aim) {
+                    thisMjCnt++;
+                }
+            }
+            for (auto& mj : state.getGangOf(i)) {
+                if (mj == aim)
+                    thisMjCnt += 4;
+            }
+        }
+    }
+
+    double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
+    return pRet;
+}
+
+// 这是单层的，改进空间是升级成多层
+double SimilarityCalc(const StateContainer& state,
+    const UsefulTableT& aim
+){
+    using namespace mahjong;
+    vector<Majang> vct;
+    for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
+    {
+        if (aim[i])
+        {
+            auto mj = MahjongToMajang(i);
+            vct.push_back(mj);
+        }
+    }
+    double sim = 0;
+    for (size_t i = 0; i < vct.size(); i++)
+    {
+        sim += ProbabilityCalc(state, vct[i]);
+    }
+    return sim;
+}
+
+pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    const StateContainer& state,
+    mahjong::useful_table_t useful_table = nullptr
+){
+    using namespace mahjong;
+
+    hand_tiles_t hand_tiles; // 牌，包括standing_tiles和fixed_packs
+    // tile_t serving_tile;
+
+    pack_t packs[4];
+    intptr_t pack_cnt = 0;
+    tile_t standing_tiles[14];
+    intptr_t standing_cnt = 0;
+
+    // tile_table_t cnt_table = { 0 };
+
+    const int offer = 0; // const 0
+
+    for (size_t i = 0; i < pack.size(); i++) {
+        auto& m = pack[i].second;
+        auto& t = pack[i].first;
+        auto tileType = TILE_T(m.getTileInt() / 10);
+        auto tt = MajangToMahjong(m);
+        if (t == "CHI") {
+            packs[pack_cnt] = make_pack(offer, PACK_TYPE_CHOW, tt);
+        }
+        else if (t == "PENG") {
+            packs[pack_cnt] = make_pack(offer, PACK_TYPE_PUNG, tt);
+        }
+        else if (t == "GANG") {
+            packs[pack_cnt] = make_pack(offer, PACK_TYPE_KONG, tt);
+        }
+        ++pack_cnt;
+    }
+
+    for (size_t i = 0; i < hand.size(); i++) {
+        standing_tiles[standing_cnt] = MajangToMahjong(hand[i]);
+        ++standing_cnt;
+    }
+
+
+    memcpy(hand_tiles.standing_tiles, standing_tiles, (standing_cnt) * sizeof(tile_t));
+    hand_tiles.tile_count = standing_cnt;
+
+    memcpy(hand_tiles.fixed_packs, packs, pack_cnt * sizeof(pack_t));
+    hand_tiles.pack_count = pack_cnt;
+
+    useful_table_t useful_table_ret = { false };
+    useful_table_t temp_table = { false };
+    int ret0;
+    int effectiveTileCount = 0;
+    double similarity= 0;
+    tile_t form_flag=0x01;
+
+    int ret_shanten = std::numeric_limits<int>::max();
+
+    auto Check = [&](tile_t cur_form_flag) -> void {
+        if (ret0 == std::numeric_limits<int>::max())
+            return;
+        if (ret0 < ret_shanten) {
+            // 上听数小的，直接覆盖数据
+            ret_shanten = ret0;
+            memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+            double cur_similarity=SimilarityCalc(state, useful_table_ret);
+            form_flag=cur_form_flag;
+            similarity=cur_similarity;
+        }
+        else if (ret_shanten == ret0) {
+            // 上听数相等的，选择Similarity小
+            double cur_similarity=SimilarityCalc(state, useful_table_ret);
+            if(cur_similarity<similarity){
+                similarity=cur_similarity;
+                memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
+                form_flag=cur_form_flag;
+            }
+        }
+    };
+
+    // 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
+
+    /*
+    #define FORM_FLAG_BASIC_FORM                0x01  ///< 基本和型
+    #define FORM_FLAG_SEVEN_PAIRS               0x02  ///< 七对
+    #define FORM_FLAG_THIRTEEN_ORPHANS          0x04  ///< 十三幺
+    #define FORM_FLAG_HONORS_AND_KNITTED_TILES  0x08  ///< 全不靠
+    #define FORM_FLAG_KNITTED_STRAIGHT          0x10  ///< 组合龙   
+    #define FORM_FLAG_ALL                       0xFF  ///< 全部和型
+    */
+    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check(0x04);
+
+    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check(0x02);
+
+    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check(0x08);
+
+    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+    Check(0x10);
+
+
+    effectiveTileCount = CountTable(useful_table_ret);
+    if (useful_table != nullptr)
+        memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
+
+    return {form_flag,{ret_shanten,similarity}};    
+}
+
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
 // 我发现useful_table很重要啊 --DRZ
 pair<int, int> ShantenCalc(
     const vector<pair<string, Majang> >& pack,
     const vector<Majang>& hand,
-    mahjong::useful_table_t useful_table = nullptr
+    mahjong::useful_table_t useful_table = nullptr,
+    mahjong::tile_t form_flag=0x01
 ) {
     using namespace mahjong;
 
@@ -538,17 +720,25 @@ pair<int, int> ShantenCalc(
 
     // 注意：无有效tile时有的函数有时会置useful_table为全1而不是全0
 
-    ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-    Check();
+    if(form_flag==0x04||form_flag==0x01){
+        ret0 = thirteen_orphans_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+        Check();
+    }
 
-    ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-    Check();
+    if(form_flag==0x02||form_flag==0x01){
+        ret0 = seven_pairs_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+        Check();
+    }
 
-    ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-    Check();
+    if(form_flag==0x08||form_flag==0x01){
+        ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+        Check();
+    }
 
-    ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-    Check();
+    if(form_flag==0x10||form_flag==0x01){
+        ret0 = knitted_straight_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+        Check();
+    }
 
     ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
     Check();

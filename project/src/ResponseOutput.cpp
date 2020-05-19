@@ -250,13 +250,53 @@ bool Output::judgeBuGang(
     return false;
 }
 
+int cmp(Majang a,Majang b){
+    return a.getTileInt()<b.getTileInt();
+}
+
+//如果有特定的胡法，则往那条路走
 const pair<double,Majang> Output::getBestPlay(
     StateContainer state,
     vector<pair<string,Majang> > pack,
     vector<Majang> hand
-){
+){  
+    using namespace mahjong;   
+    sort(hand.begin(),hand.end(),cmp);
+
+    useful_table_t useful_table;
+
+    tile_t form_flag;
+    int shanten=14;
+    double similarity=0;
+    for(unsigned int i=0;i<hand.size();i++){
+        vector<Majang> newHand(hand);
+        newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
+        auto p=ShantenJudge(pack, newHand, state, useful_table);
+        if(shanten>p.second.first){
+            shanten=p.second.first;
+            similarity=p.second.second;
+            form_flag=p.first;
+        }
+    }
+
+    //如果存在一个特殊番型，且相似度应大于一定值(minLimit)
     int bestChoice=0;
     double maxResult=-1e5;
+
+    double minLimit=0.01;
+    if(form_flag!=0x01&&similarity>=minLimit&&shanten<=2){
+        for(unsigned int i=0;i<hand.size();i++){
+            vector<Majang> newHand(hand);
+            newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
+            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
+            if(ans>maxResult){
+                maxResult=ans;
+                bestChoice=i;
+            }
+        }
+    }
+
+    else{
     for(unsigned int i=0;i<hand.size();i++){
         vector<Majang> newHand(hand);
         newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -265,6 +305,7 @@ const pair<double,Majang> Output::getBestPlay(
             maxResult=ans;
             bestChoice=i;
         }
+    }
     }
     return make_pair(maxResult,hand[bestChoice]);
 }
@@ -277,8 +318,32 @@ const Majang Output::getBestCP(
     const Majang& newTile,
     int pos
 ){
+
     //先得到不进行操作时最优得分
-    double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+    using namespace mahjong;   
+    sort(hand.begin(),hand.end(),cmp);
+
+    useful_table_t useful_table;
+
+    tile_t form_flag;
+    int shanten=14;
+    double similarity=0;
+    auto p=ShantenJudge(pack, hand, state, useful_table);
+    shanten=p.second.first;
+    similarity=p.second.second;
+    form_flag=p.first;
+
+    //如果存在一个特殊番型，且相似度应大于一定值(minLimit)
+    double maxResult1=-1e5;
+
+    double minLimit=0.1;
+    //这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
+    if(form_flag!=0x01&&similarity>=minLimit&&shanten<=2){
+        maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
+        return Majang(1);
+        }
+    else
+        maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
     //进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
     if(pos==0){
         for(unsigned int i=0;i<hand.size();i++){

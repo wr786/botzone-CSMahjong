@@ -14,6 +14,8 @@
 #include "Majang.h"
 #include "StateContainer.h"
 #include "ScoreCalculator.h"
+#include "ShantenCalculator.h"
+
 
 using namespace std;
 

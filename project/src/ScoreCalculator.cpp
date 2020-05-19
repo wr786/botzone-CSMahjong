@@ -12,16 +12,23 @@ double Calculator::MajangScoreCalculator(
     vector<pair<string, Majang> > pack,
     vector<Majang> hand,
     int flowerCount,
-    StateContainer state
+    StateContainer state,
+    mahjong::tile_t form_flag=0x01
 ) {    
     double k1,k2,k3;
     //参数实际应按游戏回合分段，这里先随便写了一个
     if(state.getTileWallLeftOf(state.getCurPosition())<=15){
         k1=0.2;    // 手牌得分所占权重
-        k2=0.4;    // 番数得分所占权重   
-        k3=0.4;    // 复合上听数所占权重
+        k2=0.5;    // 番数得分所占权重   
+        k3=0.3;    // 复合上听数所占权重
+    }
+    else if(state.getTileWallLeftOf(state.getCurPosition())<=18){
+        k1=0.3;    // 手牌得分所占权重
+        k2=0.3;    // 番数得分所占权重   
+        k3=0.4;    // 复合上听数所占权重          
     }
     else{
+        //前几手抓牌shanten不太准
         k1=0.5;    // 手牌得分所占权重
         k2=0.3;    // 番数得分所占权重   
         k3=0.2;    // 复合上听数所占权重        
@@ -41,7 +48,7 @@ double Calculator::MajangScoreCalculator(
     int param1, param2;
     double param3;
     mahjong::useful_table_t useful_table;
-    auto p = ShantenCalc(pack, hand, useful_table);
+    auto p = ShantenCalc(pack, hand, useful_table,form_flag);
     param1 = p.first;                               // shanten数
     param2 = p.second;                              // effective tiles
     param3 = SimilarityCalc(state, useful_table);   // similarity
@@ -64,7 +71,8 @@ double Calculator::MajangScoreCalculator(
 
     if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
-    double k5=25.0;
+    double k5=20;
+    if(form_flag!=0x01) k5=30;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;
 
 
@@ -82,7 +90,7 @@ double Calculator::FanScoreCalculator(
     Majang winTile,
     StateContainer state    
 ){  
-    double k6=120.0;    //将Majang类调整为适用于算番器的接口    
+    double k6=40;    //将Majang类调整为适用于算番器的接口    
     vector <pair<string,pair<string,int> > > p;
     for(unsigned int i=0;i<pack.size();++i){
         p.push_back(make_pair(pack[i].first,make_pair(pack[i].second.getTileString(),1)));
@@ -100,7 +108,7 @@ double Calculator::FanScoreCalculator(
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-        return r*k6;
+        return r*k6*3;
     }
     catch(const string &error){
         int tileAmount[70];
@@ -138,7 +146,12 @@ double Calculator::FanScoreCalculator(
         tileAmount[winTile.getTileInt()]++;
         handAndPack.push_back(winTile.getTileInt());
         int r=fanCalculator(tileAmount,handAndPack,quanfeng,menfeng);
-        return r*k6;
+        if(state.getTileWallLeftOf(state.getCurPosition())<=16){
+            return 0;
+        }
+        else{
+            return r*k6;
+        }
     }
 }
 
@@ -202,93 +215,20 @@ double Calculator::MajangHandScore(
     for (unsigned int i = 0; i < hand.size(); i++) {
         tileAmount[hand[i].getTileInt()]++;
     }
+    //各个数值都翻了倍，原因是吃碰杠后handscore会明显减少，然而这是不科学的
     for (unsigned int i = 0; i < pack.size(); i++) {
-        if (pack[i].first == "GANG") result += 16;
-        else if (pack[i].first == "PENG") result += 9;
+        if (pack[i].first == "GANG") result += 32;
+        else if (pack[i].first == "PENG") result += 18;
         else {
-            result += 10;
+            result += 20;
         }
     }
     result += HandScoreCalculator(tileAmount,dianpao);
     return result * c;
 }
 
-// 这是单层的，改进空间是升级成多层
-double Calculator::SimilarityCalc(const StateContainer& state,
-    const UsefulTableT& aim
-){
-    using namespace mahjong;
-    vector<Majang> vct;
-    for (tile_t i = 0; i < TILE_TABLE_SIZE; ++i)
-    {
-        if (aim[i])
-        {
-            auto mj = MahjongToMajang(i);
-            vct.push_back(mj);
-        }
-    }
-    double sim = 0;
-    for (size_t i = 0; i < vct.size(); i++)
-    {
-        sim += ProbabilityCalc(state, vct[i]);
-    }
-    return sim;
-}
 
-double Calculator::ProbabilityCalc(const StateContainer& state,
-    const Majang& aim
-){
-    const int playerIdx = state.getCurTurnPlayer();
 
-    int OtherMingTilesCnt = 0;
-    for (int i = 0; i < 4; ++i) {
-        if (i != playerIdx) {
-            // 他人鸣牌总数
-            OtherMingTilesCnt += state.getPengOf(i).size() * 3;
-            OtherMingTilesCnt += state.getChiOf(i).size() * 3;
-            OtherMingTilesCnt += state.getGangOf(i).size() * 4;
-        }
-    }
-    int allSecretCnt = 136 - OtherMingTilesCnt - 14;
-
-    int thisMjCnt = 0;
-    auto& MyMj = state.getInHand();
-    for (auto& mj : MyMj) {
-        // 自己手中的该麻将
-        if (mj == aim)
-            thisMjCnt++;
-    }
-    for (int i = 0; i < 4; ++i) {
-        if (i != playerIdx) {
-            // 他人鸣牌中的该麻将
-            for (auto& mj : state.getPengOf(i)) {
-                if (mj == aim)
-                    thisMjCnt += 3;
-            }
-            for (auto& mj : state.getChiOf(i)) {
-                if (mj == aim
-                    || mj.getPrvMajang() == aim
-                    || mj.getNxtMajang() == aim) {
-                    thisMjCnt++;
-                }
-            }
-            for (auto& mj : state.getGangOf(i)) {
-                if (mj == aim)
-                    thisMjCnt += 4;
-            }
-        }
-    }
-
-    double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
-    return pRet;
-}
-
-double SimilarityCalc(const StateContainer& state, 
-    mahjong::useful_table_t useful_table
-){
-    // TO DO
-    return 1.0;
-}
 
 //得分计算方法：对于每一张牌，若有手牌满足与之相隔,则+1;相邻,则+2;2张相同,则+2,3张相同,则+3,4张相同,则+4;
 //未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
