@@ -5,12 +5,11 @@
 #define Shanten_Calculator_H
 
 #ifndef _PREPROCESS_ONLY
-// #include <fstream>
-// #include <vector>
-// #include <algorithm>
-// #include <numeric>
-#include <bits/stdc++.h>
-#include <sys/stat.h>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <ctime>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -28,11 +27,6 @@
 using TileTableT = mahjong::tile_table_t;
 using UsefulTableT = mahjong::useful_table_t;
 using TileT = mahjong::tile_t;
-
-inline bool file_exists(const char name[]) {
-    struct stat buffer;
-    return stat(name,&buffer)==0;
-}
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
     int cnt = 0;
@@ -464,14 +458,16 @@ double ProbabilityCalc(const StateContainer& state,
             }
         }
     }
-
+   // double pRet=state.getTileLeft(aim.getTileInt())/state.getTotalLeft();
     double pRet = (4 - thisMjCnt) / (double)allSecretCnt;
     return pRet;
 }
 
 // 这是单层的，改进空间是升级成多层
+// 对于全不靠这些，当牌库中没有必要牌时，相似度应为0
 double SimilarityCalc(const StateContainer& state,
-    const UsefulTableT& aim
+    const UsefulTableT& aim,
+    mahjong::tile_t form_flag=0x01
 ){
     using namespace mahjong;
     vector<Majang> vct;
@@ -485,8 +481,12 @@ double SimilarityCalc(const StateContainer& state,
     }
     double sim = 0;
     for (size_t i = 0; i < vct.size(); i++)
-    {
-        sim += ProbabilityCalc(state, vct[i]);
+    {        
+        if(form_flag==0x08&&vct[i].getTileInt()>=41&&state.getTileLeft(vct[i].getTileInt())==0){
+            return 0;
+        }
+        sim += state.getTileLeft(vct[i].getTileInt())/(double)state.getTotalLeft();
+
     }
     return sim;
 }
@@ -507,7 +507,7 @@ double SimilarityCalc(const StateContainer& state,
     double sim = 0;
     for (size_t i = 0; i < vct.size(); i++)
     {
-        sim += ProbabilityCalc(state, vct[i]);
+        sim += state.getTileLeft(vct[i].getTileInt())/(double)state.getTotalLeft();
     }
     return sim;
 }
@@ -577,13 +577,13 @@ pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
             // 上听数小的，直接覆盖数据
             ret_shanten = ret0;
             memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
-            double cur_similarity=SimilarityCalc(state, useful_table_ret);
+            double cur_similarity=SimilarityCalc(state, useful_table_ret,cur_form_flag);
             form_flag=cur_form_flag;
             similarity=cur_similarity;
         }
         else if (ret_shanten == ret0) {
             // 上听数相等的，选择Similarity小
-            double cur_similarity=SimilarityCalc(state, useful_table_ret);
+            double cur_similarity=SimilarityCalc(state, useful_table_ret,cur_form_flag);
             if(cur_similarity<similarity){
                 similarity=cur_similarity;
                 memcpy(useful_table_ret, temp_table, sizeof(useful_table_ret));
@@ -760,6 +760,7 @@ pair<int, int> ShantenCalc(
     }
 
     if(form_flag==0x08||form_flag==0x01){
+        
         ret0 = honors_and_knitted_tiles_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
         Check();
     }
@@ -807,41 +808,34 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
     int tileAmount[70]={0};
     for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
     for(auto i:hand) ntileAmount[i.getTileInt()]++;
-    
+
     string input;
     specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高        
     int flag;
     int minShanten=5;
     double maxSimilarity=0;
-    // bool try1 = file_exists("./data/specialShanten.txt");
-    // bool try2 = file_exists("/data/specialShanten.txt");
-    // bool try3 = file_exists(".\\data\\specialShanten.txt");
-    // bool try4 = file_exists("./specialShanten.txt");
-    // bool try5 = file_exists("..\\data\\specialShanten.txt");
-    // cout << try1 << try2 << try3 << try4 << try5 << endl;
+    double prt=100;
+    //freopen("D://specialShanten.txt","r",stdin);
     freopen("./data/specialShanten.txt","r",stdin);
-
+    //clock_t start=clock();
     while(true){    
-        Reader::readIn(input);   
-        if(input=="Over") {
+        Reader::readIn(input);        
+        if(input=="Over"){
             break;
         }
         memset(useful_table,0,sizeof(useful_table));
         memcpy(tileAmount,ntileAmount,70*4);
         int shanten=0;
         double similarity=0;
-        if(input[0]=='C') {
-            // flag=input[4]-'0';
-            Reader::readIn(flag);
-            continue;
-        }
+        if(input[0]=='C') {flag=input[4]-'0';continue;}
         else{
             for(int i=0;i<9;i++){
                 int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
                 if(!tileAmount[num]){
                     shanten++;
                     useful_table[num]++;
-                } else {
+                }
+                else{
                     tileAmount[num]--;
                 }
                 if(shanten>=5) break;
@@ -849,6 +843,14 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
         }
         if(shanten>=5){continue;}
         similarity=SimilarityCalc(state,useful_table);
+        //double cnt = shanten - 1 - log(similarity) * k[flag]/4;
+        //if(cnt<prt){
+        //    prt=cnt;
+        //    minShanten=shanten;
+        //   maxSimilarity=similarity;
+        //    r.formFlag=flag;
+        //    r.tileForm=input;
+        //}
         if(shanten<minShanten){
             r.formFlag=flag;
             r.tileForm=input;
@@ -863,7 +865,8 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
         }
         if(minShanten==0) break;
     }
-    fclose(stdin);
+    //clock_t end=clock();
+    //cout<<end-start<<endl;
     return {r,{minShanten,maxSimilarity}};
 }
 
@@ -882,12 +885,13 @@ int specialShantenCalc(
         int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
         if(!tileAmount[num]){
             shanten++;
-            useful_table[num]++;
-        } else {
+                useful_table[num]++;
+        }
+        else{
             tileAmount[num]--;
         }
-        if(shanten>=5) break;
-    }   
+            if(shanten>=5) break;
+        }
     return shanten;
 }
 

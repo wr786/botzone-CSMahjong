@@ -54,7 +54,8 @@ int main() {
         << "effective tiles: " << param2 << endl;
     cout << "=== simplified shanten test end ===" << endl;
     cout << "=== shanten test end ===" << endl;
-#endif // !_BOTZONE_ONLINE
+#endif // !_BOTZONE_ONLINE6
+    //clock_t start=clock();
     int turnID; Reader::readIn(turnID);
     string tmp;
     int lastRequest;
@@ -77,6 +78,8 @@ int main() {
     //        cout<<endl;      
     
     Output::Response(t, basicState);
-
+    //clock_t end=clock();
+    //cout<<endl;
+    //cout<<end-start<<endl;
     return 0;
 }

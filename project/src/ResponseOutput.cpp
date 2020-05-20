@@ -260,6 +260,7 @@ const pair<double,Majang> Output::getBestPlay(
     vector<pair<string,Majang> > pack,
     vector<Majang> hand
 ){  
+    //clock_t start=clock();
     using namespace mahjong;   
     sort(hand.begin(),hand.end(),cmp);
 
@@ -283,7 +284,7 @@ const pair<double,Majang> Output::getBestPlay(
     double maxResult=-1e5;
 
 
-    if(form_flag!=0x01&&similarity>=0.01&&shanten<=2){
+    if(form_flag!=0x01&&similarity>=0.1&&shanten<=2){
         for(unsigned int i=0;i<hand.size();i++){
             vector<Majang> newHand(hand);
             newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -299,11 +300,11 @@ const pair<double,Majang> Output::getBestPlay(
 //2.判断有没有我们想要的目标番型
         auto p=specialShantenCalc(pack,hand,state);
         //如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-        if(p.second.first<=3&&p.second.second>=0.01||p.second.first==0){
+        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-                if(specialShantenCalc(pack,hand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
+                if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
                 double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
                 if(ans>maxResult){
                     maxResult=ans;
@@ -325,6 +326,8 @@ const pair<double,Majang> Output::getBestPlay(
             }
         }
     }
+    //clock_t end=clock();
+    //cout<<end-start<<endl;
     return make_pair(maxResult,hand[bestChoice]);
 }
 
@@ -353,16 +356,16 @@ const Majang Output::getBestCP(
 
     //如果存在一个特殊番型，且相似度应大于一定值(minLimit)
     double maxResult1=-1e5;
-    bool flag=false;
+    bool quanqiuren=pack.size()<2;
     //这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
-    if(form_flag!=0x01&&similarity>=0.1&&shanten<=2){
+    if(quanqiuren&&form_flag!=0x01&&similarity>=0.1&&shanten<=2){
         maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
         return Majang(1);
         }
     else{
         auto p=specialShantenCalc(pack,hand,state);
         //看看有没有目标番型，如果有，则评估标准就变成目标番型中是否有这对吃、碰
-        if(p.second.first<=2&&p.second.second>=0.1||p.second.first==0){
+        if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075))){
             string newPack="";
             if(pos==0){
                 newPack+=to_string(newTile.getTileInt());
@@ -386,7 +389,7 @@ const Majang Output::getBestCP(
                 newPack+=to_string(newTile.getTileInt());         
             }                
             }
-            if(p.first.tileForm.find(newPack)==string::npos) return Majang(1);
+            if(pack.size()>=1&&p.first.tileForm.find(newPack)==string::npos) return Majang(1);
             //else flag=true;//这里先认为如果有的话 就吃、碰（不过也不一定，比如已经有345了，再去碰345好像就不太行，但万一我碰345再把5打掉呢？这还是交给之前的贪心去评估吧
         }
 
@@ -461,7 +464,7 @@ const Majang Output::getBestCP(
         //得到操作过后的最优解
         pair<double,Majang> r=getBestPlay(state,pack,hand);
         double maxResult2=r.first;
-        if(flag||maxResult2-maxResult1>=1e-5){
+        if(!quanqiuren||maxResult2-maxResult1>=1e-5){
             return r.second;
         }
         else return Majang(1);

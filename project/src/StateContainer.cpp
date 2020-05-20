@@ -3,7 +3,7 @@
 #include <cassert>
 #endif
 
-StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurnPlayer(curT), inHand(13),  totalLeft(144) {
+StateContainer::StateContainer(int curP, int curT) :  curPosition(curP), curTurnPlayer(curT), inHand(13),  totalLeft(136) {
     for(int i = 1; i < 10; i++) {
         tileLeft[10 + i] = 4;   // WANN
         tileLeft[20 + i] = 4;   // BING

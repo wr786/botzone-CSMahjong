@@ -44,8 +44,8 @@ double Calculator::MajangScoreCalculator(
     double r1 = MajangHandScore(pack, hand,dianpao,state);
     double r2 = MajangFanScore(pack, hand, flowerCount, state);
 
-    double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
 
+    double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
     int param1, param2;
     double param3;
     mahjong::useful_table_t useful_table;
@@ -74,10 +74,10 @@ double Calculator::MajangScoreCalculator(
 
     if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
-    double k5=20;
-    if(form_flag!=0x01) k5=30;  //这时候要加大shanten的占比
+    double k5=15;
+    if(form_flag!=0x01) k5=25;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;
-
+    if(form_flag==0x08) r3*=0.5;
 
     //printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
 
@@ -329,7 +329,7 @@ double Calculator::HandScoreCalculator(
     //箭牌和风牌可能要有特殊的地位*
     for (int i = 41; i <= 44; i++) {
         if (tileAmount[i]) {
-            double singleValue = 0;
+            double singleValue = -0.3;
             // if(i>=43) singleValue+=tileAmount[i-2]*1;
             // if(i>=42) singleValue+=tileAmount[i-1]*2;
             // if(i<=42) singleValue+=tileAmount[i+2]*1;
@@ -337,8 +337,8 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
-            if((i-1)%4==state.getCurPosition()) singleValue+=1.7;
-            if((i-1)%4==StateContainer::quan) singleValue+=1.7;
+            if((i-1)%4==state.getCurPosition()) singleValue+=1.4;
+            if((i-1)%4==StateContainer::quan) singleValue+=1.4;
             if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
@@ -351,7 +351,7 @@ double Calculator::HandScoreCalculator(
     }
     for (int i = 51; i <= 53; i++) {
         if (tileAmount[i]) {
-            double singleValue = 0;
+            double singleValue = -0.3;
             // if(i>=53) singleValue+=tileAmount[i-2]*1;
             // if(i>=52) singleValue+=tileAmount[i-1]*2;
             // if(i<=51) singleValue+=tileAmount[i+2]*1;
@@ -397,6 +397,7 @@ int Calculator::fanCalculator(
     bool jianke=true;
     bool quanfengke=true;
     bool menfengke=true;
+
     //记录以multiset中元素为中间元素的顺子和刻字
     sort(handAndPack.begin(),handAndPack.end());   
     multiset<int> shunzi[4];
