@@ -5,10 +5,12 @@
 #define Shanten_Calculator_H
 
 #ifndef _PREPROCESS_ONLY
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <numeric>
+// #include <fstream>
+// #include <vector>
+// #include <algorithm>
+// #include <numeric>
+#include <bits/stdc++.h>
+#include <sys/stat.h>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -26,6 +28,11 @@
 using TileTableT = mahjong::tile_table_t;
 using UsefulTableT = mahjong::useful_table_t;
 using TileT = mahjong::tile_t;
+
+inline bool file_exists(const char name[]) {
+    struct stat buffer;
+    return stat(name,&buffer)==0;
+}
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
     int cnt = 0;
@@ -795,33 +802,47 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
     const vector<Majang>& hand,
     const StateContainer& state
 ) {
-    int tileAmount[70]={0};
+    int ntileAmount[70]={0};
     int useful_table[70];
-    for(auto i:pack) tileAmount[i.second.getTileInt()]++;
-    for(auto i:hand) tileAmount[i.getTileInt()]++;
+    int tileAmount[70]={0};
+    for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+    for(auto i:hand) ntileAmount[i.getTileInt()]++;
     
     string input;
     specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高        
     int flag;
     int minShanten=5;
     double maxSimilarity=0;
-    freopen("D://specialShanten.txt","r",stdin);
+    // bool try1 = file_exists("./data/specialShanten.txt");
+    // bool try2 = file_exists("/data/specialShanten.txt");
+    // bool try3 = file_exists(".\\data\\specialShanten.txt");
+    // bool try4 = file_exists("./specialShanten.txt");
+    // bool try5 = file_exists("..\\data\\specialShanten.txt");
+    // cout << try1 << try2 << try3 << try4 << try5 << endl;
+    freopen("./data/specialShanten.txt","r",stdin);
 
     while(true){    
-        Reader::readIn(input);        
-        if(input=="Over"){
+        Reader::readIn(input);   
+        if(input=="Over") {
             break;
         }
         memset(useful_table,0,sizeof(useful_table));
+        memcpy(tileAmount,ntileAmount,70*4);
         int shanten=0;
         double similarity=0;
-        if(input[0]=='C') {flag=input[4]-'0';continue;}
+        if(input[0]=='C') {
+            // flag=input[4]-'0';
+            Reader::readIn(flag);
+            continue;
+        }
         else{
             for(int i=0;i<9;i++){
                 int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
                 if(!tileAmount[num]){
                     shanten++;
                     useful_table[num]++;
+                } else {
+                    tileAmount[num]--;
                 }
                 if(shanten>=5) break;
             }
@@ -842,6 +863,7 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
         }
         if(minShanten==0) break;
     }
+    fclose(stdin);
     return {r,{minShanten,maxSimilarity}};
 }
 
@@ -856,14 +878,16 @@ int specialShantenCalc(
     for(auto i:hand) tileAmount[i.getTileInt()]++;
 
     int shanten=0;
-    for(int i=0;i<13;i++){
+    for(int i=0;i<9;i++){
         int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
         if(!tileAmount[num]){
             shanten++;
-                useful_table[num]++;
-            }
-            if(shanten>=5) break;
+            useful_table[num]++;
+        } else {
+            tileAmount[num]--;
         }
+        if(shanten>=5) break;
+    }   
     return shanten;
 }
 
