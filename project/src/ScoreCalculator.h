@@ -48,7 +48,8 @@ public:
         //flowerCount:补花数
         StateContainer state,
         //StateContainer:牌库状态
-        mahjong::tile_t form_flag
+        mahjong::tile_t form_flag,
+        int shanten
     );
 
     //利用算番器计算番数得分
@@ -72,12 +73,14 @@ public:
     static double MajangHandScore(
         vector<pair<string, Majang> > pack, 
         vector<Majang> hand,
-        bool dianpao
+        bool dianpao,
+        const StateContainer & state
     );
 
     static double HandScoreCalculator(
         int TileAmount[70],
-        bool dianpao
+        bool dianpao,
+        const StateContainer & state
     );
 
     static int fanCalculator(

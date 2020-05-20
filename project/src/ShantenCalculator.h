@@ -484,6 +484,27 @@ double SimilarityCalc(const StateContainer& state,
     return sim;
 }
 
+double SimilarityCalc(const StateContainer& state,
+    const int aim[70]
+){
+
+    vector<Majang> vct;
+    for (int i = 0; i < 70; ++i)
+    {
+        if (aim[i])
+        {
+            auto mj = Majang(i);
+            vct.push_back(mj);
+        }
+    }
+    double sim = 0;
+    for (size_t i = 0; i < vct.size(); i++)
+    {
+        sim += ProbabilityCalc(state, vct[i]);
+    }
+    return sim;
+}
+
 pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
     const vector<pair<string, Majang> >& pack,
     const vector<Majang>& hand,
@@ -593,6 +614,7 @@ pair<mahjong::tile_t,pair<int,double> > ShantenJudge(
 
     return {form_flag,{ret_shanten,similarity}};    
 }
+
 
 // 返回值的first为shanten，second为effective tiles count
 // useful_table_ret!=nullptr时作为out参数
@@ -740,14 +762,109 @@ pair<int, int> ShantenCalc(
         Check();
     }
 
-    ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
-    Check();
+    if(form_flag==0x01){
+        ret0 = basic_form_shanten(hand_tiles.standing_tiles, hand_tiles.tile_count, &temp_table);
+        Check();
+    }
 
     effectiveTileCount = CountTable(useful_table_ret);
     if (useful_table != nullptr)
         memcpy(useful_table, useful_table_ret, sizeof(useful_table_ret));
 
     return { ret_shanten, effectiveTileCount };
+}
+
+
+
+struct specialShanten{
+    int formFlag;//表示某一种番型
+    string tileForm;//表示具体的牌组成
+};
+/*
+Case 1:三色三步高
+Case 2:三色三同顺
+Case 3:花龙
+Case 4:清龙
+Case 5:一色三步高
+*/
+double k[8]={0,5.16,2.96,2.88,4.32,2.56};//权重（百局内胡的局数/100*番数）
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenCalc(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    const StateContainer& state
+) {
+    int tileAmount[70]={0};
+    int useful_table[70];
+    for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+    for(auto i:hand) tileAmount[i.getTileInt()]++;
+    
+    string input;
+    specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高        
+    int flag;
+    int minShanten=5;
+    double maxSimilarity=0;
+    freopen("D://specialShanten.txt","r",stdin);
+
+    while(true){    
+        Reader::readIn(input);        
+        if(input=="Over"){
+            break;
+        }
+        memset(useful_table,0,sizeof(useful_table));
+        int shanten=0;
+        double similarity=0;
+        if(input[0]=='C') {flag=input[4]-'0';continue;}
+        else{
+            for(int i=0;i<9;i++){
+                int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+                if(!tileAmount[num]){
+                    shanten++;
+                    useful_table[num]++;
+                }
+                if(shanten>=5) break;
+            }
+        }
+        if(shanten>=5){continue;}
+        similarity=SimilarityCalc(state,useful_table);
+        if(shanten<minShanten){
+            r.formFlag=flag;
+            r.tileForm=input;
+            minShanten=shanten;
+            maxSimilarity=similarity;
+        }
+        else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+            r.formFlag=flag;
+            r.tileForm=input;
+            minShanten=shanten;
+            maxSimilarity=similarity;            
+        }
+        if(minShanten==0) break;
+    }
+    return {r,{minShanten,maxSimilarity}};
+}
+
+int specialShantenCalc(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    string target
+) {
+    int tileAmount[70]={0};
+    int useful_table[70];
+    for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+    for(auto i:hand) tileAmount[i.getTileInt()]++;
+
+    int shanten=0;
+    for(int i=0;i<13;i++){
+        int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
+        if(!tileAmount[num]){
+            shanten++;
+                useful_table[num]++;
+            }
+            if(shanten>=5) break;
+        }
+    return shanten;
 }
 
 #endif // !Shanten_Calculator_H

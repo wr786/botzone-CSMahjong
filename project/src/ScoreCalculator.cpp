@@ -13,7 +13,8 @@ double Calculator::MajangScoreCalculator(
     vector<Majang> hand,
     int flowerCount,
     StateContainer state,
-    mahjong::tile_t form_flag=0x01
+    mahjong::tile_t form_flag=0x01,
+    int shanten=20
 ) {    
     double k1,k2,k3;
     //参数实际应按游戏回合分段，这里先随便写了一个
@@ -40,7 +41,7 @@ double Calculator::MajangScoreCalculator(
     }
     bool dianpao=num>=2;
     //freopen("D://out.txt","w",stdout);
-    double r1 = MajangHandScore(pack, hand,dianpao);
+    double r1 = MajangHandScore(pack, hand,dianpao,state);
     double r2 = MajangFanScore(pack, hand, flowerCount, state);
 
     double resultShanten = 0;   // 在shanten写好之后，将结果存入resultShanten
@@ -53,6 +54,8 @@ double Calculator::MajangScoreCalculator(
     param2 = p.second;                              // effective tiles
     param3 = SimilarityCalc(state, useful_table);   // similarity
 
+    if(param1>shanten) return -1e5; //shanten数变大则必不打这张牌
+    
     // 其实讲道理这里仅应该使用similarity一个参量
     // shanten数是离听牌的距离
     // 同样shanten数下，effective tiles越多，能减少shanten数的几率就越大
@@ -206,7 +209,8 @@ double Calculator::MajangFanScore(
 double Calculator::MajangHandScore(
     vector<pair<string, Majang> > pack,
     vector<Majang> hand,
-    bool dianpao
+    bool dianpao,
+    const StateContainer & state
 ) { 
     double c = 1;
     double result = 0;
@@ -223,7 +227,7 @@ double Calculator::MajangHandScore(
             result += 20;
         }
     }
-    result += HandScoreCalculator(tileAmount,dianpao);
+    result += HandScoreCalculator(tileAmount,dianpao,state);
     return result * c;
 }
 
@@ -234,7 +238,8 @@ double Calculator::MajangHandScore(
 //未考虑缺色操作（若有某一花色的数量显然少于其他花色,则应直接打出此花色牌;正确性仍有待商榷,但在决策出牌时应考虑这一点)
 double Calculator::HandScoreCalculator(
     int tileAmount[70],
-    bool dianpao
+    bool dianpao,
+    const StateContainer & state
 ) {
     double kw=1;
     double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
@@ -244,15 +249,18 @@ double Calculator::HandScoreCalculator(
         if (tileAmount[i]) {
             double singleValue = 0;
             if (i >= 13) singleValue += tileAmount[i - 2] * 1;
-            if (i >= 12) singleValue += tileAmount[i - 1] * 2;
+            if (i >= 12) singleValue += tileAmount[i - 1] * 3;
             if (i <= 17) singleValue += tileAmount[i + 2] * 1;
-            if (i <= 18) singleValue += tileAmount[i + 1] * 2;
+            if (i <= 18) singleValue += tileAmount[i + 1] * 3;
+            if (i>=12&&i<=18&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
+            if (i<=17&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
+            if (i>=13&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
-            if(i==11||i==19) singleValue+=0.4;
-            else if(i==12||i==18) singleValue+=0.8;
-            else singleValue+=1.2;
+            //if(i==11||i==19) singleValue+=0.4;
+            //else if(i==12||i==18) singleValue+=0.8;
+            //else singleValue+=1.2;
 
             if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
@@ -268,15 +276,18 @@ double Calculator::HandScoreCalculator(
         if (tileAmount[i]) {
             double singleValue = 0;
             if (i >= 23) singleValue += tileAmount[i - 2] * 1;
-            if (i >= 22) singleValue += tileAmount[i - 1] * 2;
+            if (i >= 22) singleValue += tileAmount[i - 1] * 3;
             if (i <= 27) singleValue += tileAmount[i + 2] * 1;
-            if (i <= 28) singleValue += tileAmount[i + 1] * 2;
+            if (i <= 28) singleValue += tileAmount[i + 1] * 3;
+            if (i>=22&&i<=28&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
+            if (i<=27&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
+            if (i>=23&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
-            if(i==21||i==29) singleValue+=0.4;
-            else if(i==22||i==28) singleValue+=0.8;
-            else singleValue+=1.2;
+            //if(i==21||i==29) singleValue+=0.4;
+            //else if(i==22||i==28) singleValue+=0.8;
+            //else singleValue+=1.2;
 
             if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
@@ -292,15 +303,18 @@ double Calculator::HandScoreCalculator(
         if (tileAmount[i]) {
             double singleValue = 0;
             if (i >= 33) singleValue += tileAmount[i - 2] * 1;
-            if (i >= 32) singleValue += tileAmount[i - 1] * 2;
+            if (i >= 32) singleValue += tileAmount[i - 1] * 3;
             if (i <= 37) singleValue += tileAmount[i + 2] * 1;
-            if (i <= 38) singleValue += tileAmount[i + 1] * 2;
+            if (i <= 38) singleValue += tileAmount[i + 1] * 3;
+            if (i>=32&&i<=38&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
+            if (i<=37&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
+            if (i>=33&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
-            if(i==31||i==39) singleValue+=0.4;
-            else if(i==32||i==38) singleValue+=0.8;
-            else singleValue+=1.2;
+            //if(i==31||i==39) singleValue+=0.4;
+            //else if(i==32||i==38) singleValue+=0.8;
+            //else singleValue+=1.2;
 
             if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
@@ -323,7 +337,8 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
-
+            if((i-1)%4==state.getCurPosition()) singleValue+=1.7;
+            if((i-1)%4==StateContainer::quan) singleValue+=1.7;
             if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
