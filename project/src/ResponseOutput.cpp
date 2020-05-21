@@ -185,7 +185,7 @@ bool Output::judgeGang(
     if(status==3){
         if(tileAmout[newTile.getTileInt()]==3){
             //先得到不杠时的评估值
-            double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+            double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
             //杠后修改pack,hand;
             for(unsigned int i=0;i<hand.size();i++){
                 if(hand[i].getTileInt()==newTile.getTileInt()){
@@ -194,7 +194,7 @@ bool Output::judgeGang(
             }
         }
             pack.push_back(make_pair("GANG",newTile));
-            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
         }
@@ -211,7 +211,7 @@ bool Output::judgeGang(
                     i--;
             }
             pack.push_back(make_pair("GANG",newTile));
-            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
             }            
@@ -242,7 +242,7 @@ bool Output::judgeBuGang(
             }
             pack.erase(pack.begin()+i);
             pack.push_back(make_pair("GANG",newTile));
-            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
             //cout << "[DEBUG] judgeBuGang Successed!\n";
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
@@ -293,7 +293,7 @@ const pair<double,Majang> Output::getBestPlay(
         for(unsigned int i=0;i<hand.size();i++){
             vector<Majang> newHand(hand);
             newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true,form_flag,shanten);
+            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag,shanten);
             if(ans>maxResult){
                 maxResult=ans;
                 bestChoice=i;
@@ -310,7 +310,7 @@ const pair<double,Majang> Output::getBestPlay(
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
                 if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
-                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
+                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
                 if(ans>maxResult){
                     maxResult=ans;
                     bestChoice=i;
@@ -323,7 +323,7 @@ const pair<double,Majang> Output::getBestPlay(
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
                 if(ans>maxResult){
                     maxResult=ans;
                     bestChoice=i;
@@ -377,9 +377,9 @@ const Majang Output::getBestCP(
         //}
 
         if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)||(p.second.first<=4&&p.second.second>=0.1)))
-            maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
+            maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
         else
-            maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+            maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
         
         pair<double,Majang> r={0,Majang(1)};
         //进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.

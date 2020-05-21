@@ -48,7 +48,7 @@ public:
         //flowerCount:补花数
         StateContainer state,
         //StateContainer:牌库状态
-        bool have_form,
+        //bool have_form,
         mahjong::tile_t form_flag,
         int shanten
     );

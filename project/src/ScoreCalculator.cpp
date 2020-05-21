@@ -13,7 +13,7 @@ double Calculator::MajangScoreCalculator(
     vector<Majang> hand,
     int flowerCount,
     StateContainer state,
-    bool have_form,
+    //bool have_form,
     mahjong::tile_t form_flag=0x01,
     int shanten=20
 ) {    
@@ -79,16 +79,13 @@ double Calculator::MajangScoreCalculator(
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
 
     //特殊番型上听数
-    if(have_form){
+    auto s=specialShantenCalc(pack,hand,state);
 
-        auto s=specialShantenCalc(pack,hand,state);
-        if(s.first==0) resultShanten+=50;
-        else
-            resultShanten+= -(s.first - 1 - log(s.second) * k4);
+    if(s.first==0) resultShanten+=50;
+    else
+        resultShanten+= -(s.first - 1 - log(s.second) * k4)*0.6;
 
-    }
-    double k5=15;
-    if(form_flag!=0x01||have_form) k5=25;  //这时候要加大shanten的占比
+    double k5=20;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;
     
     if(form_flag==0x08) r3*=0.5;
@@ -239,7 +236,7 @@ double Calculator::MajangHandScore(
         if (pack[i].first == "GANG") result += 32;
         else if (pack[i].first == "PENG") result += 18;
         else {
-            result += 20;
+            result += 14;
         }
     }
     result += HandScoreCalculator(tileAmount,dianpao,state);

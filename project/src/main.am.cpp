@@ -9460,8 +9460,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -9490,10 +9490,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -9518,7 +9518,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -9537,9 +9537,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -9562,7 +9562,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -9581,9 +9581,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;
@@ -9894,7 +9894,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
-		bool have_form,
+		//bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -12176,8 +12176,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -12206,10 +12206,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -12234,7 +12234,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -12253,9 +12253,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -12278,7 +12278,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -12297,9 +12297,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;
@@ -12610,7 +12610,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
-		bool have_form,
+		//bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -12674,7 +12674,7 @@ double Calculator::MajangScoreCalculator(
 	vector<Majang> hand,
 	int flowerCount,
 	StateContainer state,
-	bool have_form,
+	//bool have_form,
 	mahjong::tile_t form_flag=0x01,
 	int shanten=20
 ) {
@@ -12739,16 +12739,13 @@ double Calculator::MajangScoreCalculator(
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
 
 	//特殊番型上听数
-	if(have_form){
+	auto s=specialShantenCalc(pack,hand,state);
 
-		auto s=specialShantenCalc(pack,hand,state);
-		if(s.first==0) resultShanten+=50;
-		else
-			resultShanten+= -(s.first - 1 - log(s.second) * k4);
+	if(s.first==0) resultShanten+=50;
+	else
+		resultShanten+= -(s.first - 1 - log(s.second) * k4)*0.6;
 
-	}
-	double k5=15;
-	if(form_flag!=0x01||have_form) k5=25;  //这时候要加大shanten的占比
+	double k5=20;  //这时候要加大shanten的占比
 	double r3=k5*resultShanten;
 
 	if(form_flag==0x08) r3*=0.5;
@@ -12899,7 +12896,7 @@ double Calculator::MajangHandScore(
 		if (pack[i].first == "GANG") result += 32;
 		else if (pack[i].first == "PENG") result += 18;
 		else {
-			result += 20;
+			result += 14;
 		}
 	}
 	result += HandScoreCalculator(tileAmount,dianpao,state);
@@ -15677,8 +15674,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -15707,10 +15704,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -15735,7 +15732,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -15754,9 +15751,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -15779,7 +15776,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -15798,9 +15795,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;
@@ -16111,7 +16108,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
-		bool have_form,
+		//bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -18112,8 +18109,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -18142,10 +18139,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -18170,7 +18167,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -18189,9 +18186,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -18214,7 +18211,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -18233,9 +18230,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;
@@ -21041,8 +21038,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -21071,10 +21068,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -21099,7 +21096,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -21118,9 +21115,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -21143,7 +21140,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -21162,9 +21159,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;
@@ -21475,7 +21472,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
-		bool have_form,
+		//bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -23476,8 +23473,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -23506,10 +23503,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -23534,7 +23531,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -23553,9 +23550,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -23578,7 +23575,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -23597,9 +23594,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;
@@ -24079,7 +24076,7 @@ bool Output::judgeGang(
 	if(status==3){
 		if(tileAmout[newTile.getTileInt()]==3){
 			//先得到不杠时的评估值
-			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			//杠后修改pack,hand;
 			for(unsigned int i=0;i<hand.size();i++){
 				if(hand[i].getTileInt()==newTile.getTileInt()){
@@ -24088,7 +24085,7 @@ bool Output::judgeGang(
 			}
 		}
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 		}
@@ -24105,7 +24102,7 @@ bool Output::judgeGang(
 					i--;
 			}
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 			}
@@ -24135,7 +24132,7 @@ bool Output::judgeBuGang(
 			}
 			pack.erase(pack.begin()+i);
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 			//cout << "[DEBUG] judgeBuGang Successed!\n";
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
@@ -24185,7 +24182,7 @@ const pair<double,Majang> Output::getBestPlay(
 		for(unsigned int i=0;i<hand.size();i++){
 			vector<Majang> newHand(hand);
 			newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true,form_flag,shanten);
+			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag,shanten);
 			if(ans>maxResult){
 				maxResult=ans;
 				bestChoice=i;
@@ -24202,7 +24199,7 @@ const pair<double,Majang> Output::getBestPlay(
 				vector<Majang> newHand(hand);
 				newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
 				if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
-				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
+				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 				if(ans>maxResult){
 					maxResult=ans;
 					bestChoice=i;
@@ -24215,7 +24212,7 @@ const pair<double,Majang> Output::getBestPlay(
 			for(unsigned int i=0;i<hand.size();i++){
 				vector<Majang> newHand(hand);
 				newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 				if(ans>maxResult){
 					maxResult=ans;
 					bestChoice=i;
@@ -24268,9 +24265,9 @@ const Majang Output::getBestCP(
 		//}
 
 		if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)||(p.second.first<=4&&p.second.second>=0.1)))
-			maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
+			maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 		else
-			maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+			maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 
 		pair<double,Majang> r={0,Majang(1)};
 		//进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
@@ -26333,8 +26330,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	string input;
 	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
 	int flag;
-	int minShanten=5;
-	double maxSimilarity=0;
+	int minShanten=7;
+	double maxSimilarity=1e-5;
 	double prt=100;
 	//freopen("D://specialShanten.txt","r",stdin);
 	// freopen("./data/specialShanten.txt","r",stdin);
@@ -26363,10 +26360,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 					else{
 						tileAmount[num]--;
 					}
-					if(shanten>=5) break;
+					if(shanten>=7||shanten>=hand.size()) break;
 				}
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			/*double cnt = shanten - 1 - log(similarity)/k[flag];
 			if(cnt<prt||shanten==0){
@@ -26391,7 +26388,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 	else if(chisum==1){
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -26410,9 +26407,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 
 			if(shanten<minShanten){
@@ -26435,7 +26432,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 
 		int myPack=allCHI[0];
 		auto t=specialShantenForPack.find(myPack);
-		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
 		for(auto input: t->second){
 			// Reader::readIn(input);
 			flag=input[input.length()-1]-'0';
@@ -26454,9 +26451,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
 				else{
 					tileAmount[num]--;
 				}
-				if(shanten>=5) break;
+				if(shanten>=7||shanten>=hand.size()) break;
 			}
-			if(shanten>=5||shanten>=hand.size()){continue;}
+			if(shanten>=7||shanten>=hand.size()){continue;}
 			similarity=SimilarityCalc(state,useful_table);
 			if(shanten<minShanten){
 				minShanten=shanten;

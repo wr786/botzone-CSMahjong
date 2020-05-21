@@ -1114,8 +1114,8 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
     string input;
     specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高        
     int flag;
-    int minShanten=5;
-    double maxSimilarity=0;
+    int minShanten=7;
+    double maxSimilarity=1e-5;
     double prt=100;
     //freopen("D://specialShanten.txt","r",stdin);
     // freopen("./data/specialShanten.txt","r",stdin);
@@ -1144,10 +1144,10 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
                     else{
                         tileAmount[num]--;
                     }
-                    if(shanten>=5) break;
+                    if(shanten>=7||shanten>=hand.size()) break;
                 }
             }
-            if(shanten>=5||shanten>=hand.size()){continue;}
+            if(shanten>=7||shanten>=hand.size()){continue;}
             similarity=SimilarityCalc(state,useful_table);
             /*double cnt = shanten - 1 - log(similarity)/k[flag];
             if(cnt<prt||shanten==0){
@@ -1172,7 +1172,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
     else if(chisum==1){            
         int myPack=allCHI[0];
         auto t=specialShantenForPack.find(myPack);
-        if(t==specialShantenForPack.end()) return {100,0};;//找不到
+        if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
         for(auto input: t->second){    
             // Reader::readIn(input);        
             flag=input[input.length()-1]-'0';
@@ -1191,9 +1191,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
                 else{
                     tileAmount[num]--;
                 }
-                if(shanten>=5) break;
+                if(shanten>=7||shanten>=hand.size()) break;
             }
-            if(shanten>=5||shanten>=hand.size()){continue;}
+            if(shanten>=7||shanten>=hand.size()){continue;}
             similarity=SimilarityCalc(state,useful_table);
 
             if(shanten<minShanten){
@@ -1216,7 +1216,7 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
        
         int myPack=allCHI[0];
         auto t=specialShantenForPack.find(myPack);
-        if(t==specialShantenForPack.end()) return {100,0};;//找不到
+        if(t==specialShantenForPack.end()) return {100,1e-5};;//找不到
         for(auto input: t->second){    
             // Reader::readIn(input);        
             flag=input[input.length()-1]-'0';
@@ -1235,9 +1235,9 @@ double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局�
                 else{
                     tileAmount[num]--;
                 }
-                if(shanten>=5) break;
+                if(shanten>=7||shanten>=hand.size()) break;
             }
-            if(shanten>=5||shanten>=hand.size()){continue;}
+            if(shanten>=7||shanten>=hand.size()){continue;}
             similarity=SimilarityCalc(state,useful_table);
             if(shanten<minShanten){
                 minShanten=shanten;
