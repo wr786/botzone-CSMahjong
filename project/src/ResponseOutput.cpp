@@ -63,7 +63,8 @@ void Output::Response(int request, StateContainer state){
         }
         //PENG
         else if(!isLast&&judgePeng(tileAmount,lastTile)){
-            Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
+            int pos=0;
+            Majang MajangPlay = getBestCP(state,pack,hand,lastTile,pos);
             if(MajangPlay.getTileInt()==1){
                 printf("PASS");
             }
@@ -184,7 +185,7 @@ bool Output::judgeGang(
     if(status==3){
         if(tileAmout[newTile.getTileInt()]==3){
             //先得到不杠时的评估值
-            double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+            double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
             //杠后修改pack,hand;
             for(unsigned int i=0;i<hand.size();i++){
                 if(hand[i].getTileInt()==newTile.getTileInt()){
@@ -193,7 +194,7 @@ bool Output::judgeGang(
             }
         }
             pack.push_back(make_pair("GANG",newTile));
-            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
         }
@@ -210,7 +211,7 @@ bool Output::judgeGang(
                     i--;
             }
             pack.push_back(make_pair("GANG",newTile));
-            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
             }            
@@ -241,7 +242,7 @@ bool Output::judgeBuGang(
             }
             pack.erase(pack.begin()+i);
             pack.push_back(make_pair("GANG",newTile));
-            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+            double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
             //cout << "[DEBUG] judgeBuGang Successed!\n";
             if(maxResult2-maxResult1>=1e-5) return true;
             else return false;
@@ -278,17 +279,21 @@ const pair<double,Majang> Output::getBestPlay(
             similarity=p.second.second;
             form_flag=p.first;
         }
+        else if(shanten==p.second.first&&similarity<p.second.second){
+            similarity=p.second.second;
+            form_flag=p.first;
+        }
     }
     //如果存在一个特殊番型，且相似度应大于一定值(minLimit)
     int bestChoice=0;
     double maxResult=-1e5;
 
 
-    if(form_flag!=0x01&&similarity>=0.1&&shanten<=2){
+    if(form_flag!=0x01&&((similarity>=0.075&&shanten<=2)||(similarity>=0.050&&shanten<=1)||(shanten==0))){
         for(unsigned int i=0;i<hand.size();i++){
             vector<Majang> newHand(hand);
             newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag,shanten);
+            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true,form_flag,shanten);
             if(ans>maxResult){
                 maxResult=ans;
                 bestChoice=i;
@@ -298,14 +303,14 @@ const pair<double,Majang> Output::getBestPlay(
 
     else{
 //2.判断有没有我们想要的目标番型
-        auto p=specialShantenCalc(pack,hand,state);
+        auto p=specialShantenJudge(pack,hand,state);
         //如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
+        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)||(p.second.first<=4&&p.second.second>=0.1)){
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
                 if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
-                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
                 if(ans>maxResult){
                     maxResult=ans;
                     bestChoice=i;
@@ -318,7 +323,7 @@ const pair<double,Majang> Output::getBestPlay(
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+                double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
                 if(ans>maxResult){
                     maxResult=ans;
                     bestChoice=i;
@@ -337,12 +342,16 @@ const Majang Output::getBestCP(
     vector<pair<string,Majang> > pack,
     vector<Majang> hand,
     const Majang& newTile,
-    int pos
+    int & pos
 ){
 
     //先得到不进行操作时最优得分
     using namespace mahjong;   
     sort(hand.begin(),hand.end(),cmp);
+    int tileAmount[70];
+    memset(tileAmount,0,sizeof(tileAmount));
+    for(const auto item: hand)
+        tileAmount[item.getTileInt()]++;
 
     useful_table_t useful_table;
 
@@ -356,44 +365,23 @@ const Majang Output::getBestCP(
 
     //如果存在一个特殊番型，且相似度应大于一定值(minLimit)
     double maxResult1=-1e5;
-    bool quanqiuren=pack.size()<2;
+    bool quanqiuren=pack.size()<3;
     //这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
-    if(quanqiuren&&form_flag!=0x01&&similarity>=0.1&&shanten<=2){
-        maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
+    if(quanqiuren&&form_flag!=0x01&&((similarity>=0.075&&shanten<=2)||(similarity>=0.050&&shanten<=1)||(shanten==0)))
         return Majang(1);
-        }
     else{
-        auto p=specialShantenCalc(pack,hand,state);
+        auto p=specialShantenJudge(pack,hand,state);        
         //看看有没有目标番型，如果有，则评估标准就变成目标番型中是否有这对吃、碰
-        if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075))){
-            string newPack="";
-            if(pos==0){
-                newPack+=to_string(newTile.getTileInt());
-                newPack+=to_string(newTile.getTileInt());
-                newPack+=to_string(newTile.getTileInt());
-            }
-            else{
-            if(pos==1){
-                newPack+=to_string(newTile.getTileInt());
-                newPack+=to_string(newTile.getTileInt()+1);
-                newPack+=to_string(newTile.getTileInt()+2);
-            }
-            else if(pos==2){
-                newPack+=to_string(newTile.getTileInt()-1);
-                newPack+=to_string(newTile.getTileInt());
-                newPack+=to_string(newTile.getTileInt()+1);       
-            }
-            else{
-                newPack+=to_string(newTile.getTileInt()-2);
-                newPack+=to_string(newTile.getTileInt()-1);
-                newPack+=to_string(newTile.getTileInt());         
-            }                
-            }
-            if(pack.size()>=1&&p.first.tileForm.find(newPack)==string::npos) return Majang(1);
-            //else flag=true;//这里先认为如果有的话 就吃、碰（不过也不一定，比如已经有345了，再去碰345好像就不太行，但万一我碰345再把5打掉呢？这还是交给之前的贪心去评估吧
-        }
+        //if(pack.size()>=1&&p.second.first!=0){
+        //    string newPack="";
+        //}
 
-        maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+        if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)||(p.second.first<=4&&p.second.second>=0.1)))
+            maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
+        else
+            maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+        
+        pair<double,Majang> r={0,Majang(1)};
         //进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
         if(pos==0){
             for(unsigned int i=0;i<hand.size();i++){
@@ -403,66 +391,97 @@ const Majang Output::getBestCP(
                 }
             }
                 pack.push_back(make_pair("PENG",newTile));
+                r=getBestPlay(state,pack,hand);
         }
-        else{            
-            //把吃掉的牌从手牌hand中去掉,再把顺子加到pack中
-            if(pos==1){
+        else{
+            if(newTile.getTileNum()<=7&&tileAmount[newTile.getTileInt()+1]&&tileAmount[newTile.getTileInt()+2]){
+                vector<Majang> newHand(hand);
+                vector<pair<string,Majang> > newPack(pack);
                 int k1=1,k2=1;
                 unsigned int i=0;
-                while((k1||k2)&&i<hand.size()){
-                    if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
+                while((k1||k2)&&i<newHand.size()){
+                    if(k1&&newHand[i].getTileInt()==newTile.getTileInt()+1){
                         k1--;
-                        hand.erase(hand.begin()+i);
+                        newHand.erase(newHand.begin()+i);
                     }
-                    else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+2){
+                    else if(k2&&newHand[i].getTileInt()==newTile.getTileInt()+2){
                         k2--;
-                        hand.erase(hand.begin()+i);
+                        newHand.erase(newHand.begin()+i);
                     }
                     else{
                         i++;
                     }
                 }
-                pack.push_back(make_pair("CHI",newTile.getNxtMajang()));
+                newPack.push_back(make_pair("CHI",newTile.getNxtMajang()));
+                pair<double,Majang> r1=getBestPlay(state,newPack,newHand);
+                if(r.second.getTileInt()==1){
+                    r=r1;                
+                    pos=1;  
+                }        
+                else{
+                    if(r.first<r1.first){r=r1;pos=1;}
+                }
+      
             }
-            else if(pos==2){
+            if(newTile.getTileNum()>=2&&newTile.getTileNum()<=8&&tileAmount[newTile.getTileInt()-1]&&tileAmount[newTile.getTileInt()+1]){
+                vector<Majang> newHand(hand);
+                vector<pair<string,Majang> > newPack(pack);
                 int k1=1,k2=1;
                 unsigned int i=0;
-                while((k1||k2)&&i<hand.size()){
-                    if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
+                while((k1||k2)&&i<newHand.size()){
+                    if(k1&&newHand[i].getTileInt()==newTile.getTileInt()-1){
                         k1--;
-                        hand.erase(hand.begin()+i);
+                        newHand.erase(newHand.begin()+i);
                     }
-                    else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+1){
+                    else if(k2&&newHand[i].getTileInt()==newTile.getTileInt()+1){
                         k2--;
-                        hand.erase(hand.begin()+i);
+                        newHand.erase(newHand.begin()+i);
                     }
                     else{
                         i++;
                     }
                 } 
-                pack.push_back(make_pair("CHI",newTile));           
+                newPack.push_back(make_pair("CHI",newTile));
+                pair<double,Majang> r1=getBestPlay(state,newPack,newHand);
+                if(r.second.getTileInt()==1){
+                    r=r1;
+                    pos=2;
+                }        
+                else{
+                    if(r.first<r1.first){r=r1;pos=2;}
+                } 
             }
-            else{
+            if(newTile.getTileNum()>=3&&tileAmount[newTile.getTileInt()-1]&&tileAmount[newTile.getTileInt()-2]){                    
+                vector<Majang> newHand(hand);
+                vector<pair<string,Majang> > newPack(pack);
                 int k1=1,k2=1;
                 unsigned int i=0;
                 while((k1||k2)&&i<hand.size()){
-                    if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
+                    if(k1&&newHand[i].getTileInt()==newTile.getTileInt()-1){
                         k1--;
-                        hand.erase(hand.begin()+i);
+                        newHand.erase(newHand.begin()+i);
                     }
-                    else if(k2&&hand[i].getTileInt()==newTile.getTileInt()-2){
+                    else if(k2&&newHand[i].getTileInt()==newTile.getTileInt()-2){
                         k2--;
-                        hand.erase(hand.begin()+i);
+                        newHand.erase(newHand.begin()+i);
                     }
                     else{
                         i++;
                     }
                 }
-                pack.push_back(make_pair("CHI",newTile.getPrvMajang()));            
-            }
+                newPack.push_back(make_pair("CHI",newTile.getPrvMajang()));
+                pair<double,Majang> r1=getBestPlay(state,newPack,newHand);
+                if(r.second.getTileInt()==1){
+                    r=r1;
+                    pos=3;
+                }        
+                else{
+                    if(r.first<r1.first) {r=r1;pos=3;}
+                }  
+            }            
+
         }
         //得到操作过后的最优解
-        pair<double,Majang> r=getBestPlay(state,pack,hand);
         double maxResult2=r.first;
         if(!quanqiuren||maxResult2-maxResult1>=1e-5){
             return r.second;

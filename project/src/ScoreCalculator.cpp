@@ -13,26 +13,27 @@ double Calculator::MajangScoreCalculator(
     vector<Majang> hand,
     int flowerCount,
     StateContainer state,
+    bool have_form,
     mahjong::tile_t form_flag=0x01,
     int shanten=20
 ) {    
     double k1,k2,k3;
     //参数实际应按游戏回合分段，这里先随便写了一个
     if(state.getTileWallLeftOf(state.getCurPosition())<=15){
-        k1=0.2;    // 手牌得分所占权重
-        k2=0.5;    // 番数得分所占权重   
-        k3=0.3;    // 复合上听数所占权重
+        k1=0.3;    // 手牌得分所占权重
+        k2=1;    // 番数得分所占权重   
+        k3=0.7;    // 复合上听数所占权重
     }
     else if(state.getTileWallLeftOf(state.getCurPosition())<=18){
-        k1=0.3;    // 手牌得分所占权重
-        k2=0.3;    // 番数得分所占权重   
-        k3=0.4;    // 复合上听数所占权重          
+        k1=0.5;    // 手牌得分所占权重
+        k2=1;    // 番数得分所占权重   
+        k3=0.5;    // 复合上听数所占权重          
     }
     else{
         //前几手抓牌shanten不太准
-        k1=0.5;    // 手牌得分所占权重
-        k2=0.3;    // 番数得分所占权重   
-        k3=0.2;    // 复合上听数所占权重        
+        k1=0.6;    // 手牌得分所占权重
+        k2=1;    // 番数得分所占权重   
+        k3=0.4;    // 复合上听数所占权重        
     }
 
     int num=0;
@@ -72,15 +73,28 @@ double Calculator::MajangScoreCalculator(
     // 所以暂时令
     double k4=0.5;
 
-    if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
+    if( param1==0 ) resultShanten=50;
+    else 
+        resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
+
+    //特殊番型上听数
+    if(have_form){
+
+        auto s=specialShantenCalc(pack,hand,state);
+        if(s.first==0) resultShanten+=50;
+        else
+            resultShanten+= -(s.first - 1 - log(s.second) * k4);
+
+    }
     double k5=15;
-    if(form_flag!=0x01) k5=25;  //这时候要加大shanten的占比
+    if(form_flag!=0x01||have_form) k5=25;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;
+    
     if(form_flag==0x08) r3*=0.5;
 
     //printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
-
+    //k2=0;
     //计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
     return r1 * k1 + r2 * k2  + r3 * k3;
 }
@@ -153,7 +167,8 @@ double Calculator::FanScoreCalculator(
             return 0;
         }
         else{
-            return r*k6;
+            //return r*k6;
+            return 0;
         }
     }
 }
@@ -249,12 +264,10 @@ double Calculator::HandScoreCalculator(
         if (tileAmount[i]) {
             double singleValue = 0;
             if (i >= 13) singleValue += tileAmount[i - 2] * 1;
-            if (i >= 12) singleValue += tileAmount[i - 1] * 3;
+            if (i >= 12) singleValue += tileAmount[i - 1] * 2;
             if (i <= 17) singleValue += tileAmount[i + 2] * 1;
-            if (i <= 18) singleValue += tileAmount[i + 1] * 3;
-            if (i>=12&&i<=18&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
-            if (i<=17&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
-            if (i>=13&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
+            if (i <= 18) singleValue += tileAmount[i + 1] * 2;
+
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
@@ -267,7 +280,9 @@ double Calculator::HandScoreCalculator(
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
             }
-
+            if (i>=12&&i<=18&&tileAmount[i-1]&&tileAmount[i+1]) valueW+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*1;
+            if (i<=17&&tileAmount[i+1]&&tileAmount[i+2]) valueW+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*1;
+            if (i>=13&&tileAmount[i-1]&&tileAmount[i-2]) valueW+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*1;
             valueW += tileAmount[i] * singleValue;
             sumW += tileAmount[i];
         }
@@ -276,12 +291,10 @@ double Calculator::HandScoreCalculator(
         if (tileAmount[i]) {
             double singleValue = 0;
             if (i >= 23) singleValue += tileAmount[i - 2] * 1;
-            if (i >= 22) singleValue += tileAmount[i - 1] * 3;
+            if (i >= 22) singleValue += tileAmount[i - 1] * 2;
             if (i <= 27) singleValue += tileAmount[i + 2] * 1;
-            if (i <= 28) singleValue += tileAmount[i + 1] * 3;
-            if (i>=22&&i<=28&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
-            if (i<=27&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
-            if (i>=23&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
+            if (i <= 28) singleValue += tileAmount[i + 1] * 2;
+
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
@@ -294,7 +307,9 @@ double Calculator::HandScoreCalculator(
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
             }
-
+            if (i>=22&&i<=28&&tileAmount[i-1]&&tileAmount[i+1]) valueB+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*1;
+            if (i<=27&&tileAmount[i+1]&&tileAmount[i+2]) valueB+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*1;
+            if (i>=23&&tileAmount[i-1]&&tileAmount[i-2]) valueB+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*1;
             valueB += tileAmount[i] * singleValue;
             sumB += tileAmount[i];
         }
@@ -303,12 +318,10 @@ double Calculator::HandScoreCalculator(
         if (tileAmount[i]) {
             double singleValue = 0;
             if (i >= 33) singleValue += tileAmount[i - 2] * 1;
-            if (i >= 32) singleValue += tileAmount[i - 1] * 3;
+            if (i >= 32) singleValue += tileAmount[i - 1] * 2;
             if (i <= 37) singleValue += tileAmount[i + 2] * 1;
-            if (i <= 38) singleValue += tileAmount[i + 1] * 3;
-            if (i>=32&&i<=38&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
-            if (i<=37&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
-            if (i>=33&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
+            if (i <= 38) singleValue += tileAmount[i + 1] * 2;
+
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
@@ -321,7 +334,9 @@ double Calculator::HandScoreCalculator(
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
                 singleValue -= kw*cntPlayedRecently[i];
             }
-
+            if (i>=32&&i<=38&&tileAmount[i-1]&&tileAmount[i+1]) valueT+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*1;
+            if (i<=37&&tileAmount[i+1]&&tileAmount[i+2]) valueT+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*1;
+            if (i>=33&&tileAmount[i-1]&&tileAmount[i-2]) valueT+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*1;
             valueT += tileAmount[i] * singleValue;
             sumT += tileAmount[i];
         }
@@ -329,7 +344,7 @@ double Calculator::HandScoreCalculator(
     //箭牌和风牌可能要有特殊的地位*
     for (int i = 41; i <= 44; i++) {
         if (tileAmount[i]) {
-            double singleValue = -0.3;
+            double singleValue = -1;
             // if(i>=43) singleValue+=tileAmount[i-2]*1;
             // if(i>=42) singleValue+=tileAmount[i-1]*2;
             // if(i<=42) singleValue+=tileAmount[i+2]*1;
@@ -337,8 +352,8 @@ double Calculator::HandScoreCalculator(
             if (tileAmount[i] == 2) singleValue += 2;
             else if (tileAmount[i] == 3) singleValue += 3;
             else if (tileAmount[i] == 4) singleValue += 4;
-            if((i-1)%4==state.getCurPosition()) singleValue+=1.4;
-            if((i-1)%4==StateContainer::quan) singleValue+=1.4;
+            if((i-1)%4==state.getCurPosition()&&(state.getTileLeft(i)+tileAmount[i]>=3)) singleValue+=0.5;
+            if((i-1)%4==StateContainer::quan&&(state.getTileLeft(i)+tileAmount[i]>=3)) singleValue+=0.5;
             if(dianpao&&cntPlayedRecently[i]) {
                 // 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
                 // 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
@@ -351,7 +366,7 @@ double Calculator::HandScoreCalculator(
     }
     for (int i = 51; i <= 53; i++) {
         if (tileAmount[i]) {
-            double singleValue = -0.3;
+            double singleValue = -1;
             // if(i>=53) singleValue+=tileAmount[i-2]*1;
             // if(i>=52) singleValue+=tileAmount[i-1]*2;
             // if(i<=51) singleValue+=tileAmount[i+2]*1;
@@ -372,11 +387,11 @@ double Calculator::HandScoreCalculator(
     }
     //手牌张数加成
     int sum = sumW + sumB + sumT + sumF + sumJ;
-    valueW *= (1 + (double)sumW / sum);
-    valueB *= (1 + (double)sumB / sum);
-    valueT *= (1 + (double)sumT / sum);
-    valueF *= (1 + (double)sumF / sum);
-    valueJ *= (1 + (double)sumJ / sum);
+    //valueW *= (1 + (double)sumW / sum);
+    //valueB *= (1 + (double)sumB / sum);
+    //valueT *= (1 + (double)sumT / sum);
+    //valueF *= (1 + (double)sumF / sum); 感觉字牌并不存在手牌数加成
+    //valueJ *= (1 + (double)sumJ / sum);
     r = valueW + valueB + valueT + valueF + valueJ;
     return r;
 }

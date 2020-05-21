@@ -56,6 +56,7 @@ int main() {
     cout << "=== shanten test end ===" << endl;
 #endif // !_BOTZONE_ONLINE6
     //clock_t start=clock();
+    specialShantenInit();
     int turnID; Reader::readIn(turnID);
     string tmp;
     int lastRequest;

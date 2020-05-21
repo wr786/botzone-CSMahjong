@@ -1934,6 +1934,7 @@ public:
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -3233,25 +3234,18 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
-#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
-#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <cstring>
-#include <iostream>
-#endif
-
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -3262,10 +3256,8 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef __MAHJONG_ALGORITHM__TILE_H__
 #define __MAHJONG_ALGORITHM__TILE_H__
 
-#ifndef _PREPROCESS_ONLY
 #include <stddef.h>
 #include <stdint.h>
-#endif
 
  // force inline
 #ifndef FORCE_INLINE
@@ -4011,6 +4003,10 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 
 /*** End of inlined file: fan_calculator.h ***/
 
+
+#include <cstring>
+#include <iostream>
+
 using namespace std;
 
 static unordered_map<string, mahjong::tile_t> str2tile;
@@ -4104,13 +4100,11 @@ void MahjongInit()
 
 
 /*** Start of inlined file: fan_calculator.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 /*** Start of inlined file: standard_tiles.h ***/
 #ifndef __MAHJONG_ALGORITHM__STANDARD_TILES_H__
@@ -6599,13 +6593,11 @@ int calculate_fan(const calculate_param_t *calculate_param, fan_table_t *fan_tab
 
 
 /*** Start of inlined file: shanten.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <string.h>
 #include <limits>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -7964,11 +7956,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 /*** End of inlined file: stringify.h ***/
 
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -8423,7 +8413,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -8524,6 +8514,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -9283,21 +9421,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -9310,19 +9467,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -9334,30 +9539,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -9371,16 +9809,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -9424,6 +9894,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
+		bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -9767,6 +10238,7 @@ public:
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -10200,11 +10672,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -10659,7 +11129,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -10760,6 +11230,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -11519,21 +12137,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -11546,19 +12183,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -11570,30 +12255,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -11607,16 +12525,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -11660,6 +12610,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
+		bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -11723,26 +12674,27 @@ double Calculator::MajangScoreCalculator(
 	vector<Majang> hand,
 	int flowerCount,
 	StateContainer state,
+	bool have_form,
 	mahjong::tile_t form_flag=0x01,
 	int shanten=20
 ) {
 	double k1,k2,k3;
 	//参数实际应按游戏回合分段，这里先随便写了一个
 	if(state.getTileWallLeftOf(state.getCurPosition())<=15){
-		k1=0.2;    // 手牌得分所占权重
-		k2=0.5;    // 番数得分所占权重
-		k3=0.3;    // 复合上听数所占权重
+		k1=0.3;    // 手牌得分所占权重
+		k2=1;    // 番数得分所占权重
+		k3=0.7;    // 复合上听数所占权重
 	}
 	else if(state.getTileWallLeftOf(state.getCurPosition())<=18){
-		k1=0.3;    // 手牌得分所占权重
-		k2=0.3;    // 番数得分所占权重
-		k3=0.4;    // 复合上听数所占权重
+		k1=0.5;    // 手牌得分所占权重
+		k2=1;    // 番数得分所占权重
+		k3=0.5;    // 复合上听数所占权重
 	}
 	else{
 		//前几手抓牌shanten不太准
-		k1=0.5;    // 手牌得分所占权重
-		k2=0.3;    // 番数得分所占权重
-		k3=0.2;    // 复合上听数所占权重
+		k1=0.6;    // 手牌得分所占权重
+		k2=1;    // 番数得分所占权重
+		k3=0.4;    // 复合上听数所占权重
 	}
 
 	int num=0;
@@ -11781,15 +12733,28 @@ double Calculator::MajangScoreCalculator(
 	// 所以暂时令
 	double k4=0.5;
 
-	if(param3 > 0) resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
+	if( param1==0 ) resultShanten=50;
+	else
+		resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
+
+	//特殊番型上听数
+	if(have_form){
+
+		auto s=specialShantenCalc(pack,hand,state);
+		if(s.first==0) resultShanten+=50;
+		else
+			resultShanten+= -(s.first - 1 - log(s.second) * k4);
+
+	}
 	double k5=15;
-	if(form_flag!=0x01) k5=25;  //这时候要加大shanten的占比
+	if(form_flag!=0x01||have_form) k5=25;  //这时候要加大shanten的占比
 	double r3=k5*resultShanten;
+
 	if(form_flag==0x08) r3*=0.5;
 
 	//printf("r1:%f r2:%f r3:%f\n",r1,r2,r3);
-
+	//k2=0;
 	//计算点炮番数得分时，出牌的概率应考虑到博弈，还没有想清楚，先用自摸胡的算法计算点炮胡
 	return r1 * k1 + r2 * k2  + r3 * k3;
 }
@@ -11862,7 +12827,8 @@ double Calculator::FanScoreCalculator(
 			return 0;
 		}
 		else{
-			return r*k6;
+			//return r*k6;
+			return 0;
 		}
 	}
 }
@@ -11955,12 +12921,10 @@ double Calculator::HandScoreCalculator(
 		if (tileAmount[i]) {
 			double singleValue = 0;
 			if (i >= 13) singleValue += tileAmount[i - 2] * 1;
-			if (i >= 12) singleValue += tileAmount[i - 1] * 3;
+			if (i >= 12) singleValue += tileAmount[i - 1] * 2;
 			if (i <= 17) singleValue += tileAmount[i + 2] * 1;
-			if (i <= 18) singleValue += tileAmount[i + 1] * 3;
-			if (i>=12&&i<=18&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
-			if (i<=17&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
-			if (i>=13&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
+			if (i <= 18) singleValue += tileAmount[i + 1] * 2;
+
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
@@ -11973,7 +12937,9 @@ double Calculator::HandScoreCalculator(
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
 			}
-
+			if (i>=12&&i<=18&&tileAmount[i-1]&&tileAmount[i+1]) valueW+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*1;
+			if (i<=17&&tileAmount[i+1]&&tileAmount[i+2]) valueW+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*1;
+			if (i>=13&&tileAmount[i-1]&&tileAmount[i-2]) valueW+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*1;
 			valueW += tileAmount[i] * singleValue;
 			sumW += tileAmount[i];
 		}
@@ -11982,12 +12948,10 @@ double Calculator::HandScoreCalculator(
 		if (tileAmount[i]) {
 			double singleValue = 0;
 			if (i >= 23) singleValue += tileAmount[i - 2] * 1;
-			if (i >= 22) singleValue += tileAmount[i - 1] * 3;
+			if (i >= 22) singleValue += tileAmount[i - 1] * 2;
 			if (i <= 27) singleValue += tileAmount[i + 2] * 1;
-			if (i <= 28) singleValue += tileAmount[i + 1] * 3;
-			if (i>=22&&i<=28&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
-			if (i<=27&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
-			if (i>=23&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
+			if (i <= 28) singleValue += tileAmount[i + 1] * 2;
+
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
@@ -12000,7 +12964,9 @@ double Calculator::HandScoreCalculator(
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
 			}
-
+			if (i>=22&&i<=28&&tileAmount[i-1]&&tileAmount[i+1]) valueB+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*1;
+			if (i<=27&&tileAmount[i+1]&&tileAmount[i+2]) valueB+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*1;
+			if (i>=23&&tileAmount[i-1]&&tileAmount[i-2]) valueB+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*1;
 			valueB += tileAmount[i] * singleValue;
 			sumB += tileAmount[i];
 		}
@@ -12009,12 +12975,10 @@ double Calculator::HandScoreCalculator(
 		if (tileAmount[i]) {
 			double singleValue = 0;
 			if (i >= 33) singleValue += tileAmount[i - 2] * 1;
-			if (i >= 32) singleValue += tileAmount[i - 1] * 3;
+			if (i >= 32) singleValue += tileAmount[i - 1] * 2;
 			if (i <= 37) singleValue += tileAmount[i + 2] * 1;
-			if (i <= 38) singleValue += tileAmount[i + 1] * 3;
-			if (i>=32&&i<=38&&tileAmount[i-1]&&tileAmount[i+1]) singleValue+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*3;
-			if (i<=37&&tileAmount[i+1]&&tileAmount[i+2]) singleValue+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*3;
-			if (i>=33&&tileAmount[i-1]&&tileAmount[i-2]) singleValue+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*3;
+			if (i <= 38) singleValue += tileAmount[i + 1] * 2;
+
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
@@ -12027,7 +12991,9 @@ double Calculator::HandScoreCalculator(
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
 				singleValue -= kw*cntPlayedRecently[i];
 			}
-
+			if (i>=32&&i<=38&&tileAmount[i-1]&&tileAmount[i+1]) valueT+=min(tileAmount[i-1],min(tileAmount[i],tileAmount[i+1]))*1;
+			if (i<=37&&tileAmount[i+1]&&tileAmount[i+2]) valueT+=min(tileAmount[i+2],min(tileAmount[i],tileAmount[i+1]))*1;
+			if (i>=33&&tileAmount[i-1]&&tileAmount[i-2]) valueT+=min(tileAmount[i-2],min(tileAmount[i],tileAmount[i-1]))*1;
 			valueT += tileAmount[i] * singleValue;
 			sumT += tileAmount[i];
 		}
@@ -12035,7 +13001,7 @@ double Calculator::HandScoreCalculator(
 	//箭牌和风牌可能要有特殊的地位*
 	for (int i = 41; i <= 44; i++) {
 		if (tileAmount[i]) {
-			double singleValue = -0.3;
+			double singleValue = -1;
 			// if(i>=43) singleValue+=tileAmount[i-2]*1;
 			// if(i>=42) singleValue+=tileAmount[i-1]*2;
 			// if(i<=42) singleValue+=tileAmount[i+2]*1;
@@ -12043,8 +13009,8 @@ double Calculator::HandScoreCalculator(
 			if (tileAmount[i] == 2) singleValue += 2;
 			else if (tileAmount[i] == 3) singleValue += 3;
 			else if (tileAmount[i] == 4) singleValue += 4;
-			if((i-1)%4==state.getCurPosition()) singleValue+=1.4;
-			if((i-1)%4==StateContainer::quan) singleValue+=1.4;
+			if((i-1)%4==state.getCurPosition()&&(state.getTileLeft(i)+tileAmount[i]>=3)) singleValue+=0.5;
+			if((i-1)%4==StateContainer::quan&&(state.getTileLeft(i)+tileAmount[i]>=3)) singleValue+=0.5;
 			if(dianpao&&cntPlayedRecently[i]) {
 				// 防止点炮，给被打出来过的牌减权，相当于给没被打出来的牌加权
 				// 因为一般来说，被打出来的牌，就是没有被人听的牌（不然人早胡了
@@ -12057,7 +13023,7 @@ double Calculator::HandScoreCalculator(
 	}
 	for (int i = 51; i <= 53; i++) {
 		if (tileAmount[i]) {
-			double singleValue = -0.3;
+			double singleValue = -1;
 			// if(i>=53) singleValue+=tileAmount[i-2]*1;
 			// if(i>=52) singleValue+=tileAmount[i-1]*2;
 			// if(i<=51) singleValue+=tileAmount[i+2]*1;
@@ -12078,11 +13044,11 @@ double Calculator::HandScoreCalculator(
 	}
 	//手牌张数加成
 	int sum = sumW + sumB + sumT + sumF + sumJ;
-	valueW *= (1 + (double)sumW / sum);
-	valueB *= (1 + (double)sumB / sum);
-	valueT *= (1 + (double)sumT / sum);
-	valueF *= (1 + (double)sumF / sum);
-	valueJ *= (1 + (double)sumJ / sum);
+	//valueW *= (1 + (double)sumW / sum);
+	//valueB *= (1 + (double)sumB / sum);
+	//valueT *= (1 + (double)sumT / sum);
+	//valueF *= (1 + (double)sumF / sum); 感觉字牌并不存在手牌数加成
+	//valueJ *= (1 + (double)sumJ / sum);
 	r = valueW + valueB + valueT + valueF + valueJ;
 	return r;
 }
@@ -12773,6 +13739,7 @@ public:
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -13206,11 +14173,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -13665,7 +14630,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -13766,6 +14731,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -14525,21 +15638,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -14552,19 +15684,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -14576,30 +15756,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -14613,16 +16026,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -14666,6 +16111,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
+		bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -14728,6 +16174,7 @@ public:
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -15161,11 +16608,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -15620,7 +17065,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -15721,6 +17166,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -16480,21 +18073,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -16507,19 +18119,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -16531,30 +18191,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -16568,16 +18461,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -16602,7 +18527,7 @@ public:
 	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
 	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
 	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
-	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int & pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
 };
 
 #endif
@@ -17178,6 +19103,7 @@ public:
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -17611,11 +19537,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -18070,7 +19994,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -18171,6 +20095,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -18930,21 +21002,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -18957,19 +21048,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -18981,30 +21120,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -19018,16 +21390,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -19071,6 +21475,7 @@ public:
 		//flowerCount:补花数
 		StateContainer state,
 		//StateContainer:牌库状态
+		bool have_form,
 		mahjong::tile_t form_flag,
 		int shanten
 	);
@@ -19133,6 +21538,7 @@ public:
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -19566,11 +21972,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -20025,7 +22429,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -20126,6 +22530,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -20885,21 +23437,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -20912,19 +23483,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -20936,30 +23555,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -20973,16 +23825,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -21007,7 +23891,7 @@ public:
 	static bool judgePeng(int tileAmout[70], const Majang& newTile);    //对手出牌后判断能否碰
 	static int judgeChi(int tileAmout[70], const Majang& newTile);     //对手出牌后判断能否吃,返回值1,2,3分别表示表示吃的牌是组成刻子中的第1,2,3张.
 	static const pair<double,Majang> getBestPlay(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand);   //返回最优的出牌及此时的评估值
-	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
+	static const Majang getBestCP(StateContainer state,vector<pair<string,Majang> > pack,vector<Majang> hand,const Majang& newTile,int & pos); //判断是否要吃(c)碰(p),若要则返回之后打出的Majang,否则Majang值为1;pos为0表示要进行的操作为碰或杠,否则表示吃时newTile的位置
 };
 
 #endif
@@ -21075,7 +23959,8 @@ void Output::Response(int request, StateContainer state){
 		}
 		//PENG
 		else if(!isLast&&judgePeng(tileAmount,lastTile)){
-			Majang MajangPlay = getBestCP(state,pack,hand,lastTile,0);
+			int pos=0;
+			Majang MajangPlay = getBestCP(state,pack,hand,lastTile,pos);
 			if(MajangPlay.getTileInt()==1){
 				printf("PASS");
 			}
@@ -21194,7 +24079,7 @@ bool Output::judgeGang(
 	if(status==3){
 		if(tileAmout[newTile.getTileInt()]==3){
 			//先得到不杠时的评估值
-			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
 			//杠后修改pack,hand;
 			for(unsigned int i=0;i<hand.size();i++){
 				if(hand[i].getTileInt()==newTile.getTileInt()){
@@ -21203,7 +24088,7 @@ bool Output::judgeGang(
 			}
 		}
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 		}
@@ -21220,7 +24105,7 @@ bool Output::judgeGang(
 					i--;
 			}
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
 			}
@@ -21250,7 +24135,7 @@ bool Output::judgeBuGang(
 			}
 			pack.erase(pack.begin()+i);
 			pack.push_back(make_pair("GANG",newTile));
-			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+			double maxResult2=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
 			//cout << "[DEBUG] judgeBuGang Successed!\n";
 			if(maxResult2-maxResult1>=1e-5) return true;
 			else return false;
@@ -21287,16 +24172,20 @@ const pair<double,Majang> Output::getBestPlay(
 			similarity=p.second.second;
 			form_flag=p.first;
 		}
+		else if(shanten==p.second.first&&similarity<p.second.second){
+			similarity=p.second.second;
+			form_flag=p.first;
+		}
 	}
 	//如果存在一个特殊番型，且相似度应大于一定值(minLimit)
 	int bestChoice=0;
 	double maxResult=-1e5;
 
-	if(form_flag!=0x01&&similarity>=0.1&&shanten<=2){
+	if(form_flag!=0x01&&((similarity>=0.075&&shanten<=2)||(similarity>=0.050&&shanten<=1)||(shanten==0))){
 		for(unsigned int i=0;i<hand.size();i++){
 			vector<Majang> newHand(hand);
 			newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag,shanten);
+			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true,form_flag,shanten);
 			if(ans>maxResult){
 				maxResult=ans;
 				bestChoice=i;
@@ -21306,14 +24195,14 @@ const pair<double,Majang> Output::getBestPlay(
 
 	else{
 //2.判断有没有我们想要的目标番型
-		auto p=specialShantenCalc(pack,hand,state);
+		auto p=specialShantenJudge(pack,hand,state);
 		//如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-		if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
+		if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)||(p.second.first<=4&&p.second.second>=0.1)){
 			for(unsigned int i=0;i<hand.size();i++){
 				vector<Majang> newHand(hand);
 				newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
 				if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
-				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
 				if(ans>maxResult){
 					maxResult=ans;
 					bestChoice=i;
@@ -21326,7 +24215,7 @@ const pair<double,Majang> Output::getBestPlay(
 			for(unsigned int i=0;i<hand.size();i++){
 				vector<Majang> newHand(hand);
 				newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+				double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
 				if(ans>maxResult){
 					maxResult=ans;
 					bestChoice=i;
@@ -21344,12 +24233,16 @@ const Majang Output::getBestCP(
 	vector<pair<string,Majang> > pack,
 	vector<Majang> hand,
 	const Majang& newTile,
-	int pos
+	int & pos
 ){
 
 	//先得到不进行操作时最优得分
 	using namespace mahjong;
 	sort(hand.begin(),hand.end(),cmp);
+	int tileAmount[70];
+	memset(tileAmount,0,sizeof(tileAmount));
+	for(const auto item: hand)
+		tileAmount[item.getTileInt()]++;
 
 	useful_table_t useful_table;
 
@@ -21363,44 +24256,23 @@ const Majang Output::getBestCP(
 
 	//如果存在一个特殊番型，且相似度应大于一定值(minLimit)
 	double maxResult1=-1e5;
-	bool quanqiuren=pack.size()<2;
+	bool quanqiuren=pack.size()<3;
 	//这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
-	if(quanqiuren&&form_flag!=0x01&&similarity>=0.1&&shanten<=2){
-		maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag);
+	if(quanqiuren&&form_flag!=0x01&&((similarity>=0.075&&shanten<=2)||(similarity>=0.050&&shanten<=1)||(shanten==0)))
 		return Majang(1);
-		}
 	else{
-		auto p=specialShantenCalc(pack,hand,state);
+		auto p=specialShantenJudge(pack,hand,state);
 		//看看有没有目标番型，如果有，则评估标准就变成目标番型中是否有这对吃、碰
-		if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075))){
-			string newPack="";
-			if(pos==0){
-				newPack+=to_string(newTile.getTileInt());
-				newPack+=to_string(newTile.getTileInt());
-				newPack+=to_string(newTile.getTileInt());
-			}
-			else{
-			if(pos==1){
-				newPack+=to_string(newTile.getTileInt());
-				newPack+=to_string(newTile.getTileInt()+1);
-				newPack+=to_string(newTile.getTileInt()+2);
-			}
-			else if(pos==2){
-				newPack+=to_string(newTile.getTileInt()-1);
-				newPack+=to_string(newTile.getTileInt());
-				newPack+=to_string(newTile.getTileInt()+1);
-			}
-			else{
-				newPack+=to_string(newTile.getTileInt()-2);
-				newPack+=to_string(newTile.getTileInt()-1);
-				newPack+=to_string(newTile.getTileInt());
-			}
-			}
-			if(pack.size()>=1&&p.first.tileForm.find(newPack)==string::npos) return Majang(1);
-			//else flag=true;//这里先认为如果有的话 就吃、碰（不过也不一定，比如已经有345了，再去碰345好像就不太行，但万一我碰345再把5打掉呢？这还是交给之前的贪心去评估吧
-		}
+		//if(pack.size()>=1&&p.second.first!=0){
+		//    string newPack="";
+		//}
 
-		maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
+		if(quanqiuren&&(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)||(p.second.first<=4&&p.second.second>=0.1)))
+			maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,true);
+		else
+			maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,false);
+
+		pair<double,Majang> r={0,Majang(1)};
 		//进行操作,改变hand和pack；若考虑到博弈过程，同时要修改state,在这里未对state进行修改.
 		if(pos==0){
 			for(unsigned int i=0;i<hand.size();i++){
@@ -21410,66 +24282,97 @@ const Majang Output::getBestCP(
 				}
 			}
 				pack.push_back(make_pair("PENG",newTile));
+				r=getBestPlay(state,pack,hand);
 		}
 		else{
-			//把吃掉的牌从手牌hand中去掉,再把顺子加到pack中
-			if(pos==1){
+			if(newTile.getTileNum()<=7&&tileAmount[newTile.getTileInt()+1]&&tileAmount[newTile.getTileInt()+2]){
+				vector<Majang> newHand(hand);
+				vector<pair<string,Majang> > newPack(pack);
 				int k1=1,k2=1;
 				unsigned int i=0;
-				while((k1||k2)&&i<hand.size()){
-					if(k1&&hand[i].getTileInt()==newTile.getTileInt()+1){
+				while((k1||k2)&&i<newHand.size()){
+					if(k1&&newHand[i].getTileInt()==newTile.getTileInt()+1){
 						k1--;
-						hand.erase(hand.begin()+i);
+						newHand.erase(newHand.begin()+i);
 					}
-					else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+2){
+					else if(k2&&newHand[i].getTileInt()==newTile.getTileInt()+2){
 						k2--;
-						hand.erase(hand.begin()+i);
+						newHand.erase(newHand.begin()+i);
 					}
 					else{
 						i++;
 					}
 				}
-				pack.push_back(make_pair("CHI",newTile.getNxtMajang()));
+				newPack.push_back(make_pair("CHI",newTile.getNxtMajang()));
+				pair<double,Majang> r1=getBestPlay(state,newPack,newHand);
+				if(r.second.getTileInt()==1){
+					r=r1;
+					pos=1;
+				}
+				else{
+					if(r.first<r1.first){r=r1;pos=1;}
+				}
+
 			}
-			else if(pos==2){
+			if(newTile.getTileNum()>=2&&newTile.getTileNum()<=8&&tileAmount[newTile.getTileInt()-1]&&tileAmount[newTile.getTileInt()+1]){
+				vector<Majang> newHand(hand);
+				vector<pair<string,Majang> > newPack(pack);
 				int k1=1,k2=1;
 				unsigned int i=0;
-				while((k1||k2)&&i<hand.size()){
-					if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
+				while((k1||k2)&&i<newHand.size()){
+					if(k1&&newHand[i].getTileInt()==newTile.getTileInt()-1){
 						k1--;
-						hand.erase(hand.begin()+i);
+						newHand.erase(newHand.begin()+i);
 					}
-					else if(k2&&hand[i].getTileInt()==newTile.getTileInt()+1){
+					else if(k2&&newHand[i].getTileInt()==newTile.getTileInt()+1){
 						k2--;
-						hand.erase(hand.begin()+i);
+						newHand.erase(newHand.begin()+i);
 					}
 					else{
 						i++;
 					}
 				}
-				pack.push_back(make_pair("CHI",newTile));
+				newPack.push_back(make_pair("CHI",newTile));
+				pair<double,Majang> r1=getBestPlay(state,newPack,newHand);
+				if(r.second.getTileInt()==1){
+					r=r1;
+					pos=2;
+				}
+				else{
+					if(r.first<r1.first){r=r1;pos=2;}
+				}
 			}
-			else{
+			if(newTile.getTileNum()>=3&&tileAmount[newTile.getTileInt()-1]&&tileAmount[newTile.getTileInt()-2]){
+				vector<Majang> newHand(hand);
+				vector<pair<string,Majang> > newPack(pack);
 				int k1=1,k2=1;
 				unsigned int i=0;
 				while((k1||k2)&&i<hand.size()){
-					if(k1&&hand[i].getTileInt()==newTile.getTileInt()-1){
+					if(k1&&newHand[i].getTileInt()==newTile.getTileInt()-1){
 						k1--;
-						hand.erase(hand.begin()+i);
+						newHand.erase(newHand.begin()+i);
 					}
-					else if(k2&&hand[i].getTileInt()==newTile.getTileInt()-2){
+					else if(k2&&newHand[i].getTileInt()==newTile.getTileInt()-2){
 						k2--;
-						hand.erase(hand.begin()+i);
+						newHand.erase(newHand.begin()+i);
 					}
 					else{
 						i++;
 					}
 				}
-				pack.push_back(make_pair("CHI",newTile.getPrvMajang()));
+				newPack.push_back(make_pair("CHI",newTile.getPrvMajang()));
+				pair<double,Majang> r1=getBestPlay(state,newPack,newHand);
+				if(r.second.getTileInt()==1){
+					r=r1;
+					pos=3;
+				}
+				else{
+					if(r.first<r1.first) {r=r1;pos=3;}
+				}
 			}
+
 		}
 		//得到操作过后的最优解
-		pair<double,Majang> r=getBestPlay(state,pack,hand);
 		double maxResult2=r.first;
 		if(!quanqiuren||maxResult2-maxResult1>=1e-5){
 			return r.second;
@@ -21492,6 +24395,7 @@ const Majang Output::getBestCP(
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <unordered_set>
 #endif
 
 #ifdef _BOTZONE_ONLINE
@@ -21925,11 +24829,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -22384,7 +25286,7 @@ const string innerTable[200] = {"Case1",
 "333435242526151617",
 "343536252627161718",
 "353637262728171819",
-"Case 2:",
+"Case2",
 "111213212223313233",
 "121314222324323334",
 "131415232425333435",
@@ -22485,6 +25387,154 @@ const string innerTable[200] = {"Case1",
 "212223232425252627272829",
 "313233333435353637373839",
 "Over"};
+
+unordered_map<int, unordered_set<string> > specialShantenForPack;
+// Case1
+void specialShantenInit(){
+	specialShantenForPack[111213].insert({"3233342324251","2223243334351"});
+	specialShantenForPack[222324].insert({"1314153435361","3334351415161","3132331314151","1112133334351"});
+	specialShantenForPack[333435].insert({"2223241415161","2425261516171","1213142425261","2122231213141","1112132223241","1415162526271"});
+	specialShantenForPack[121314].insert({"2324253435361","2122233334351","3132332324251","3334352425261"});
+	specialShantenForPack[232425].insert({"3435361516171","1112133233341","3233341415161","1415163536371","3132331213141","1213143435361"});
+	specialShantenForPack[343536].insert({"2324251516171","1314152526271","1213142324251","2526271617181","2223241314151","1516172627281"});
+	specialShantenForPack[131415].insert({"3435362526271","3132332223241","3233342425261","2223243435361","2425263536371","2122233233341"});
+	specialShantenForPack[242526].insert({"1314153536371","1516173637381","1213143334351","3334351516171","3233341314151","3536371617181"});
+	specialShantenForPack[353637].insert({"2324251415161","2627281718191","1415162627281","2425261617181","1314152425261","1617182728291"});
+	specialShantenForPack[141516].insert({"2223243334351","2324253536371","3233342324251","2526273637381","3334352526271","3536372627281"});
+	specialShantenForPack[252627].insert({"1617183738391","1314153435361","1415163637381","3637381718191","3435361617181","3334351415161"});
+	specialShantenForPack[363738].insert({"1516172728291","1415162526271","2526271718191","2425261516171"});
+	specialShantenForPack[151617].insert({"2324253435361","3637382728291","2425263637381","2627283738391","3435362627281","3334352425261"});
+	specialShantenForPack[262728].insert({"3536371718191","1516173738391","3435361516171","1415163536371"});
+	specialShantenForPack[373839].insert({"1516172627281","2526271617181"});
+	specialShantenForPack[323334].insert({"1112132324251","2122231314151","1314152425261","2324251415161"});
+	specialShantenForPack[272829].insert({"1516173637381","3536371617181"});
+	specialShantenForPack[212223].insert({"3233341314151","1213143334351"});
+	specialShantenForPack[161718].insert({"2425263536371","2526273738391","3435362526271","3536372728291"});
+	specialShantenForPack[171819].insert({"2526273637381","3536372627281"});
+	specialShantenForPack[313233].insert({"1213142324251","2223241314151"});
+	// Case2
+	specialShantenForPack[111213].insert({"2122233132332"});
+	specialShantenForPack[212223].insert({"1112133132332"});
+	specialShantenForPack[313233].insert({"1112132122232"});
+	specialShantenForPack[121314].insert({"2223243233342"});
+	specialShantenForPack[222324].insert({"1213143233342"});
+	specialShantenForPack[323334].insert({"1213142223242"});
+	specialShantenForPack[131415].insert({"2324253334352"});
+	specialShantenForPack[232425].insert({"1314153334352"});
+	specialShantenForPack[333435].insert({"1314152324252"});
+	specialShantenForPack[141516].insert({"2425263435362"});
+	specialShantenForPack[242526].insert({"1415163435362"});
+	specialShantenForPack[343536].insert({"1415162425262"});
+	specialShantenForPack[151617].insert({"2526273536372"});
+	specialShantenForPack[252627].insert({"1516173536372"});
+	specialShantenForPack[353637].insert({"1516172526272"});
+	specialShantenForPack[161718].insert({"2627283637382"});
+	specialShantenForPack[262728].insert({"1617183637382"});
+	specialShantenForPack[363738].insert({"1617182627282"});
+	specialShantenForPack[171819].insert({"2728293738392"});
+	specialShantenForPack[272829].insert({"1718193738392"});
+	specialShantenForPack[373839].insert({"1718192728292"});
+	// Case3
+	specialShantenForPack[111213].insert({"2425263738393","2728293435363"});
+	specialShantenForPack[242526].insert({"1718193132333","1112133738393"});
+	specialShantenForPack[373839].insert({"1112132425263","1415162122233"});
+	specialShantenForPack[272829].insert({"1415163132333","1112133435363"});
+	specialShantenForPack[343536].insert({"1112132728293","1718192122233"});
+	specialShantenForPack[141516].insert({"2122233738393","2728293132333"});
+	specialShantenForPack[212223].insert({"1718193435363","1415163738393"});
+	specialShantenForPack[313233].insert({"1415162728293","1718192425263"});
+	specialShantenForPack[171819].insert({"2425263132333","2122233435363"});
+	// Case4
+	specialShantenForPack[111213].insert({"1415161718194"});
+	specialShantenForPack[141516].insert({"1112131718194"});
+	specialShantenForPack[171819].insert({"1112131415164"});
+	specialShantenForPack[212223].insert({"2425262728294"});
+	specialShantenForPack[242526].insert({"2122232728294"});
+	specialShantenForPack[272829].insert({"2122232425264"});
+	specialShantenForPack[313233].insert({"3435363738394"});
+	specialShantenForPack[343536].insert({"3132333738394"});
+	specialShantenForPack[373839].insert({"3132333435364"});
+	// Case5
+	specialShantenForPack[111213].insert({"1314151516175","1213141314155"});
+	specialShantenForPack[121314].insert({"1415161617185","1314151415165","1112131314155"});
+	specialShantenForPack[131415].insert({"1112131213145","1213141415165","1112131516175","1415161516175"});
+	specialShantenForPack[141516].insert({"1213141617185","1516171617185","1314151516175","1213141314155"});
+	specialShantenForPack[151617].insert({"1415161617185","1112131314155","1314151415165"});
+	specialShantenForPack[161718].insert({"1213141415165","1415161516175"});
+	specialShantenForPack[212223].insert({"2223242324255","2324252526275"});
+	specialShantenForPack[222324].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[232425].insert({"2122232223245","2122232526275","2223242425265","2425262526275"});
+	specialShantenForPack[242526].insert({"2223242324255","2223242627285","2324252526275","2526272627285"});
+	specialShantenForPack[252627].insert({"2324252425265","2425262627285","2122232324255"});
+	specialShantenForPack[262728].insert({"2223242425265","2425262526275"});
+	specialShantenForPack[313233].insert({"3233343334355","3334353536375"});
+	specialShantenForPack[323334].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[333435].insert({"3132333233345","3132333536375","3435363536375","3233343435365"});
+	specialShantenForPack[343536].insert({"3233343334355","3536373637385","3233343637385","3334353536375"});
+	specialShantenForPack[353637].insert({"3435363637385","3334353435365","3132333334355"});
+	specialShantenForPack[363738].insert({"3233343435365","3435363536375"});
+	// Case6
+	specialShantenForPack[111111].insert({"2222223333336","3232322323236"});
+	specialShantenForPack[222222].insert({"3333331414146","3131311313136","1111113333336","1313133434346"});
+	specialShantenForPack[333333].insert({"2424241515156","2222221414146","1414142525256","1212122424246","1111112222226","2121211212126"});
+	specialShantenForPack[121212].insert({"3333332424246","3131312323236","2121213333336","2323233434346"});
+	specialShantenForPack[232323].insert({"3131311212126","1212123434346","1111113232326","3232321414146","1414143535356"});
+	specialShantenForPack[343434].insert({"1212122323236","2525251616166","1515152626266","2222221313136","1313132525256"});
+	specialShantenForPack[131313].insert({"3434342525256","2424243535356","3131312222226","2222223434346","2121213232326","3232322424246"});
+	specialShantenForPack[242424].insert({"3232321313136","3333331515156","3535351616166","1212123333336","1515153636366","1313133535356"});
+	specialShantenForPack[353535].insert({"1414142626266","2626261717176","2323231414146","1616162727276","2424241616166","1313132424246"});
+	specialShantenForPack[141414].insert({"3232322323236","2525253636366","2222223333336","3333332525256","2323233535356","3535352626266"});
+	specialShantenForPack[252525].insert({"1414143636366","3434341616166","3636361717176","1616163737376","3333331414146","1313133434346"});
+	specialShantenForPack[363636].insert({"1414142525256","2424241515156","2525251717176","1515152727276"});
+	specialShantenForPack[151515].insert({"2626263737376","3333332424246","3636362727276","2424243636366","3434342626266"});
+	specialShantenForPack[262626].insert({"1414143535356","1515153737376","3434341515156","3535351717176"});
+	specialShantenForPack[373737].insert({"1515152626266","2525251616166"});
+	specialShantenForPack[323232].insert({"2121211313136","1313132424246","2323231414146","1111112323236"});
+	specialShantenForPack[272727].insert({"1515153636366","3535351616166"});
+	specialShantenForPack[212121].insert({"3232321313136","1212123333336"});
+	specialShantenForPack[161616].insert({"2525253737376","3535352727276","2424243535356","3434342525256"});
+	specialShantenForPack[171717].insert({"3535352626266","2525253636366"});
+	specialShantenForPack[313131].insert({"1212122323236","2222221313136"});
+	// Case7
+	specialShantenForPack[111213].insert({"1112131112137"});
+	specialShantenForPack[121314].insert({"1213141213147"});
+	specialShantenForPack[131415].insert({"1314151314157"});
+	specialShantenForPack[141516].insert({"1415161415167"});
+	specialShantenForPack[151617].insert({"1516171516177"});
+	specialShantenForPack[212223].insert({"2122232122237"});
+	specialShantenForPack[222324].insert({"2223242223247"});
+	specialShantenForPack[232425].insert({"2324252324257"});
+	specialShantenForPack[242526].insert({"2425262425267"});
+	specialShantenForPack[252627].insert({"2526272526277"});
+	specialShantenForPack[313233].insert({"3132333132337"});
+	specialShantenForPack[323334].insert({"3233343233347"});
+	specialShantenForPack[333435].insert({"3334353334357"});
+	specialShantenForPack[343536].insert({"3435363435367"});
+	specialShantenForPack[353637].insert({"3536373536377"});
+	// Case8
+	specialShantenForPack[111213].insert({"1314151516171718198","1213141314151415168"});
+	specialShantenForPack[121314].insert({"1112131314151415168","1314151415161516178"});
+	specialShantenForPack[131415].insert({"1415161516171617188","1112131213141415168","1213141415161516178","1112131516171718198"});
+	specialShantenForPack[141516].insert({"1516171617181718198","1213141314151516178","1314151516171617188","1112131213141314158"});
+	specialShantenForPack[151617].insert({"1415161617181718198","1314151415161617188","1112131314151718198","1213141314151415168"});
+	specialShantenForPack[161718].insert({"1415161516171718198","1314151415161516178"});
+	specialShantenForPack[171819].insert({"1415161516171617188","1112131314151516178"});
+	specialShantenForPack[212223].insert({"2223242324252425268","2324252526272728298"});
+	specialShantenForPack[222324].insert({"2122232324252425268","2324252425262526278"});
+	specialShantenForPack[232425].insert({"2122232223242425268","2122232526272728298","2425262526272627288","2223242425262526278"});
+	specialShantenForPack[242526].insert({"2223242324252526278","2324252526272627288","2526272627282728298","2122232223242324258"});
+	specialShantenForPack[252627].insert({"2223242324252425268","2324252425262627288","2425262627282728298","2122232324252728298"});
+	specialShantenForPack[262728].insert({"2324252425262526278","2425262526272728298"});
+	specialShantenForPack[272829].insert({"2122232324252526278","2425262526272627288"});
+	specialShantenForPack[313233].insert({"3233343334353435368","3334353536373738398"});
+	specialShantenForPack[323334].insert({"3334353435363536378","3132333334353435368"});
+	specialShantenForPack[333435].insert({"3435363536373637388","3132333536373738398","3233343435363536378","3132333233343435368"});
+	specialShantenForPack[343536].insert({"3132333233343334358","3334353536373637388","3536373637383738398","3233343334353536378"});
+	specialShantenForPack[353637].insert({"3132333334353738398","3334353435363637388","3435363637383738398","3233343334353435368"});
+	specialShantenForPack[363738].insert({"3334353435363536378","3435363536373738398"});
+	specialShantenForPack[373839].insert({"3435363536373637388","3132333334353536378"});
+}
+// Over
 
 int CountUsefulTiles(const TileTableT& used_table, const UsefulTableT& useful_table) {
 	int cnt = 0;
@@ -23244,21 +26294,40 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙
+Case 4:清龙 (权重从4.32降低至3.5)
 Case 5:一色三步高
+Case 6:三色三节高
+Case 7:一色三同顺
+Case 8:一色四步高
 */
-double k[20]={0,5.16,2.96,2.88,4.32,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
 
-//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
-pair<specialShanten, pair<int,double> > specialShantenCalc(
+double k[20]={1,5.16,2.96,2.88,3.50,2.56,0.1024,0.0216,0.144};//权重（百局内胡的局数/100*番数）
+
+//第一项为shanten数，第二项为相似度
+ pair<int,double> specialShantenCalc(
 	const vector<pair<string, Majang> >& pack,
 	const vector<Majang>& hand,
 	const StateContainer& state
 ) {
 	int ntileAmount[70]={0};
-	int useful_table[70];
 	int tileAmount[70]={0};
-	for(auto i:pack) ntileAmount[i.second.getTileInt()]++;
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
+		//}
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
 	for(auto i:hand) ntileAmount[i.getTileInt()]++;
 
 	string input;
@@ -23271,19 +26340,67 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 	// freopen("./data/specialShanten.txt","r",stdin);
 	//clock_t start=clock();
 	int idx = 0;
-	while(true){
-		// Reader::readIn(input);
-		input = innerTable[idx++];
-		if(input=="Over"){
-			break;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			/*double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			*/
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		memset(useful_table,0,sizeof(useful_table));
-		memcpy(tileAmount,ntileAmount,70*4);
-		int shanten=0;
-		double similarity=0;
-		if(input[0]=='C') {flag=input[4]-'0';continue;}
-		else{
-			int len = input.length();
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
 			for(int i=0;i<len/2;i++){
 				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
 				if(!tileAmount[num]){
@@ -23295,30 +26412,263 @@ pair<specialShanten, pair<int,double> > specialShantenCalc(
 				}
 				if(shanten>=5) break;
 			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
 		}
-		if(shanten>=5){continue;}
-		similarity=SimilarityCalc(state,useful_table);
-		//double cnt = shanten - 1 - log(similarity) * k[flag]/4;
-		//if(cnt<prt){
-		//    prt=cnt;
-		//    minShanten=shanten;
-		//   maxSimilarity=similarity;
-		//    r.formFlag=flag;
-		//    r.tileForm=input;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {100,0};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			if(shanten<minShanten){
+				minShanten=shanten;
+				maxSimilarity=similarity;
+			}
+			else if(shanten==minShanten){
+				maxSimilarity+=similarity*k[flag];
+			}
+			if(minShanten==0) break;
+		}
+	}
+	//clock_t end=clock();
+	//cout<<end-start<<endl;
+	return {minShanten,maxSimilarity};
+}
+
+//第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
+pair<specialShanten, pair<int,double> > specialShantenJudge(
+	const vector<pair<string, Majang> >& pack,
+	const vector<Majang>& hand,
+	const StateContainer& state
+) {
+	int ntileAmount[70]={0};
+	int tileAmount[70]={0};
+	int useful_table[70]={0};
+	int allCHI[10]={0};
+	int chisum=0;
+	for(auto i:pack) {
+		if(i.first=="CHI"){
+			//ntileAmount[i.second.getTileInt()]++;
+			//ntileAmount[i.second.getTileInt()+1]++;
+			//ntileAmount[i.second.getTileInt()-1]++;
+			allCHI[chisum++]=(i.second.getTileInt()-1)*10000+(i.second.getTileInt())*100+(i.second.getTileInt()+1);
+		}
+		//else if(i.first=="PENG"){
+		//    ntileAmount[i.second.getTileInt()]+=3;
 		//}
-		if(shanten<minShanten){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+		//else {
+		//    ntileAmount[i.second.getTileInt()]+=4;
+		//}
+	}
+	for(auto i:hand) ntileAmount[i.getTileInt()]++;
+
+	string input;
+	specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+	int flag;
+	int minShanten=5;
+	double maxSimilarity=0;
+	double prt=100;
+	//freopen("D://specialShanten.txt","r",stdin);
+	// freopen("./data/specialShanten.txt","r",stdin);
+	//clock_t start=clock();
+	int idx = 0;
+	if(chisum==0){
+		while(true){
+			// Reader::readIn(input);
+			input = innerTable[idx++];
+			if(input=="Over"){
+				break;
+			}
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+			int shanten=0;
+			double similarity=0;
+			if(input[0]=='C') {flag=input[4]-'0';continue;}
+			else{
+				int len = input.length();
+				for(int i=0;i<len/2;i++){
+					int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+					if(!tileAmount[num]){
+						shanten++;
+						useful_table[num]++;
+					}
+					else{
+						tileAmount[num]--;
+					}
+					if(shanten>=5) break;
+				}
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=input;
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
-			r.formFlag=flag;
-			r.tileForm=input;
-			minShanten=shanten;
-			maxSimilarity=similarity;
+	}
+	//如果已经有了一个吃,就围绕这个吃来打
+	else if(chisum==1){
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
 		}
-		if(minShanten==0) break;
+	}
+	else{
+		//尽管有多个吃，但仍以第一个为核心
+		for(int i=1;i<chisum;i++){
+			ntileAmount[allCHI[i]/10000]++;
+			ntileAmount[(allCHI[i]/100)%100]++;
+			ntileAmount[allCHI[i]%100]++;
+		}
+
+		int myPack=allCHI[0];
+		auto t=specialShantenForPack.find(myPack);
+		if(t==specialShantenForPack.end()) return {r,{minShanten,maxSimilarity}};;//找不到
+		for(auto input: t->second){
+			// Reader::readIn(input);
+			flag=input[input.length()-1]-'0';
+			memset(useful_table,0,sizeof(useful_table));
+			memcpy(tileAmount,ntileAmount,70*4);
+
+			int shanten=0;
+			double similarity=0;
+			int len = input.length()-1;
+			for(int i=0;i<len/2;i++){
+				int num=(input[i*2]-'0')*10+input[i*2+1]-'0';
+				if(!tileAmount[num]){
+					shanten++;
+					useful_table[num]++;
+				}
+				else{
+					tileAmount[num]--;
+				}
+				if(shanten>=5) break;
+			}
+			if(shanten>=5||shanten>=hand.size()){continue;}
+			similarity=SimilarityCalc(state,useful_table);
+			double cnt = shanten - 1 - log(similarity)/k[flag];
+			if(cnt<prt||shanten==0){
+				prt=cnt;
+				minShanten=shanten;
+				maxSimilarity=similarity;
+				r.formFlag=flag;
+				r.tileForm=to_string(myPack)+input.substr(0,len);
+			}
+			//cout<<k[-16]<<Endl;
+			//if(shanten<minShanten){
+			//    r.formFlag=flag;
+			//    r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			//else if(shanten==minShanten&&maxSimilarity*k[r.formFlag]<similarity*k[flag]){
+			//    r.formFlag=flag;
+			//   r.tileForm=input;
+			//    minShanten=shanten;
+			//    maxSimilarity=similarity;
+			//}
+			if(minShanten==0) break;
+		}
 	}
 	//clock_t end=clock();
 	//cout<<end-start<<endl;
@@ -23332,16 +26682,48 @@ int specialShantenCalc(
 ) {
 	int tileAmount[70]={0};
 	int useful_table[70];
-	for(auto i:pack) tileAmount[i.second.getTileInt()]++;
+	/*for(auto i:pack) {
+		if(i.first=="CHI"){
+			tileAmount[i.second.getTileInt()]++;
+			tileAmount[i.second.getTileInt()+1]++;
+			tileAmount[i.second.getTileInt()-1]++;
+		}
+		else if(i.first=="PENG"){
+			tileAmount[i.second.getTileInt()]+=3;
+		}
+		else {
+			tileAmount[i.second.getTileInt()]+=4;
+		}
+	}
+	*/
 	for(auto i:hand) tileAmount[i.getTileInt()]++;
-
 	int shanten=0;
 	int len = target.length();
+	//先看pack
+	vector<string> targetPart;
+	for(int i=0;i<len/6;i++){
+		targetPart.push_back(target.substr(i*6,6));
+	}
+	for(auto i:pack){
+		if(i.first=="CHI"){
+			string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+			for(auto j=targetPart.begin();j!=targetPart.end();j++){
+				if((*j)==chi){targetPart.erase(j);break;}
+			}
+		}
+	}
+
+	target="";
+	for(auto i:targetPart){
+		target+=i;
+	}
+	len=target.length();
+
 	for(int i=0;i<len/2;i++){
 		int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
 		if(!tileAmount[num]){
 			shanten++;
-				useful_table[num]++;
+			useful_table[num]++;
 		}
 		else{
 			tileAmount[num]--;
@@ -23390,6 +26772,7 @@ int main() {
 	cout << "=== shanten test end ===" << endl;
 #endif // !_BOTZONE_ONLINE6
 	//clock_t start=clock();
+	specialShantenInit();
 	int turnID; Reader::readIn(turnID);
 	string tmp;
 	int lastRequest;
