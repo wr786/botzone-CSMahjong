@@ -81,9 +81,9 @@ double Calculator::MajangScoreCalculator(
     //特殊番型上听数
     auto s=specialShantenCalc(pack,hand,state);
 
-    if(s.first==-1) resultShanten+=50;
+    if(s.first==0) resultShanten+=50;
     else
-        resultShanten+= -(s.first - log(s.second) * k4);
+        resultShanten+= -(s.first -1 - log(s.second) * k4);
 
     double k5=20;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;

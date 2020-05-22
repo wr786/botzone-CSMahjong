@@ -1410,7 +1410,7 @@ pair<int,double> specialShantenCalc0(
     const StateContainer & state,
     int ntileAmount[70]
 ){
-    double minShanten=20;
+    double minShanten=100;
     double maxSimilarity=1e-5;
     int idx=0;
     string input;
@@ -1425,7 +1425,7 @@ pair<int,double> specialShantenCalc0(
         }
         memset(useful_table,0,sizeof(useful_table));
         memcpy(tileAmount,ntileAmount,70*4);
-        int shanten=-1;
+        int shanten=0;
         double similarity=0;
         if(input[0]=='C') {flag=input[4]-'0';continue;}
         else{
@@ -1439,10 +1439,10 @@ pair<int,double> specialShantenCalc0(
                     else{
                         tileAmount[num]--;
                     }
-                    if(shanten>=4||shanten>=hand.size()-1) break;
+                    if(shanten>=5||shanten>=hand.size()) break;
                 }
             }
-            if(shanten>=4||shanten>=hand.size()-1){continue;}
+            if(shanten>=5||shanten>=hand.size()){continue;}
             similarity=SimilarityCalc(state,useful_table);
             /*double cnt = shanten - 1 - log(similarity)/k[flag];
             if(cnt<prt||shanten==0){
@@ -1460,7 +1460,7 @@ pair<int,double> specialShantenCalc0(
             else if(shanten==minShanten){
                 maxSimilarity+=similarity*k[flag]/4;            
             }
-            if(minShanten==-1) break;
+            if(minShanten==0) break;
         }    
         return {minShanten,maxSimilarity};
 }
@@ -1472,7 +1472,7 @@ pair<int,double> specialShantenCalc1(
     int myPack,
     int ntileAmount[70]
 ){    
-    double minShanten=20;
+    double minShanten=100;
     double maxSimilarity=1e-5;
     int idx=0;
     string input;
@@ -1490,7 +1490,7 @@ pair<int,double> specialShantenCalc1(
             flag=input[input.length()-1]-'0';
             memset(useful_table,0,sizeof(useful_table));
             memcpy(tileAmount,ntileAmount,70*4);
-            int shanten=-1;
+            int shanten=0;
             double similarity=0;
             int len = input.length()-1;
             for(int i=0;i<len/2;i++){
@@ -1502,9 +1502,9 @@ pair<int,double> specialShantenCalc1(
                 else{
                     tileAmount[num]--;
                 }
-                if(shanten>=4||shanten>hand.size()) break;
+                if(shanten>=5||shanten>=hand.size()) break;
             }
-            if(shanten>=4||shanten>hand.size()){continue;}
+            if(shanten>=5||shanten>=hand.size()){continue;}
             similarity=SimilarityCalc(state,useful_table);
 
             if(shanten<minShanten){
@@ -1514,7 +1514,7 @@ pair<int,double> specialShantenCalc1(
             else if(shanten==minShanten){
                 maxSimilarity+=similarity*k[flag]/4;            
             }
-            if(minShanten==-1) break;
+            if(minShanten==0) break;
         }    
     }
     return {minShanten,maxSimilarity};
@@ -1528,7 +1528,7 @@ pair<int,double> specialShantenCalc2(
     string myPack,
     int ntileAmount[70]
 ){    
-    double minShanten=20;
+    double minShanten=100;
     double maxSimilarity=1e-5;
     int idx=0;
     string input;
@@ -1546,7 +1546,7 @@ pair<int,double> specialShantenCalc2(
             memset(useful_table,0,sizeof(useful_table));
             memcpy(tileAmount,ntileAmount,70*4);
 
-            int shanten=-1;
+            int shanten=0;
             double similarity=0;
             int len = input.length()-1;
             for(int i=0;i<len/2;i++){
@@ -1558,9 +1558,9 @@ pair<int,double> specialShantenCalc2(
                 else{
                     tileAmount[num]--;
                 }
-                if(shanten>=4||shanten>=hand.size()-1) break;
+                if(shanten>=5||shanten>=hand.size()) break;
             }
-            if(shanten>=4||shanten>=hand.size()-1){continue;}
+            if(shanten>=5||shanten>=hand.size()){continue;}
             similarity=SimilarityCalc(state,useful_table);
             if(shanten<minShanten){
                 minShanten=shanten;
@@ -1569,7 +1569,7 @@ pair<int,double> specialShantenCalc2(
             else if(shanten==minShanten){
                 maxSimilarity+=similarity*k[flag]/4;            
             }
-            if(minShanten==-1) break;
+            if(minShanten==0) break;
         } 
     }
     return {minShanten,maxSimilarity};
@@ -1594,7 +1594,7 @@ pair<int,double> specialShantenCalc3(
     }//找不到
     else{
         for(auto input:t->second){
-            minShanten=-1;
+            minShanten=0;
             maxSimilarity=k[input[0]-'0']*2;
         }
     }
@@ -1625,8 +1625,8 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge0(
             }
             memset(useful_table,0,sizeof(useful_table));
             memcpy(tileAmount,ntileAmount,70*4);
-            int shanten=-1;
-            double similarity=0;
+            int shanten=0;
+            double similarity=1e-5;
             if(input[0]=='C') {flag=input[4]-'0';continue;}
             else{
                 int len = input.length();
@@ -1639,20 +1639,23 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge0(
                     else{
                         tileAmount[num]--;
                     }
-                    if(shanten>=4) break;
+                    if(shanten>=5) break;
                 }
             }
-            if(shanten>=4||shanten>=hand.size()-1){continue;}
+            
+            if((shanten>=5)||shanten>=(hand.size())){
+                continue;
+            }
             similarity=SimilarityCalc(state,useful_table);
             double cnt = shanten - 1 - log(similarity)/k[flag];
-            if(cnt<prt||shanten==-1){
+            if(cnt<prt||shanten==0){
                 prt=cnt;
                 minShanten=shanten;
                 maxSimilarity=similarity;
                 r.formFlag=flag;
                 r.tileForm=input;
             }
-            if(minShanten==-1) break;
+            if(minShanten==0) break;
         }    
         return {{r,prt},{minShanten,maxSimilarity}};
 }
@@ -1681,7 +1684,7 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge1(
         memset(useful_table,0,sizeof(useful_table));
         memcpy(tileAmount,ntileAmount,70*4);
 
-        int shanten=-1;
+        int shanten=0;
         double similarity=0;
         int len = input.length()-1;
         for(int i=0;i<len/2;i++){
@@ -1693,20 +1696,20 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge1(
             else{
                 tileAmount[num]--;
             }
-            if(shanten>=4) break;
+            if(shanten>=5) break;
         }
 
-        if(shanten>=4||shanten>=hand.size()-1){continue;}
+        if(shanten>=5||shanten>=hand.size()){continue;}
         similarity=SimilarityCalc(state,useful_table);
         double cnt = shanten - 1 - log(similarity)/k[flag];
-        if(cnt<prt||shanten==-1){
+        if(cnt<prt||shanten==0){
             prt=cnt;
             minShanten=shanten;
             maxSimilarity=similarity;
             r.formFlag=flag;
             r.tileForm=to_string(myPack)+input.substr(0,len);
         }
-        if(minShanten==-1) break;
+        if(minShanten==0) break;
     }    
     return {{r,prt},{minShanten,maxSimilarity}};
 }
@@ -1735,7 +1738,7 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge2(
         memset(useful_table,0,sizeof(useful_table));
         memcpy(tileAmount,ntileAmount,70*4);
 
-        int shanten=-1;
+        int shanten=0;
         double similarity=0;
         int len = input.length()-1;
         for(int i=0;i<len/2;i++){
@@ -1747,9 +1750,9 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge2(
             else{
                 tileAmount[num]--;
             }
-            if(shanten>=4) break;
+            if(shanten>=5) break;
         }
-        if(shanten>=4||shanten>=hand.size()-1){continue;}
+        if(shanten>=5||shanten>=hand.size()){continue;}
         similarity=SimilarityCalc(state,useful_table);
         double cnt = shanten - 1 - log(similarity)/k[flag];
         if(cnt<prt||shanten==0){
@@ -1759,7 +1762,7 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge2(
             r.formFlag=flag;
             r.tileForm=myPack+input.substr(0,len);
         }
-        if(minShanten==-1) break;    
+        if(minShanten==0) break;    
     }           
     return {{r,prt},{minShanten,maxSimilarity}};
 }
@@ -1785,7 +1788,7 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge3(
     for(auto i:t->second){
         r.formFlag=input[input.length()-1]-'0';
         r.tileForm=myPack;
-        minShanten=-1;
+        minShanten=0;
         maxSimilarity=k[r.formFlag]*2;
         prt=-1e5;            
     }       
@@ -2087,7 +2090,7 @@ int specialShantenCalc(
     }
     */
     for(auto i:hand) tileAmount[i.getTileInt()]++;
-    int shanten=-1;
+    int shanten=0;
     int len = target.length();
     //先看pack
     vector<string> targetPart;
@@ -2108,7 +2111,7 @@ int specialShantenCalc(
         target+=i;
     }
     len=target.length();
-    if(len==0) return -1;
+    if(len==0) return 0;
     for(int i=0;i<len/2;i++){
         int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
         if(!tileAmount[num]){

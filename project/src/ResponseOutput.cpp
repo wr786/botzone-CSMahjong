@@ -326,7 +326,7 @@ const pair<double,Majang> Output::getBestPlay(
 //2.判断有没有我们想要的目标番型
         auto p=specialShantenJudge(pack,hand,state);
         //如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-        if(p.second.first==-1||(p.second.first<=0&&p.second.second>=0.0250)||(p.second.first<=1&&p.second.second>=0.050)||(p.second.first<=2&&p.second.second>=0.075)){
+        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
