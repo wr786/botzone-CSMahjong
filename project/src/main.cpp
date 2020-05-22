@@ -54,7 +54,7 @@ int main() {
         << "effective tiles: " << param2 << endl;
     cout << "=== simplified shanten test end ===" << endl;
     cout << "=== shanten test end ===" << endl;
-#endif // !_BOTZONE_ONLINE6
+#endif // !_BOTZONE_ONLINE
     //clock_t start=clock();
     specialShantenInit();
     int turnID; Reader::readIn(turnID);

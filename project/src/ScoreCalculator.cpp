@@ -81,9 +81,9 @@ double Calculator::MajangScoreCalculator(
     //特殊番型上听数
     auto s=specialShantenCalc(pack,hand,state);
 
-    if(s.first==0) resultShanten+=50;
+    if(s.first==-1) resultShanten+=50;
     else
-        resultShanten+= -(s.first - 1 - log(s.second) * k4)*0.6;
+        resultShanten+= -(s.first - log(s.second) * k4);
 
     double k5=20;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;
@@ -122,7 +122,8 @@ double Calculator::FanScoreCalculator(
         auto re=MahjongFanCalculator(p,h,winTile.getTileString(),flowerCount,1,isJUEZHANG,isGANG,isLast,state.getCurPosition(),StateContainer::quan);//算番器中有许多我未理解的参数,先用0代入——wym
         int r=0;
         for(unsigned int i=0;i<re.size();i++) r+=re[i].first;//这里暂且暴力地以求和的方式作为番数得分的计算公式
-        return r*k6*3;
+        if(r>=8) return r*k6*3;
+        else return 0;
     }
     catch(const string &error){
         int tileAmount[70];
@@ -233,10 +234,10 @@ double Calculator::MajangHandScore(
     }
     //各个数值都翻了倍，原因是吃碰杠后handscore会明显减少，然而这是不科学的
     for (unsigned int i = 0; i < pack.size(); i++) {
-        if (pack[i].first == "GANG") result += 32;
-        else if (pack[i].first == "PENG") result += 18;
+        if (pack[i].first == "GANG") result += 9;
+        else if (pack[i].first == "PENG") result += 6;
         else {
-            result += 14;
+            result += 12;
         }
     }
     result += HandScoreCalculator(tileAmount,dianpao,state);
