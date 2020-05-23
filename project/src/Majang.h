@@ -44,7 +44,8 @@ public:
 
     Majang& operator = (const Majang& other);
     bool operator == (const Majang& other) const;
-
+    bool operator < (const Majang& other) const;
+    
     void resetFromString(const string& strExpr);                              // 由此将string转换为string_view，提高速度
 
     static TILE_T getTileTypeFromChar(char ch);                             // 从char得到麻将牌的类型

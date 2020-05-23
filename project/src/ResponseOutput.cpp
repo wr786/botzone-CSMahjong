@@ -324,13 +324,25 @@ const pair<double,Majang> Output::getBestPlay(
 
     else{
 //2.判断有没有我们想要的目标番型
-        auto p=specialShantenJudge(pack,hand,state);
+        auto p=specialShantenJudge(pack,hand,state);                    
+        set<string> notplay;
+        if(p.first.formFlag==8){
+            notplay.insert(p.first.tileForm.substr(0,2));
+            notplay.insert(p.first.tileForm.substr(2,2));
+            notplay.insert(p.first.tileForm.substr(4,2));
+            notplay.insert(p.first.tileForm.substr(6,2));
+        }
         //如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
         if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
-                if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
+                if(p.first.formFlag==8){
+                    if(notplay.count(to_string(hand[i].getTileInt()))==1) continue;
+                }
+                else{
+                    if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
+                }
                 double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
                 if(ans>maxResult){
                     maxResult=ans;
@@ -408,7 +420,6 @@ const Majang Output::getBestCP(
         //if(pack.size()>=1&&p.second.first!=0){
         //    string newPack="";
         //}
-
         maxResult1=Calculator::MajangScoreCalculator(pack,hand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
 
         pair<double,Majang> r={0,Majang(1)};
@@ -544,7 +555,7 @@ const Majang Output::getBestCP(
                 }  
             }            
         }
-
+        if(p.first.formFlag==8&&pos==0) quanqiuren=false;
         //得到操作过后的最优解
         double maxResult2=r.first;
         if(!quanqiuren||maxResult2-maxResult1>=1e-5){

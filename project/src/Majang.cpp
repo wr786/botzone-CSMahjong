@@ -69,7 +69,9 @@ bool Majang::operator == (const Majang &other) const {
     return innerType == other.innerType;
 }
 
-
+bool Majang::operator < (const Majang & other) const{
+    return innerType < other.innerType;
+}
 
 /*
  * 其他方法区
