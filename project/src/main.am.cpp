@@ -3249,18 +3249,25 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
+#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
+#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <cstring>
+#include <iostream>
+#endif
+
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -3271,8 +3278,10 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef __MAHJONG_ALGORITHM__TILE_H__
 #define __MAHJONG_ALGORITHM__TILE_H__
 
+#ifndef _PREPROCESS_ONLY
 #include <stddef.h>
 #include <stdint.h>
+#endif
 
  // force inline
 #ifndef FORCE_INLINE
@@ -4018,10 +4027,6 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 
 /*** End of inlined file: fan_calculator.h ***/
 
-
-#include <cstring>
-#include <iostream>
-
 using namespace std;
 
 static unordered_map<string, mahjong::tile_t> str2tile;
@@ -4115,11 +4120,13 @@ void MahjongInit()
 
 
 /*** Start of inlined file: fan_calculator.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 /*** Start of inlined file: standard_tiles.h ***/
 #ifndef __MAHJONG_ALGORITHM__STANDARD_TILES_H__
@@ -6608,11 +6615,13 @@ int calculate_fan(const calculate_param_t *calculate_param, fan_table_t *fan_tab
 
 
 /*** Start of inlined file: shanten.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <string.h>
 #include <limits>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -7971,9 +7980,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 /*** End of inlined file: stringify.h ***/
 
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -11518,9 +11529,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -14585,7 +14598,7 @@ double Calculator::HandScoreCalculator(
 	bool dianpao,
 	const StateContainer & state
 ) {
-	double kw=1;
+	double kw=0.37510;
 	double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
 	int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
 	double r = 0;
@@ -14830,13 +14843,43 @@ int Calculator::fanCalculator(
 	return fan;
 }
 
-void Calculator::calcPlayedRecently(const StateContainer &state) {
+void Calculator::calcPlayedRecently(const StateContainer &state) {	// 计算出来的是“虚”的cnt，实际上并不一定打出了这么多
 	for(int i=0; i<4; i++) {
 		const vector<Majang>& tilePlayed = state.getTilePlayedOf(i);
 		int len = tilePlayed.size();
 		int depth = min(5, len);
+		unordered_map<int, int> isJinged;	// 用来对每个玩家计算中筋，以提高权重，value来存上一个筋的是啥
 		for(int idx=len-depth; idx<len; idx++) {
-			cntPlayedRecently[tilePlayed[idx].getTileInt()] += 1;
+			int curMajang = tilePlayed[idx].getTileInt();
+			cntPlayedRecently[curMajang] += 2;	// 直接变成2，为了信筋
+			if(i != state.getCurPosition()) {	// 不是我们打出来的牌，这时候就要信筋了
+				if(curMajang % 10 > 3) {	// 可以-3信筋
+					if(curMajang % 10 < 6) { // 1 23 4   2 34 5可以比较安全   但(12)3 45 6，这时3还是比较危险的
+						cntPlayedRecently[curMajang - 3] += 3;	// 提高权重，这样比较安全
+					} else {
+						cntPlayedRecently[curMajang - 3] += 1;	// 相对来说就没那么安全了
+						if(isJinged[curMajang - 3] && isJinged[curMajang - 3] != curMajang) {
+							isJinged[curMajang - 3] = 0;	// 免得重复加筋
+							cntPlayedRecently[curMajang - 3] += 2;	// 中筋的权重会是 1+2+1 == 4
+						} else {
+							isJinged[curMajang - 3] = curMajang;
+						}
+					}
+				}
+				if(curMajang % 10 < 7) {	// 可以+3信筋
+					if(curMajang % 10 > 4) { // 6 78 9   5 67 8  但 4 56 7(89)，这时还是比较危险的
+						cntPlayedRecently[curMajang + 3] += 3;	// 信筋，信筋
+					} else {
+						cntPlayedRecently[curMajang + 3] += 1;
+						if(isJinged[curMajang + 3] && isJinged[curMajang + 3] != curMajang) {
+							isJinged[curMajang + 3] = 0;
+							cntPlayedRecently[curMajang + 3] += 2;
+						} else {
+							isJinged[curMajang + 3] = curMajang;
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -15850,9 +15893,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -19114,9 +19159,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -22876,9 +22923,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -26140,9 +26189,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 
@@ -29899,9 +29950,11 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
+#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
+#endif
 
 namespace mahjong {
 

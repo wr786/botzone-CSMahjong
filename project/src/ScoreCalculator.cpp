@@ -254,7 +254,7 @@ double Calculator::HandScoreCalculator(
     bool dianpao,
     const StateContainer & state
 ) {
-    double kw=1;
+    double kw=0.37510;
     double valueW = 0, valueB = 0, valueT = 0, valueF = 0, valueJ = 0;
     int sumW = 0, sumB = 0, sumT = 0, sumF = 0, sumJ = 0;
     double r = 0;
@@ -499,13 +499,43 @@ int Calculator::fanCalculator(
     return fan;
 }
 
-void Calculator::calcPlayedRecently(const StateContainer &state) {
+void Calculator::calcPlayedRecently(const StateContainer &state) {	// 计算出来的是“虚”的cnt，实际上并不一定打出了这么多
     for(int i=0; i<4; i++) {
         const vector<Majang>& tilePlayed = state.getTilePlayedOf(i);
         int len = tilePlayed.size();
         int depth = min(5, len);
+        unordered_map<int, int> isJinged;	// 用来对每个玩家计算中筋，以提高权重，value来存上一个筋的是啥
         for(int idx=len-depth; idx<len; idx++) {
-            cntPlayedRecently[tilePlayed[idx].getTileInt()] += 1;
+        	int curMajang = tilePlayed[idx].getTileInt();
+            cntPlayedRecently[curMajang] += 2;	// 直接变成2，为了信筋
+            if(i != state.getCurPosition()) {	// 不是我们打出来的牌，这时候就要信筋了
+        		if(curMajang % 10 > 3) {	// 可以-3信筋
+        			if(curMajang % 10 < 6) { // 1 23 4   2 34 5可以比较安全   但(12)3 45 6，这时3还是比较危险的 
+        				cntPlayedRecently[curMajang - 3] += 3;	// 提高权重，这样比较安全
+        			} else {
+        				cntPlayedRecently[curMajang - 3] += 1;	// 相对来说就没那么安全了
+        				if(isJinged[curMajang - 3] && isJinged[curMajang - 3] != curMajang) {
+        					isJinged[curMajang - 3] = 0;	// 免得重复加筋
+        					cntPlayedRecently[curMajang - 3] += 2;	// 中筋的权重会是 1+2+1 == 4
+        				} else {
+        					isJinged[curMajang - 3] = curMajang;
+        				}
+        			}
+        		}
+        		if(curMajang % 10 < 7) {	// 可以+3信筋
+        			if(curMajang % 10 > 4) { // 6 78 9   5 67 8  但 4 56 7(89)，这时还是比较危险的
+        				cntPlayedRecently[curMajang + 3] += 3;	// 信筋，信筋
+        			} else {
+        				cntPlayedRecently[curMajang + 3] += 1;
+        				if(isJinged[curMajang + 3] && isJinged[curMajang + 3] != curMajang) {
+        					isJinged[curMajang + 3] = 0;
+        					cntPlayedRecently[curMajang + 3] += 2;
+        				} else {
+        					isJinged[curMajang + 3] = curMajang;
+        				}
+        			}
+        		}
+        	}
         }
     }
 }
