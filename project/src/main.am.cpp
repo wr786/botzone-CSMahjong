@@ -3249,25 +3249,18 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef MAHJONG_H
 #define MAHJONG_H
 
-#ifndef _PREPROCESS_ONLY
 #include <utility>
 #include <vector>
 #include <string>
-#endif
 
 //CPP
 
 /*** Start of inlined file: MahjongGB.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <cstring>
-#include <iostream>
-#endif
-
 
 /*** Start of inlined file: fan_calculator.h ***/
 #ifndef __MAHJONG_ALGORITHM__FAN_CALCULATOR_H__
@@ -3278,10 +3271,8 @@ void enum_discard_tile(const hand_tiles_t *hand_tiles, tile_t serving_tile, uint
 #ifndef __MAHJONG_ALGORITHM__TILE_H__
 #define __MAHJONG_ALGORITHM__TILE_H__
 
-#ifndef _PREPROCESS_ONLY
 #include <stddef.h>
 #include <stdint.h>
-#endif
 
  // force inline
 #ifndef FORCE_INLINE
@@ -4027,6 +4018,10 @@ bool is_fixed_packs_contains_kong(const pack_t *fixed_packs, intptr_t fixed_cnt)
 
 /*** End of inlined file: fan_calculator.h ***/
 
+
+#include <cstring>
+#include <iostream>
+
 using namespace std;
 
 static unordered_map<string, mahjong::tile_t> str2tile;
@@ -4120,13 +4115,11 @@ void MahjongInit()
 
 
 /*** Start of inlined file: fan_calculator.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 /*** Start of inlined file: standard_tiles.h ***/
 #ifndef __MAHJONG_ALGORITHM__STANDARD_TILES_H__
@@ -6615,13 +6608,11 @@ int calculate_fan(const calculate_param_t *calculate_param, fan_table_t *fan_tab
 
 
 /*** Start of inlined file: shanten.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <assert.h>
 #include <string.h>
 #include <limits>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -7980,11 +7971,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 /*** End of inlined file: stringify.h ***/
 
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -11529,11 +11518,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -14386,7 +14373,7 @@ double Calculator::MajangScoreCalculator(
 
 	int num=0;
 	for(int i:{0,1,2,3}){
-		if(i!=state.getCurPosition()&&state.getTileWallLeftOf(i)<=8) num++;
+		if(i!=state.getCurPosition()&&state.getTileWallLeftOf(i)<=12) num++;
 	}
 	bool dianpao=num>=2;
 	//freopen("D://out.txt","w",stdout);
@@ -14420,9 +14407,7 @@ double Calculator::MajangScoreCalculator(
 	// 所以暂时令
 	double k4=0.5;
 
-	if( param1==0 ) resultShanten=50;
-	else
-		resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
+	resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
 	// param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍
 
 	//特殊番型上听数
@@ -14850,6 +14835,7 @@ void Calculator::calcPlayedRecently(const StateContainer &state) {	// 计算出�
 		int depth = min(5, len);
 		unordered_map<int, int> isJinged;	// 用来对每个玩家计算中筋，以提高权重，value来存上一个筋的是啥
 		for(int idx=len-depth; idx<len; idx++) {
+			cntPlayedRecently[tilePlayed[idx].getTileInt()] += 1;
 			int curMajang = tilePlayed[idx].getTileInt();
 			cntPlayedRecently[curMajang] += 2;	// 直接变成2，为了信筋
 			if(i != state.getCurPosition()) {	// 不是我们打出来的牌，这时候就要信筋了
@@ -15893,11 +15879,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -19159,11 +19143,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -22923,11 +22905,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -26189,11 +26169,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 
@@ -29218,6 +29196,10 @@ const pair<double,Majang> Output::getBestPlay(
 	using namespace mahjong;
 	sort(hand.begin(),hand.end(),cmp);
 
+	int bestChoice=0;
+	int bestChoice1=0;
+	double maxResult=-1e5;
+
 //1.判断是不是特殊番型
 	useful_table_t useful_table;
 	tile_t form_flag;
@@ -29231,18 +29213,40 @@ const pair<double,Majang> Output::getBestPlay(
 			shanten=p.second.first;
 			similarity=p.second.second;
 			form_flag=p.first;
+			bestChoice1=i;
+			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,p.first,shanten);
+			maxResult=ans;
 		}
-		else if(shanten==p.second.first&&similarity<p.second.second){
-			similarity=p.second.second;
-			form_flag=p.first;
+		else if(shanten==p.second.first){
+			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,p.first,shanten);
+			if(similarity<p.second.second){
+				similarity=p.second.second;
+				form_flag=p.first;
+				bestChoice1=i;
+				maxResult=ans;
+			}
+			else if(similarity==p.second.second){
+				if(ans>maxResult){
+					similarity=p.second.second;
+					form_flag=p.first;
+					bestChoice1=i;
+					maxResult=ans;
+				}
+				else if(ans==maxResult){
+					if(state.getTileLeft(hand[i].getTileInt())<state.getTileLeft(hand[bestChoice].getTileInt())){
+						similarity=p.second.second;
+						form_flag=p.first;
+						bestChoice1=i;
+						maxResult=ans;
+					}
+				}
+			}
 		}
 	}
 	//如果存在一个特殊番型，且相似度应大于一定值(minLimit)
-	int bestChoice=0;
-	double maxResult=-1e5;
 
-	if(form_flag!=0x01&&((similarity>=0.100&&shanten<=2)||(similarity>=0.075&&shanten<=1)||(shanten==0))){
-		for(unsigned int i=0;i<hand.size();i++){
+	if(form_flag!=0x01&&((similarity>=0.140&&shanten<=2)||(similarity>=0.100&&shanten<=1)||(shanten==0))){
+		/*for(unsigned int i=0;i<hand.size();i++){
 			vector<Majang> newHand(hand);
 			newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
 			double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag,shanten);
@@ -29255,8 +29259,9 @@ const pair<double,Majang> Output::getBestPlay(
 				if(state.getTileLeft(hand[i].getTileInt())<state.getTileLeft(hand[bestChoice].getTileInt())){
 					bestChoice=i;
 				}
-				}
-		}
+			}
+		}*/
+		return make_pair(maxResult,hand[bestChoice1]);
 	}
 
 	else{
@@ -29270,7 +29275,7 @@ const pair<double,Majang> Output::getBestPlay(
 			notplay.insert(p.first.tileForm.substr(6,2));
 		}
 		//如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-		if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
+		if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.055)||(p.second.first<=2&&p.second.second>=0.080)||(p.second.first<=3&&p.second.second>=0.105)){
 			for(unsigned int i=0;i<hand.size();i++){
 				vector<Majang> newHand(hand);
 				newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -29348,7 +29353,7 @@ const Majang Output::getBestCP(
 	double maxResult1=-1e5;
 	bool quanqiuren=pack.size()<3;
 	//这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
-	if(quanqiuren&&form_flag!=0x01&&((similarity>=0.075&&shanten<=2)||(similarity>=0.050&&shanten<=1)||(shanten==0)))
+	if(quanqiuren&&form_flag!=0x01&&((similarity>=0.140&&shanten<=2)||(similarity>=0.100&&shanten<=1)||(shanten==0)))
 		return Majang(1);
 	else{
 		auto p=specialShantenJudge(pack,hand,state);
@@ -29950,11 +29955,9 @@ intptr_t hand_tiles_to_string(const hand_tiles_t *hand_tiles, char *str, intptr_
 
 
 /*** Start of inlined file: stringify.cpp ***/
-#ifndef _PREPROCESS_ONLY
 #include <string.h>
 #include <algorithm>
 #include <iterator>
-#endif
 
 namespace mahjong {
 

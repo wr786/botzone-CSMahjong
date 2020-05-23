@@ -278,6 +278,9 @@ const pair<double,Majang> Output::getBestPlay(
     using namespace mahjong;   
     sort(hand.begin(),hand.end(),cmp);
 
+    int bestChoice=0;
+    int bestChoice1=0;
+    double maxResult=-1e5;
 
 
 //1.判断是不是特殊番型
@@ -293,19 +296,42 @@ const pair<double,Majang> Output::getBestPlay(
             shanten=p.second.first;
             similarity=p.second.second;
             form_flag=p.first;
+            bestChoice1=i;
+            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,p.first,shanten);
+            maxResult=ans;
         }
-        else if(shanten==p.second.first&&similarity<p.second.second){
-            similarity=p.second.second;
-            form_flag=p.first;
+        else if(shanten==p.second.first){
+            double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,p.first,shanten);
+            if(similarity<p.second.second){
+                similarity=p.second.second;
+                form_flag=p.first;
+                bestChoice1=i;
+                maxResult=ans;
+            }
+            else if(similarity==p.second.second){
+                if(ans>maxResult){
+                    similarity=p.second.second;
+                    form_flag=p.first;
+                    bestChoice1=i;
+                    maxResult=ans;                    
+                }
+                else if(ans==maxResult){
+                    if(state.getTileLeft(hand[i].getTileInt())<state.getTileLeft(hand[bestChoice].getTileInt())){
+                        similarity=p.second.second;
+                        form_flag=p.first;
+                        bestChoice1=i;
+                        maxResult=ans;
+                    }
+                }
+            }
         }
     }
     //如果存在一个特殊番型，且相似度应大于一定值(minLimit)
-    int bestChoice=0;
-    double maxResult=-1e5;
 
 
-    if(form_flag!=0x01&&((similarity>=0.100&&shanten<=2)||(similarity>=0.075&&shanten<=1)||(shanten==0))){
-        for(unsigned int i=0;i<hand.size();i++){
+
+    if(form_flag!=0x01&&((similarity>=0.140&&shanten<=2)||(similarity>=0.100&&shanten<=1)||(shanten==0))){
+        /*for(unsigned int i=0;i<hand.size();i++){
             vector<Majang> newHand(hand);
             newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
             double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state,form_flag,shanten);
@@ -318,8 +344,9 @@ const pair<double,Majang> Output::getBestPlay(
                 if(state.getTileLeft(hand[i].getTileInt())<state.getTileLeft(hand[bestChoice].getTileInt())){
                     bestChoice=i;
                 }
-                }
-        }
+            }
+        }*/
+        return make_pair(maxResult,hand[bestChoice1]);
     }
 
     else{
@@ -333,7 +360,7 @@ const pair<double,Majang> Output::getBestPlay(
             notplay.insert(p.first.tileForm.substr(6,2));
         }
         //如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.0250)||(p.second.first<=2&&p.second.second>=0.050)||(p.second.first<=3&&p.second.second>=0.075)){
+        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.055)||(p.second.first<=2&&p.second.second>=0.080)||(p.second.first<=3&&p.second.second>=0.105)){
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -412,7 +439,7 @@ const Majang Output::getBestCP(
     double maxResult1=-1e5;
     bool quanqiuren=pack.size()<3;
     //这里得好好想想，是不是就找定这组胡型不去吃碰杠了.
-    if(quanqiuren&&form_flag!=0x01&&((similarity>=0.075&&shanten<=2)||(similarity>=0.050&&shanten<=1)||(shanten==0)))
+    if(quanqiuren&&form_flag!=0x01&&((similarity>=0.140&&shanten<=2)||(similarity>=0.100&&shanten<=1)||(shanten==0)))
         return Majang(1);
     else{
         auto p=specialShantenJudge(pack,hand,state);        

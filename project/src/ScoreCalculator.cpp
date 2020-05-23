@@ -38,7 +38,7 @@ double Calculator::MajangScoreCalculator(
 
     int num=0;
     for(int i:{0,1,2,3}){
-        if(i!=state.getCurPosition()&&state.getTileWallLeftOf(i)<=8) num++;
+        if(i!=state.getCurPosition()&&state.getTileWallLeftOf(i)<=12) num++;
     }
     bool dianpao=num>=2;
     //freopen("D://out.txt","w",stdout);
@@ -73,9 +73,7 @@ double Calculator::MajangScoreCalculator(
     // 所以暂时令
     double k4=0.5;
 
-    if( param1==0 ) resultShanten=50;
-    else 
-        resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
+    resultShanten = -(param1 - 1 - log(param3) * k4);	// 因为初始化是0，所以不用写else
     // param3是在[0,1)的，这意味着param1-1相当于param3变为e^2倍    
 
     //特殊番型上听数
@@ -506,6 +504,7 @@ void Calculator::calcPlayedRecently(const StateContainer &state) {	// 计算出�
         int depth = min(5, len);
         unordered_map<int, int> isJinged;	// 用来对每个玩家计算中筋，以提高权重，value来存上一个筋的是啥
         for(int idx=len-depth; idx<len; idx++) {
+            cntPlayedRecently[tilePlayed[idx].getTileInt()] += 1;
         	int curMajang = tilePlayed[idx].getTileInt();
             cntPlayedRecently[curMajang] += 2;	// 直接变成2，为了信筋
             if(i != state.getCurPosition()) {	// 不是我们打出来的牌，这时候就要信筋了
