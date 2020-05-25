@@ -83,6 +83,20 @@ double Calculator::MajangScoreCalculator(
     else
         resultShanten+= -(s.first -1 - log(s.second) * k4);
 
+    //五门齐
+    /*
+    auto t=wumenqiShantenCalc(pack,hand,state);
+
+    if(t.first==0) resultShanten+=50;
+    else{
+        if(t.first>=5||t.second<=1e-6){
+            resultShanten-=5/10;
+        }
+        else{
+            resultShanten+= -(t.first-1-log(t.second)*k4)/10;
+        }
+    }
+    */
     double k5=20;  //这时候要加大shanten的占比
     double r3=k5*resultShanten;
     
