@@ -360,7 +360,7 @@ const pair<double,Majang> Output::getBestPlay(
             notplay.insert(p.first.tileForm.substr(6,2));
         }
         //如果有，之后出牌就要从其他牌里选出最优解，shanten=0时或许要单独考虑.
-        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.055)||(p.second.first<=2&&p.second.second>=0.080)||(p.second.first<=3&&p.second.second>=0.105)){
+        if(p.second.first==0||(p.second.first<=1&&p.second.second>=0.025)||(p.second.first<=2&&p.second.second>=0.080)||(p.second.first<=3&&p.second.second>=0.105)){
             for(unsigned int i=0;i<hand.size();i++){
                 vector<Majang> newHand(hand);
                 newHand.erase(newHand.begin()+i);//从手牌中打出这一张牌
@@ -368,7 +368,7 @@ const pair<double,Majang> Output::getBestPlay(
                     if(notplay.count(to_string(hand[i].getTileInt()))==1) continue;
                 }
                 else{
-                    if(specialShantenCalc(pack,newHand,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
+                    if(specialShantenCalc(pack,newHand,p.first.formFlag,p.first.tileForm)>p.second.first) continue; //shanten数变大说明此牌不能打
                 }
                 double ans=Calculator::MajangScoreCalculator(pack,newHand,state.getFlowerTilesOf(state.getCurPosition()).size(),state);
                 if(ans>maxResult){

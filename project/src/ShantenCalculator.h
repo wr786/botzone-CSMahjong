@@ -1396,14 +1396,15 @@ struct specialShanten{
 Case 1:三色三步高
 Case 2:三色三同顺
 Case 3:花龙
-Case 4:清龙 (权重从4.32降低至2.6)
+Case 4:清龙 (权重从4.32降低至3.0)
 Case 5:一色三步高
 Case 6:三色三节高
 Case 7:一色三同顺
 Case 8:碰碰胡
+Case 9:五门齐
 */
 
-double k[20]={1,5.16,2.96,2.88,2.60,2.56,0.1024,0.0216,1.26};//权重（百局内胡的局数/100*番数）
+double k[20]={1,5.16,2.96,2.88,3.0,2.56,0.1024,0.0216,1.26,3.0};//权重（百局内胡的局数/100*番数）
 
 pair<int,double> specialShantenCalc0(
     const vector<pair<string, Majang> >& pack,
@@ -1412,7 +1413,7 @@ pair<int,double> specialShantenCalc0(
     int ntileAmount[70]
 ){
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     int idx=0;
     string input;
     int tileAmount[70];
@@ -1446,7 +1447,7 @@ pair<int,double> specialShantenCalc0(
             }
             if(shanten>=5||shanten>=hand.size()-2){continue;}
             similarity=SimilarityCalc(state,useful_table);
-            /*double cnt = shanten - 1 - log(similarity)/k[flag];
+            /*double cnt = shanten - 1 - log(similarity)*k[flag];
             if(cnt<prt||shanten==0){
                 prt=cnt;
                 minShanten=shanten;
@@ -1475,7 +1476,7 @@ pair<int,double> specialShantenCalc1(
     int ntileAmount[70]
 ){    
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     int idx=0;
     string input;
     int tileAmount[70];
@@ -1532,7 +1533,7 @@ pair<int,double> specialShantenCalc2(
     int ntileAmount[70]
 ){    
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     int idx=0;
     string input;
     int tileAmount[70];
@@ -1587,7 +1588,7 @@ pair<int,double> specialShantenCalc3(
     int ntileAmount[70]
 ){    
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     int idx=0;
     string input;
     int tileAmount[70];
@@ -1613,7 +1614,7 @@ pair<int,double> pengpenghuShantenCalc(
     int ntileAmount[70]
 ){    
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     string input;
 
 
@@ -1675,8 +1676,211 @@ pair<int,double> pengpenghuShantenCalc(
     else if(needpair==0){
         minShanten=0;
     }
-    
+    maxSimilarity*=k[8];
     return {minShanten,maxSimilarity};
+}
+
+pair<int,double> wumenqiShantenCalc(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    const StateContainer & state,
+    int ntileAmount[70]
+){
+    int useful_table[70]={0};
+    bool have[6]={0};
+    int flag=9;        
+
+    int minShanten=100;
+    double maxSimilarity=1e-8;
+    
+    for(auto i:pack) {
+        if(i.first=="CHI"){
+            if(have[i.second.getTileInt()/10]) return {minShanten,maxSimilarity};
+            have[i.second.getTileInt()/10]=1;
+        }
+        else if(i.first=="PENG"){
+            if(have[i.second.getTileInt()/10]) return {minShanten,maxSimilarity};
+            have[i.second.getTileInt()/10]=1;
+        }
+        else {
+            if(have[i.second.getTileInt()/10]) return {minShanten,maxSimilarity};
+            have[i.second.getTileInt()/10]=1;
+        }
+    }
+
+    //为对子的是哪一种类型牌
+    for(int i=1;i<=5;i++){
+        if(have[i]) continue;
+        double maxSimilarityi=1e-8;
+        int shanteni=0;
+        for(int j=1;j<=5;j++){     
+            if(have[j]) continue;               
+            if(shanteni>=4) break;
+            if(j<=3){
+                //B W T
+                if(j==i){
+                    //找对子
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=1;k<=9;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=2) {shantenj=0;simij=1e-8;break;}
+                        if(2-ntileAmount[tilenum]<shantenj){
+                            shantenj=2-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(2-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij+=simi;
+                        }
+                    }
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+                else{
+                    //找顺子(优先留顺子，因为可能可以构成其他番型)
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=2;k<=8;k++){
+                        int tilenum=j*10+k;
+                        int tt=ntileAmount[tilenum]+ntileAmount[tilenum-1]+ntileAmount[tilenum+1];
+                        if(tt==3){shantenj=0;simij=1e-8;break;}
+                        if(3-tt<shantenj){
+                            shantenj=3-tt;
+                            simij=0;
+                            if(ntileAmount[tilenum]==0)
+                                simij+=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            else if(ntileAmount[tilenum-1]==0)
+                                simij+=state.getTileLeft(tilenum-1)/(double)state.getTotalLeft();
+                            else
+                                simij+=state.getTileLeft(tilenum+1)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=0;
+                            if(ntileAmount[tilenum]==0) simi+=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(ntileAmount[tilenum-1]==0) simi+=state.getTileLeft(tilenum-1)/(double)state.getTotalLeft();
+                            if(ntileAmount[tilenum+1]==0) simi+=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij+=simi;
+                            }                            
+                        }                
+                    if(shantenj==0){
+                        shanteni+=shantenj;
+                        maxSimilarityi+=simij;
+                        continue;
+                    }
+                    //找刻子                    
+                    for(int k=1;k<=9;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=3){shantenj=0;simij=1e-8;break;}
+                        if(3-ntileAmount[tilenum]<shantenj){
+                            shantenj=3-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij+=simi;                           
+                        }
+                    }
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+            }
+            else if(j==4){
+                // F
+                if(j==i){
+                    //找对子
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=1;k<=4;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=2) {shantenj=0;simij=1e-8;break;}
+                        if(2-ntileAmount[tilenum]<shantenj){
+                            shantenj=2-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(2-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij+=simi;
+                        }
+                    }
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+                else{
+                    //F J只有刻子
+                    int shantenj=2;
+                    double simij=1e-8;
+                    //找刻子                    
+                    for(int k=1;k<=4;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=3){shantenj=0;simij=1e-8;break;}
+                        if(3-ntileAmount[tilenum]<shantenj){
+                            shantenj=3-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij=simi;                         
+                        }
+                    }            
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }                
+            }
+            else if(j==5){
+                // F
+                if(j==i){
+                    //找对子
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=1;k<=3;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=2) {shantenj=0;simij=1e-8;break;}
+                        if(2-ntileAmount[tilenum]<shantenj){
+                            shantenj=2-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(2-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij+=simi;
+                        }
+                    }
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+                else{
+                    //F J只有刻子
+                    int shantenj=2;
+                    double simij=1e-8;
+                    //找刻子                    
+                    for(int k=1;k<=3;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=3){shantenj=0;simij=1e-8;break;}
+                        if(3-ntileAmount[tilenum]<shantenj){
+                            shantenj=3-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            simij=simi;                         
+                        }
+                    }            
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }                
+            }
+        }
+        if(minShanten>shanteni){
+            minShanten=shanteni;
+            maxSimilarity=maxSimilarityi;
+        }
+        else if(minShanten==shanteni){
+            maxSimilarity+=maxSimilarityi;
+        }
+    }
+    maxSimilarity*=k[9];
+    return {minShanten,maxSimilarity};
+
 }
 
 pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge0(
@@ -1686,7 +1890,7 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge0(
     int ntileAmount[70]
 ){
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     specialShanten r;
     double prt=100;
     int idx=0;
@@ -1704,7 +1908,7 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge0(
             memset(useful_table,0,sizeof(useful_table));
             memcpy(tileAmount,ntileAmount,70*4);
             int shanten=0;
-            double similarity=1e-5;
+            double similarity=1e-8;
             if(input[0]=='C') {flag=input[4]-'0';continue;}
             else{
                 int len = input.length();
@@ -1725,7 +1929,7 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge0(
                 continue;
             }
             similarity=SimilarityCalc(state,useful_table);
-            double cnt = shanten - 1 - log(similarity)/k[flag];
+            double cnt = shanten - 1 - log(similarity)*k[flag];
             if(cnt<prt||shanten==0){
                 prt=cnt;
                 minShanten=shanten;
@@ -1746,7 +1950,7 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge1(
     int ntileAmount[70]
 ){
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     specialShanten r;
     double prt=100;
     int idx=0;
@@ -1780,7 +1984,7 @@ pair<pair<specialShanten,double> ,pair <int, double> > specialShantenJudge1(
 
         if(shanten>=5||shanten>=hand.size()-2){continue;}
         similarity=SimilarityCalc(state,useful_table);
-        double cnt = shanten - 1 - log(similarity)/k[flag];
+        double cnt = shanten - 1 - log(similarity)*k[flag];
         if(cnt<prt||shanten==0){
             prt=cnt;
             minShanten=shanten;
@@ -1801,7 +2005,7 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge2(
     int ntileAmount[70]
 ){
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     specialShanten r;
     double prt=100;
     int idx=0;
@@ -1834,7 +2038,7 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge2(
         }
         if(shanten>=5||shanten>=hand.size()-2){continue;}
         similarity=SimilarityCalc(state,useful_table);
-        double cnt = shanten - 1 - log(similarity)/k[flag];
+        double cnt = shanten - 1 - log(similarity)*k[flag];
         if(cnt<prt||shanten==0){
             prt=cnt;
             minShanten=shanten;
@@ -1855,7 +2059,7 @@ pair<pair<specialShanten,double>,pair <int, double> > specialShantenJudge3(
     int ntileAmount[70]
 ){
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     specialShanten r;
     double prt=100;
     int idx=0;
@@ -1882,7 +2086,7 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
     int ntileAmount[70]
 ){    
     double minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     specialShanten r;
     int flag=8;
     double prt=100;
@@ -1934,7 +2138,7 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
                         r.tileForm=alreadypeng+to_string(i->getTileInt())+to_string(j->getTileInt());
                         r.formFlag=flag;
                         maxSimilarity=Simi;
-                        prt=minShanten-1-log(maxSimilarity)/k[flag];
+                        prt=minShanten-1-log(maxSimilarity)*k[flag];
                     }
                 }
             }
@@ -1948,7 +2152,7 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
                         r.tileForm=alreadypeng+to_string(i->getTileInt())+to_string(j->getTileInt());
                         r.formFlag=flag;
                         maxSimilarity=Simi;
-                        prt=minShanten-1-log(maxSimilarity)/k[flag];
+                        prt=minShanten-1-log(maxSimilarity)*k[flag];
                     }                    
                 }
             }
@@ -1963,7 +2167,7 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
                     r.tileForm=alreadypeng+to_string(i->getTileInt());
                     r.formFlag=flag;
                     maxSimilarity=Simi;
-                    prt=minShanten-1-log(maxSimilarity)/k[flag];
+                    prt=minShanten-1-log(maxSimilarity)*k[flag];
                 }
             }            
         }
@@ -1975,7 +2179,7 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
                     r.tileForm=alreadypeng+to_string(i->getTileInt());
                     r.formFlag=flag;
                     maxSimilarity=Simi;
-                    prt=minShanten-1-log(maxSimilarity)/k[flag];
+                    prt=minShanten-1-log(maxSimilarity)*k[flag];
                 }
             }            
         }
@@ -1986,9 +2190,277 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
         minShanten=0;
         prt=-1e5;
     }
-    
+    //因为五门齐和碰碰胡的maxSimilarity会偏小，乘以2
+    //maxSimilarity*=2;    
     return {{r,prt},{minShanten,maxSimilarity}};
 }
+
+pair<pair<specialShanten,double>,pair <int, double>> wumenqiShantenJudge(
+    const vector<pair<string, Majang> >& pack,
+    const vector<Majang>& hand,
+    const StateContainer & state,
+    int ntileAmount[70]
+){
+    int useful_table[70]={0};
+    bool have[6]={0};
+    specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高
+    int flag=9;        
+    string tileform="";
+    int minShanten=100;
+    double maxSimilarity=1e-8;
+    double prt=100;
+    
+    for(auto i:pack) {
+        if(i.first=="CHI"){
+            if(have[i.second.getTileInt()/10]) return {{r,prt},{minShanten,maxSimilarity}};
+            have[i.second.getTileInt()/10]=1;
+        }
+        else if(i.first=="PENG"){
+            if(have[i.second.getTileInt()/10]) return {{r,prt},{minShanten,maxSimilarity}};
+            have[i.second.getTileInt()/10]=1;
+        }
+        else {
+            if(have[i.second.getTileInt()/10]) return {{r,prt},{minShanten,maxSimilarity}};
+            have[i.second.getTileInt()/10]=1;
+        }
+    }
+
+    //为对子的是哪一种类型牌
+    for(int i=1;i<=5;i++){
+        if(have[i]) continue;
+        string tileformi="";
+        double maxSimilarityi=1e-8;
+        double prti=100;
+        int shanteni=0;
+        for(int j=1;j<=5;j++){     
+            if(have[j]) continue;               
+            if(shanteni>=4) break;
+            if(j<=3){
+                //B W T
+                if(j==i){
+                    //找对子
+                    int targetnum=0;
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=1;k<=9;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=2) {targetnum=tilenum;shantenj=0;simij=1e-8;break;}
+                        if(2-ntileAmount[tilenum]<shantenj){
+                            targetnum=tilenum;
+                            shantenj=2-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(2-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                simij=simi;
+                                targetnum=tilenum;
+                            }
+                        }
+                    }
+                    tileformi+=to_string(targetnum)+to_string(targetnum);
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+                else{
+                    //找顺子(优先留顺子，因为可能可以构成其他番型)
+                    int targetnum=0;
+                    int shunzi_kezi=0;
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=2;k<=8;k++){
+                        int tilenum=j*10+k;
+                        int tt=0;
+                        if(ntileAmount[tilenum]) tt++;
+                        if(ntileAmount[tilenum-1]) tt++;
+                        if(+ntileAmount[tilenum+1]) tt++;
+                        if(tt==3){targetnum=tilenum;shunzi_kezi=1;shantenj=0;simij=1e-8;break;}
+                        if(3-tt<shantenj){
+                            shunzi_kezi=1;
+                            targetnum=tilenum;
+                            shantenj=3-tt;
+                            simij=0;
+                            if(ntileAmount[tilenum]==0)
+                                simij+=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            else if(ntileAmount[tilenum-1]==0)
+                                simij+=state.getTileLeft(tilenum-1)/(double)state.getTotalLeft();
+                            else
+                                simij+=state.getTileLeft(tilenum+1)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=0;
+                            if(ntileAmount[tilenum]==0) simi+=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(ntileAmount[tilenum-1]==0) simi+=state.getTileLeft(tilenum-1)/(double)state.getTotalLeft();
+                            if(ntileAmount[tilenum+1]==0) simi+=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                shunzi_kezi=1;
+                                simij=simi;
+                                targetnum=tilenum;
+                            }                            
+                        }
+                    }                
+                    if(shantenj==0){
+                        if(shunzi_kezi==2)
+                            tileformi+=to_string(targetnum)+to_string(targetnum)+to_string(targetnum);
+                        else
+                            tileformi+=to_string(targetnum-1)+to_string(targetnum)+to_string(targetnum+1);
+                        shanteni+=shantenj;
+                        maxSimilarityi+=simij;
+                        continue;
+                    }
+                    //找刻子                    
+                    for(int k=1;k<=9;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=3){targetnum=tilenum;shunzi_kezi=2;shantenj=0;simij=1e-8;break;}
+                        if(3-ntileAmount[tilenum]<shantenj){
+                            shunzi_kezi=2;
+                            targetnum=tilenum;
+                            shantenj=3-ntileAmount[tilenum];
+                            simij=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                shunzi_kezi=2;
+                                simij=simi;
+                                targetnum=tilenum;
+                            }                            
+                        }
+                    }
+                    if(shunzi_kezi==2)
+                        tileformi+=to_string(targetnum)+to_string(targetnum)+to_string(targetnum);
+                    else
+                        tileformi+=to_string(targetnum-1)+to_string(targetnum)+to_string(targetnum+1);
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+            }
+            else if(j==4){
+                // F
+                if(j==i){
+                    //找对子
+                    int targetnum=0;
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=1;k<=4;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=2) {targetnum=tilenum;shantenj=0;simij=1e-8;break;}
+                        if(2-ntileAmount[tilenum]<shantenj){
+                            targetnum=tilenum;
+                            shantenj=2-ntileAmount[tilenum];
+                            simij=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(2-ntileAmount[tilenum]==shantenj){
+                            double simi=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                simij=simi;
+                                targetnum=tilenum;
+                            }
+                        }
+                    }
+                    tileformi+=to_string(targetnum)+to_string(targetnum);
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+                else{
+                    //F J只有刻子
+                    int targetnum=0;
+                    int shantenj=2;
+                    double simij=1e-8;
+                    //找刻子                    
+                    for(int k=1;k<=4;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=3){targetnum=tilenum;shantenj=0;simij=1e-8;break;}
+                        if(3-ntileAmount[tilenum]<shantenj){
+                            targetnum=tilenum;
+                            shantenj=3-ntileAmount[tilenum];
+                            simij=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                simij=simi;
+                                targetnum=tilenum;
+                            }                            
+                        }
+                    }
+                    tileformi+=to_string(targetnum)+to_string(targetnum)+to_string(targetnum);              
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }                
+            }
+            else if(j==5){
+                // F
+                if(j==i){
+                    //找对子
+                    int targetnum=0;
+                    int shantenj=2;
+                    double simij=1e-8;
+                    for(int k=1;k<=3;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=2) {targetnum=tilenum;shantenj=0;simij=1e-8;break;}
+                        if(2-ntileAmount[tilenum]<shantenj){
+                            targetnum=tilenum;
+                            shantenj=2-ntileAmount[tilenum];
+                            simij=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(2-ntileAmount[tilenum]==shantenj){
+                            double simi=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                simij=simi;
+                                targetnum=tilenum;
+                            }
+                        }
+                    }
+                    tileformi+=to_string(targetnum)+to_string(targetnum);
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }
+                else{
+                    //F J只有刻子
+                    int targetnum=0;
+                    int shantenj=2;
+                    double simij=1e-8;
+                    //找刻子                    
+                    for(int k=1;k<=3;k++){
+                        int tilenum=j*10+k;
+                        if(ntileAmount[tilenum]>=3){targetnum=tilenum;shantenj=0;simij=1e-8;break;}
+                        if(3-ntileAmount[tilenum]<shantenj){
+                            targetnum=tilenum;
+                            shantenj=3-ntileAmount[tilenum];
+                            simij=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                        }
+                        else if(3-ntileAmount[tilenum]==shantenj){
+                            double simi=2*state.getTileLeft(tilenum)/(double)state.getTotalLeft();
+                            if(simi>simij){
+                                simij=simi;
+                                targetnum=tilenum;
+                            }                            
+                        }
+                    }
+                    tileformi+=to_string(targetnum)+to_string(targetnum)+to_string(targetnum);              
+                    shanteni+=shantenj;
+                    maxSimilarityi+=simij;
+                }                
+            }
+        }       
+        prti=shanteni-1 -log(maxSimilarityi)/k[flag];
+        if(prti<=prt){
+            prt=prti;
+            minShanten=shanteni;
+            maxSimilarity=maxSimilarityi;
+            tileform=tileformi;
+        }
+    }
+    r.tileForm=tileform;
+    r.formFlag=flag;
+    //因为五门齐和碰碰胡的maxSimilarity会偏小，乘以2
+    //maxSimilarity*=2;
+    return {{r,prt},{minShanten,maxSimilarity}};
+
+}
+
+
 
 //第一项为shanten数，第二项为相似度
  pair<int,double> specialShantenCalc(
@@ -2122,10 +2594,22 @@ pair<pair<specialShanten,double>,pair <int, double>> pengpenghuShantenJudge(
             maxSimilarity=t4.second;
         }        
     }           
+    //五门齐
+    auto t=wumenqiShantenCalc(pack,hand,state,ntileAmount);
+    if(minShanten>t.first){
+        minShanten=t.first;
+        maxSimilarity=t.second;
+    }
+    else if(minShanten==t.first){
+        maxSimilarity+=t.second;
+    }
+
     //clock_t end=clock();
     //cout<<end-start<<endl;
     return {minShanten,maxSimilarity};
 }
+
+
 
 //第一项表示得到的shanten数最小番型，第二项为shanten数，第三项为相似度
 pair<specialShanten, pair<int,double> > specialShantenJudge(
@@ -2158,24 +2642,36 @@ pair<specialShanten, pair<int,double> > specialShantenJudge(
     specialShanten r;//用来标记现在是哪一种番型,比如1是三色三步高        
 
     int minShanten=100;
-    double maxSimilarity=1e-5;
+    double maxSimilarity=1e-8;
     double prt=100;
     //freopen("D://specialShanten.txt","r",stdin);
     // freopen("./data/specialShanten.txt","r",stdin);
     //clock_t start=clock();
+
+    //五门齐
+    auto t=wumenqiShantenJudge(pack,hand,state,ntileAmount);
+    if(t.first.second<=prt){
+        r=t.first.first;
+        minShanten=t.second.first;
+        maxSimilarity=t.second.second;
+        prt=t.first.second;
+    }
+
     int idx = 0;
     if(chisum==0){
         auto t1=specialShantenJudge0(pack,hand,state,ntileAmount);
         auto t2=pengpenghuShantenJudge(pack,hand,state,pengsum,ntileAmount);
-        if(t1.first.second<=t2.first.second){
+        if(prt>t1.first.second){
             r=t1.first.first;
             minShanten=t1.second.first;
             maxSimilarity=t1.second.second;
+            prt=t1.first.second;
         }
-        else{
+        if(prt>t2.first.second){
             r=t2.first.first;
             minShanten=t2.second.first;
             maxSimilarity=t2.second.second;
+            prt=t2.first.second;
         }
     }
     //如果已经有了一个吃,就围绕这个吃来打
@@ -2183,15 +2679,17 @@ pair<specialShanten, pair<int,double> > specialShantenJudge(
         int myPack=allCHI[0];
         auto t1=specialShantenJudge0(pack,hand,state,ntileAmount);
         auto t2=specialShantenJudge1(pack,hand,state,myPack,ntileAmount);
-        if(t1.first.second<t2.first.second){
-            r=t1.first.first;
-            minShanten=t1.second.first;
-            maxSimilarity=t1.second.second;
-        }
-        else{
+        if(prt>t2.first.second){
             r=t2.first.first;
             minShanten=t2.second.first;
             maxSimilarity=t2.second.second;
+            prt=t2.first.second;
+        }
+        if(prt>t1.first.second){
+            r=t1.first.first;
+            minShanten=t1.second.first;
+            maxSimilarity=t1.second.second;
+            prt=t1.first.second;
         }
     }
     else if(chisum==2){
@@ -2200,7 +2698,6 @@ pair<specialShanten, pair<int,double> > specialShantenJudge(
         auto t1=specialShantenJudge1(pack,hand,state,allCHI[0],ntileAmount);
         auto t2=specialShantenJudge1(pack,hand,state,allCHI[1],ntileAmount);
         auto t3=specialShantenJudge2(pack,hand,state,myPack,ntileAmount);
-        double prt=100;
         if(prt>t3.first.second){
             r=t3.first.first;
             minShanten=t3.second.first;
@@ -2227,7 +2724,6 @@ pair<specialShanten, pair<int,double> > specialShantenJudge(
         auto t2=specialShantenJudge2(pack,hand,state,to_string(allCHI[0])+to_string(allCHI[2]),ntileAmount);
         auto t3=specialShantenJudge2(pack,hand,state,to_string(allCHI[1])+to_string(allCHI[2]),ntileAmount);
         auto t4=specialShantenJudge3(pack,hand,state,myPack,ntileAmount);
-        double prt=100;
         if(prt>t4.first.second){
             r=t4.first.first;
             minShanten=t4.second.first;
@@ -2259,7 +2755,6 @@ pair<specialShanten, pair<int,double> > specialShantenJudge(
         auto t2=specialShantenJudge3(pack,hand,state,to_string(allCHI[0])+to_string(allCHI[1])+to_string(allCHI[3]),ntileAmount);
         auto t3=specialShantenJudge3(pack,hand,state,to_string(allCHI[0])+to_string(allCHI[2])+to_string(allCHI[3]),ntileAmount);
         auto t4=specialShantenJudge3(pack,hand,state,to_string(allCHI[1])+to_string(allCHI[2])+to_string(allCHI[3]),ntileAmount);
-        double prt=100;
         if(prt>t4.first.second){
             r=t4.first.first;
             minShanten=t4.second.first;
@@ -2293,6 +2788,7 @@ pair<specialShanten, pair<int,double> > specialShantenJudge(
 int specialShantenCalc(
     const vector<pair<string, Majang> >& pack,
     const vector<Majang>& hand,
+    int form_flag,
     string target
 ) {
     int tileAmount[70]={0};
@@ -2313,38 +2809,54 @@ int specialShantenCalc(
     */
     for(auto i:hand) tileAmount[i.getTileInt()]++;
     int shanten=0;
-    int len = target.length();
-    //先看pack
-    vector<string> targetPart;
-    for(int i=0;i<len/6;i++){
-        targetPart.push_back(target.substr(i*6,6));
-    }
-    for(auto i:pack){
-        if(i.first=="CHI"){
-            string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
-            for(auto j=targetPart.begin();j!=targetPart.end();j++){
-                if((*j)==chi){targetPart.erase(j);break;}
+    if(form_flag!=9){
+        int len = target.length();
+        //先看pack
+        vector<string> targetPart;
+        for(int i=0;i<len/6;i++){
+            targetPart.push_back(target.substr(i*6,6));
+        }
+        for(auto i:pack){
+            if(i.first=="CHI"){
+                string chi=to_string(i.second.getTileInt()-1)+to_string(i.second.getTileInt())+to_string(i.second.getTileInt()+1);
+                for(auto j=targetPart.begin();j!=targetPart.end();j++){
+                    if((*j)==chi){targetPart.erase(j);break;}
+                }
             }
         }
-    }
 
-    target="";
-    for(auto i:targetPart){
-        target+=i;
+        target="";
+        for(auto i:targetPart){
+            target+=i;
+        }
+        len=target.length();
+        if(len==0) return 0;
+        for(int i=0;i<len/2;i++){
+            int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
+            if(!tileAmount[num]){
+                shanten++;
+                useful_table[num]++;
+            }
+            else{
+                tileAmount[num]--;
+            }
+                if(shanten>=4) break;
+        }
     }
-    len=target.length();
-    if(len==0) return 0;
-    for(int i=0;i<len/2;i++){
-        int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
-        if(!tileAmount[num]){
-            shanten++;
-            useful_table[num]++;
-        }
-        else{
-            tileAmount[num]--;
-        }
-            if(shanten>=4) break;
-        }
+    else{
+        int len = target.length();
+        for(int i=0;i<len/2;i++){
+            int num=(target[i*2]-'0')*10+target[i*2+1]-'0';
+            if(!tileAmount[num]){
+                shanten++;
+                useful_table[num]++;
+            }
+            else{
+                tileAmount[num]--;
+            }
+                if(shanten>=4) break;
+        }        
+    }
     return shanten;
 }
 
